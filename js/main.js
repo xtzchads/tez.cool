@@ -896,8 +896,8 @@ function main(ratio) {
     const data = aggregatedDataCache.homeData;
     const { totalStakedPercentage, totalDelegatedPercentage, stakingApy, delegationApy } = data.stakingData;
     createPieChart(
-      totalStakedPercentage.toFixed(2), 
-      totalDelegatedPercentage.toFixed(2), 
+      totalStakedPercentage, 
+      totalDelegatedPercentage, 
       stakingApy.toFixed(2), 
       delegationApy.toFixed(2)
     );
