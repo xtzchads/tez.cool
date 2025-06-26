@@ -593,6 +593,119 @@ function createTotalAccountsChart() {
   }
 }
 
+function createTotalTransactionsChart() {
+  try {
+    const tezosData = aggregatedDataCache.tezosTransactionsData;
+    const etherlinkData = aggregatedDataCache.etherlinkTxnsData;
+    
+    const series = [];
+    
+    // Tezos transactions series
+if (tezosData && tezosData.length > 0) {
+  // Reverse to go from oldest to newest, then convert to cumulative
+  const reversedTezosData = [...tezosData].reverse();
+  console.log(reversedTezosData);
+  const cumulativeTezosData = [];
+  let runningTotal = 0;
+  
+  reversedTezosData.forEach(point => {
+    runningTotal += point[1]; // Assuming point format is [timestamp, value]
+    cumulativeTezosData.push([point[0], runningTotal]);
+  });
+  console.log(cumulativeTezosData);
+  series.push({
+    showInLegend: false,
+    shadow: {
+      color: 'rgba(255, 255, 0, 0.7)',
+      offsetX: 0, offsetY: 0,
+      opacity: 1, width: 10
+    },
+    name: 'Tezos Transactions',
+    data: cumulativeTezosData,
+    dataLabels: {
+      enabled: true,
+      formatter: function() {
+        return this.point.index === this.series.data.length - 1 ? `${(this.y / 1000000).toFixed(1)}M` : null;
+      },
+      align: 'right',
+      verticalAlign: 'bottom',
+    },
+    color: {
+      linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+      stops: [[0, '#77dd77'], [1, '#ff6961']]
+    }
+  });
+}
+    
+    if (etherlinkData && etherlinkData.length > 0) {
+      series.push({
+        showInLegend: false,
+        shadow: {
+          color: 'rgba(0, 150, 255, 0.7)',
+          offsetX: 0, offsetY: 0,
+          opacity: 1, width: 8
+        },
+        name: 'Etherlink Transactions',
+        data: etherlinkData,
+        dataLabels: {
+          enabled: true,
+          formatter: function() {
+            return this.point.index === this.series.data.length - 1 ? `${(this.y / 1000000).toFixed(1)}M` : null;
+          },
+          align: 'right',
+          verticalAlign: 'bottom',
+        },
+        color: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [[0, '#87CEEB'],[1, '#4169E1']]
+        },
+        yAxis: 0 
+      });
+    }
+
+    Highcharts.chart('chart-container8', { 
+      chart: {
+        type: 'spline',
+        backgroundColor: 'rgba(0,0,0,0)'
+      },
+      title: {
+        text: 'Tezos & Etherlink cumulative tx growth',
+        style: { color: '#ffffff' }
+      },
+      xAxis: {
+        type: 'datetime',
+        lineColor: '#ffffff',
+        lineWidth: 1,
+        labels: {
+          enabled: false,
+          style: { color: '#ffffff' },
+          formatter: function() {
+            return Highcharts.dateFormat('%b %Y', this.value);
+          }
+        }
+      },
+      yAxis: {
+        gridLineWidth: 0,
+        title: { text: null },
+        labels: { enabled: false }
+      },
+      plotOptions: {
+        series: {
+          marker: { enabled: false },
+          lineWidth: 2,
+          states: { hover: { lineWidthPlus: 0 } }
+        }
+      },
+
+      exporting: { enabled: false },
+      series: series,
+      credits: { enabled: false }
+    });
+  } catch (error) {
+    console.error('Error loading transactions data:', error);
+  }
+}
+
 function createTimeSeriesChart(containerId, title, data, formatter) {
   Highcharts.chart(containerId, {
     chart: {
@@ -890,6 +1003,7 @@ function main(ratio) {
   createDALSupportChart();
   createBurnedSupplyChart();
   createTotalAccountsChart();
+  createTotalTransactionsChart();
   createTVLChart();
   
   try {
