@@ -546,7 +546,7 @@ if (tezosData.length > 0) {
         dataLabels: {
           enabled: true,
           formatter: function() {
-            return this.point.index === this.series.data.length-1 ? `${(this.y / 1000000).toFixed(2)}M` : null;
+            return this.point.index === this.series.data.length-1 ? `$${(this.y / 1000000).toFixed(2)}M` : null;
           },
           align: 'right',
           verticalAlign: 'bottom',
