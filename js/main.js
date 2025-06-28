@@ -369,7 +369,7 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
       type: 'pie'
     },
     title: {
-      text: 'TezJeetMeter',
+      text: 'TezStakeMeter',
       style: { color: '#ffffff', fontSize: '24px' }
     },
     tooltip: {
