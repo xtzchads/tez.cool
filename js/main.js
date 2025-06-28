@@ -5,6 +5,7 @@ const AI_ACTIVATION_CYCLE = 748;
 const WORKER_URL = 'https://ai.tez.cool/api/v1/getData';
 let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
+let totalTVL;
 
 function computeExtremum(cycle, initialValue, finalValue) {
   const initialLimit = AI_ACTIVATION_CYCLE + INITIAL_PERIOD;
@@ -527,6 +528,9 @@ function createHistoricalTvlChart() {
  aggregatedDataCache.combinedTvlChart.filter(item => item[0] > 1655769600000),
  0.2
 );
+if (tezosData.length > 0) {
+ tezosData[tezosData.length - 1][1] = totalTVL;
+}
     
     const series = [];
 
@@ -713,7 +717,6 @@ function createTotalTransactionsChart() {
 if (tezosData && tezosData.length > 0) {
   // Reverse to go from oldest to newest, then convert to cumulative
   const reversedTezosData = [...tezosData].reverse();
-  console.log(reversedTezosData);
   const cumulativeTezosData = [];
   let runningTotal = 0;
   
@@ -721,7 +724,6 @@ if (tezosData && tezosData.length > 0) {
     runningTotal += point[1]; // Assuming point format is [timestamp, value]
     cumulativeTezosData.push([point[0], runningTotal]);
   });
-  console.log(cumulativeTezosData);
   series.push({
     showInLegend: false,
     shadow: {
@@ -1067,7 +1069,7 @@ function createTVLChart() {
         `hsl(${(index * 25) % 360}, 70%, 50%)`
     }));
     
-    const totalTVL = tvlValues.reduce((sum, value) => sum + value, 0);
+    totalTVL = tvlValues.reduce((sum, value) => sum + value, 0);
     
     Highcharts.chart('tvl-chart-container', {
       chart: {
@@ -1110,11 +1112,11 @@ function main(ratio) {
   const issuanceChart = createIssuanceChart(ratio);
   const stakeChart = createStakeChart(ratio, updateIssuanceChart);
   createDALSupportChart();
-  createHistoricalTvlChart();
   createBurnedSupplyChart();
   createTotalAccountsChart();
   createTotalTransactionsChart();
   createTVLChart();
+  createHistoricalTvlChart();
   
   try {
     const data = aggregatedDataCache.homeData;
