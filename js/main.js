@@ -489,6 +489,115 @@ function createBurnedSupplyChart() {
   }
 }
 
+function recursivelyRemoveDips(data, threshold = 0.2) {
+ let hasChanges = true;
+ let result = [...data];
+ 
+ while (hasChanges) {
+   hasChanges = false;
+   const newResult = [];
+   
+   for (let i = 0; i < result.length; i++) {
+     if (i === 0) {
+       newResult.push(result[i]);
+       continue;
+     }
+     
+     const prevValue = newResult[newResult.length - 1][1]; // Use last kept point
+     const currentValue = result[i][1];
+     const dipPercent = (prevValue - currentValue) / prevValue;
+     
+     if (dipPercent > threshold) {
+       // Skip this point (remove it)
+       hasChanges = true;
+     } else {
+       newResult.push(result[i]);
+     }
+   }
+   
+   result = newResult;
+ }
+ 
+ return result;
+}
+
+function createHistoricalTvlChart() {
+  try {
+    const tezosData = recursivelyRemoveDips(
+ aggregatedDataCache.combinedTvlChart.filter(item => item[0] > 1655769600000),
+ 0.2
+);
+    
+    const series = [];
+
+      series.push({
+        showInLegend: false,
+        shadow: {
+          color: 'rgba(255, 255, 0, 0.7)',
+          offsetX: 0, offsetY: 0,
+          opacity: 1, width: 10
+        },
+        name: 'TVL',
+        data: tezosData,
+        dataLabels: {
+          enabled: true,
+          formatter: function() {
+            return this.point.index === this.series.data.length-1 ? `${(this.y / 1000000).toFixed(2)}M` : null;
+          },
+          align: 'right',
+          verticalAlign: 'bottom',
+        },
+        color: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [[0, '#77dd77'], [1, '#ff6961']]
+        }
+      });
+    
+
+    Highcharts.chart('chart-container9', {
+      chart: {
+        type: 'spline',
+        backgroundColor: 'rgba(0,0,0,0)'
+      },
+      title: {
+        text: 'DeFi Growth (L1+L2)',
+        style: { color: '#ffffff' }
+      },
+      xAxis: {
+        type: 'datetime',
+        lineColor: '#ffffff',
+        lineWidth: 1,
+        labels: {
+          enabled: false,
+          style: { color: '#ffffff' },
+          formatter: function() {
+            return Highcharts.dateFormat('%b %Y', this.value);
+          }
+        }
+      },
+      yAxis: {
+        // Single y-axis for both series (millions)
+        gridLineWidth: 0,
+        title: { text: null },
+        labels: { enabled: false }
+      },
+      plotOptions: {
+        series: {
+          marker: { enabled: false },
+          lineWidth: 2,
+          states: { hover: { lineWidthPlus: 0 } }
+        }
+      },
+
+      exporting: { enabled: false },
+      series: series,
+      credits: { enabled: false }
+    });
+  } catch (error) {
+    console.error('Error loading accounts data:', error);
+  }
+}
+
 function createTotalAccountsChart() {
   try {
     const tezosData = aggregatedDataCache.totalAccountsData;
@@ -1001,6 +1110,7 @@ function main(ratio) {
   const issuanceChart = createIssuanceChart(ratio);
   const stakeChart = createStakeChart(ratio, updateIssuanceChart);
   createDALSupportChart();
+  createHistoricalTvlChart();
   createBurnedSupplyChart();
   createTotalAccountsChart();
   createTotalTransactionsChart();
