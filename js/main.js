@@ -711,7 +711,7 @@ function createHistoricalCharts(ratio) {
     createHistoricalChart('issuanceh', 'Issuance since genesis', issuanceDataWithRatio, d => ({
       x: d.cycle,
       y: d.issuance
-    }), [428, 743, 823]);
+    }), [428, 743, 823, currentCycle]);
     
     const stakingDataWithRatio = [
       ...stakingData.ratios, 
@@ -725,7 +725,7 @@ function createHistoricalCharts(ratio) {
     createHistoricalChart('stakingh', 'Staked since genesis', stakingDataWithRatio, d => ({
       x: d.cycle,
       y: (d.staking + (d.ratio || 0)) * 100
-    }), [428, 743, 823]);
+    }), [428, 743, 823, currentCycle]);
   } catch (error) {
     console.error('Error creating historical charts:', error);
   }
@@ -744,8 +744,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
             this.customGroup = this.renderer.g('custom-lines').add();
             
             const chartData = data.map(dataMapper);
-            
-            [428, 743, 823].forEach(position => {
+            [428, 743, 823, currentCycle].forEach(position => {
               const dataPoint = chartData.find(point => point.x === position);
               if (dataPoint) {
                 const xPixel = this.xAxis[0].toPixels(position);
@@ -788,6 +787,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
           if (this.value === 428) return 'Hangzhou';
           if (this.value === 743) return 'P';
           if (this.value === 823) return 'Q';
+		  if (this.value === currentCycle) return 'Now';
           return '';
         },
         style: { color: '#ffffff' }
