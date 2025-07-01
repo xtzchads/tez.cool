@@ -42,7 +42,7 @@ function applyBonus(cycle, value, targetRatio, tmp1) {
   const udist = Math.max(0, Math.abs(stakedRatioValue - targetRatio) - 0.02);
   const dist = stakedRatioValue >= targetRatio ? -udist : udist;
   const maxNewBonus = Math.min(staticRateDistToMax, 0.05);
-  const newBonus = previousBonus + dist * 0.01 * ((cycle==858) ? (245760 / 86400) : 1);
+  const newBonus = previousBonus + dist * 0.01 * (cycle==858)?(245760 / 86400):1;
   const res = clip(newBonus, 0, maxNewBonus);
   
   console.assert(res >= 0 && res <= 5);
@@ -112,6 +112,14 @@ function slowIncrement(current, avgDiff) {
   const center = 0.5;
   const scale = 6; 
   return avgDiff * 0.2 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
+}
+
+function fetchHistoricalCycleData() {
+  return aggregatedDataCache.historicalCycleData;
+}
+
+async function getCurrentStakingRatio() {
+  return aggregatedDataCache.currentStakingRatio;
 }
 
 async function initializeRatios() {
