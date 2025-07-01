@@ -924,6 +924,7 @@ function processIssuanceData(data) {
     const growthRate = supplyDiff / prevSupply;
     const timeDiffSec = (new Date(curr.timestamp) - new Date(prev.timestamp)) / 1000;
     const annualized = (growthRate * ((365.25 * 24 * 60 * 60) / timeDiffSec)) * 100;
+    //365.25 is a way
 
     ratios.push({ cycle: curr.cycle, issuance: annualized });
   }
