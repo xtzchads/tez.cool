@@ -42,7 +42,7 @@ function applyBonus(cycle, value, targetRatio, tmp1) {
   const udist = Math.max(0, Math.abs(stakedRatioValue - targetRatio) - 0.02);
   const dist = stakedRatioValue >= targetRatio ? -udist : udist;
   const maxNewBonus = Math.min(staticRateDistToMax, 0.05);
-  const newBonus = previousBonus + dist * 0.01 * (cycle==858)?(245760 / 86400):1;
+  const newBonus = previousBonus + dist * 0.01 * ((cycle==858) ? (245760 / 86400) : 1);
   const res = clip(newBonus, 0, maxNewBonus);
   
   console.assert(res >= 0 && res <= 5);
@@ -111,21 +111,12 @@ function calculateAverageDifference(arr) {
 function slowIncrement(current, avgDiff) {
   const center = 0.5;
   const scale = 6; 
-  return avgDiff * 0.4 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
-}
-
-function fetchHistoricalCycleData() {
-  return aggregatedDataCache.historicalCycleData;
-}
-
-async function getCurrentStakingRatio() {
-  return aggregatedDataCache.currentStakingRatio;
+  return avgDiff * 0.2 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
 }
 
 async function initializeRatios() {
   let ratios = [];
   let last = 0;
-
   try {
     aggregatedDataCache = await fetchAggregatedData();
     
@@ -141,15 +132,16 @@ async function initializeRatios() {
       last = ratio;
     });
     
-    last = aggregatedDataCache.currentStakingRatio;
-    ratios.push(last);
-
-    while (ratios.length < 495) {
+    while (ratios.length < 500) {
       last += slowIncrement(last, calculateAverageDifference(ratios));
       ratios.push(last);
     }
-
     forecasted = ratios[ratios.length - 1];
+    
+    // Remove first (currentCycle - AI_ACTIVATION_CYCLE) elements
+    const elementsToRemove = currentCycle - AI_ACTIVATION_CYCLE;
+    ratios = ratios.slice(elementsToRemove);
+    
     return ratios;
   } catch (error) {
     console.error('Error initializing ratios:', error);
@@ -180,185 +172,6 @@ function createVerticalLines(chart, positions) {
   positions.forEach(pos => createVerticalLine(chart, pos));
 }
 
-function createIssuanceChart(ratio) {
-  return Highcharts.chart('issuance', {
-    chart: {
-      type: 'spline',
-      backgroundColor: 'rgba(0,0,0,0)',
-      events: {
-        load: function() { createVerticalLine(this, currentCycle + 1); }
-      }
-    },
-    title: {
-      text: 'Issuance since Paris',
-      style: { color: '#ffffff' }
-    },
-    xAxis: {
-      lineColor: '#ffffff',
-      labels: {
-        formatter: function() {
-          return this.value === currentCycle + 1 ? 'Now' : '';
-        },
-        style: { color: '#ffffff' }
-      },
-      title: { text: null },
-      tickInterval: 1,
-      tickPositions: [currentCycle + 1, 823]
-    },
-    yAxis: {
-      labels: { enabled: false },
-      gridLineWidth: 0,
-      title: { text: null },
-      min: 0, max: 11,
-      tickInterval: 1
-    },
-    tooltip: {
-      formatter: function() {
-        return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> ${this.series.name}: <b>${this.y.toFixed(2)}%</b><br/>`;
-      }
-    },
-    series: [{
-      zoneAxis: 'x',
-      zones: [{ value: (currentCycle + 1) }, { dashStyle: 'ShortDot' }],
-      showInLegend: false,
-      shadow: {
-        color: 'rgba(255, 255, 0, 0.7)',
-        offsetX: 0, offsetY: 0,
-        opacity: 1, width: 10
-      },
-      color: {
-        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-        stops: [[0, '#ff6961'], [1, '#77dd77']]
-      },
-      name: 'Issuance',
-      data: ratio.map((value, index) => ({
-        x: index + 749,
-        y: issuanceRateQ(index + 749, value)+0.24
-      })),
-      lineWidth: 3,
-      dataLabels: {
-        enabled: true,
-        formatter: function() {
-          if (this.point.index === this.series.data.length - 1 || this.point.x === currentCycle + 1) {
-            return `${this.y.toFixed(2)}%`;
-          }
-          return null;
-        },
-        align: 'right',
-        verticalAlign: 'bottom',
-      },
-      marker: { enabled: false },
-    }],
-    credits: { enabled: false }
-  });
-}
-
-function createStakeChart(ratio, updateIssuanceChart) {
-  return Highcharts.chart('stake', {
-    chart: {
-      type: 'spline',
-      backgroundColor: 'rgba(0,0,0,0)',
-      events: {
-        load: function() { createVerticalLine(this, currentCycle + 1); }
-      }
-    },
-    title: {
-      text: 'Staked since Paris',
-      style: { color: '#ffffff' }
-    },
-    xAxis: {
-      labels: {
-        formatter: function() {
-          return this.value === currentCycle + 1 ? 'Now' : '';
-        },
-        style: { color: '#ffffff' }
-      },
-      lineColor: '#ffffff',
-      title: { text: null },
-      tickPositions: [currentCycle + 1],
-      tickInterval: 1,
-    },
-    yAxis: {
-      labels: { enabled: false },
-      lineColor: '#ffffff',
-      gridLineWidth: 0,
-      title: { text: null },
-      min: 0, max: 1,
-      tickInterval: 0.2
-    },
-    tooltip: {
-      formatter: function() {
-        return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> ${this.series.name}: <b>${(this.y * 100).toFixed(2)}%</b><br/>`;
-      }
-    },
-    series: [{
-      zoneAxis: 'x',
-      zones: [{ value: (currentCycle + 1) }, { dashStyle: 'ShortDot' }],
-      shadow: {
-        color: 'rgba(255, 255, 0, 0.7)',
-        offsetX: 0, offsetY: 0,
-        opacity: 1, width: 10
-      },
-      name: "Staking ratio",
-      showInLegend: false,
-      data: ratio.map((value, index) => ({
-        x: index + 748,
-        y: stakedRatio(index + 1, value)
-      })),
-      dataLabels: {
-        enabled: true,
-        formatter: function() {
-          if (this.point.index === this.series.data.length - 1 || this.point.x === currentCycle + 1) {
-            return `${(this.y * 100).toFixed(2)}%`;
-          }
-          return null;
-        },
-        align: 'right',
-        verticalAlign: 'bottom',
-      },
-      lineWidth: 3,
-      marker: { enabled: false },
-    }],
-    credits: { enabled: false },
-    plotOptions: {
-      series: {
-        color: {
-          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-          stops: [[0, '#77dd77'], [1, '#ff6961']]
-        },
-        stickyTracking: true,
-        dragDrop: {
-          draggableY: true,
-          dragMaxY: 1,
-          dragMinY: 0,
-          liveRedraw: true
-        },
-        point: {
-          events: {
-            drag: function(e) {
-              const point = e.target;
-              if (point.x <= currentCycle + 1) {
-                e.newPoint.y = point.y;
-                return;
-              }
-              const newValue = e.newPoint.y;
-              const series = point.series;
-              const updatedData = series.data.map((p, i) => ({
-                x: p.x,
-                y: i >= point.index ? parseFloat(newValue) : p.y
-              }));
-              series.setData(updatedData, true, {
-                duration: 800,
-                easing: 'easeOutBounce'
-              });
-              updateIssuanceChart(updatedData);
-            }
-          }
-        }
-      }
-    }
-  });
-}
 
 function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedAPY, delegatedAPY) {
   const jeetsPercentage = Math.max(0, 100 - totalStakedPercentage - totalDelegatedPercentage);
@@ -872,21 +685,38 @@ function createTimeSeriesChart(containerId, title, data, formatter) {
   });
 }
 
-function createHistoricalCharts() {
+function createHistoricalCharts(ratio) {
   try {
     const data = aggregatedDataCache.historicalCycleData;
     const issuanceData = processIssuanceData(data);
     const stakingData = processStakingData(data);
     currentCycle = issuanceData.currentCycle;
     
-    createHistoricalChart('issuanceh', 'Issuance since genesis', issuanceData.ratios, d => ({
+    const issuanceDataWithRatio = [
+      ...issuanceData.ratios,
+      ...ratio.map((ratioValue, index) => ({
+        cycle: currentCycle + index,
+        issuance: issuanceRateQ(index + currentCycle, ratioValue)
+      }))
+    ];
+    
+    createHistoricalChart('issuanceh', 'Issuance since genesis', issuanceDataWithRatio, d => ({
       x: d.cycle,
       y: d.issuance
     }), [428, 743, 823]);
     
-    createHistoricalChart('stakingh', 'Staked since genesis', stakingData.ratios, d => ({
+    const stakingDataWithRatio = [
+      ...stakingData.ratios, 
+      ...ratio.map((ratioValue, index) => ({
+        cycle: currentCycle + index, 
+        staking: 0,
+        ratio: ratioValue
+      }))
+    ];
+    
+    createHistoricalChart('stakingh', 'Staked since genesis', stakingDataWithRatio, d => ({
       x: d.cycle,
-      y: d.staking * 100
+      y: (d.staking + (d.ratio || 0)) * 100
     }), [428, 743, 823]);
   } catch (error) {
     console.error('Error creating historical charts:', error);
@@ -894,7 +724,7 @@ function createHistoricalCharts() {
 }
 
 function createHistoricalChart(containerId, title, data, dataMapper, tickPositions) {
-  Highcharts.chart(containerId, {
+  const chartConfig = {
     chart: {
       type: 'spline',
       backgroundColor: 'rgba(0,0,0,0)',
@@ -963,7 +793,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
       gridLineWidth: 0,
       title: { text: null },
       min: 0,
-      max: containerId === 'issuanceh' ? 11 : undefined,
+      max: containerId === 'issuanceh' ? 10 : 50,
       tickInterval: 1
     },
     tooltip: {
@@ -974,6 +804,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
     },
     series: [{
       zoneAxis: 'x',
+      zones: [{ value: (currentCycle + 1) }, { dashStyle: 'ShortDot' }],
       showInLegend: false,
       shadow: {
         color: 'rgba(255, 255, 0, 0.7)',
@@ -992,7 +823,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
       dataLabels: {
         enabled: true,
         formatter: function() {
-          if (this.point.index === this.series.data.length - 1 || this.point.x === currentCycle + 1) {
+          if (this.point.index === this.series.data.length - 1 || this.point.x === currentCycle) {
             return `${this.y.toFixed(2)}%`;
           }
           return null;
@@ -1003,19 +834,74 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
       marker: { enabled: false },
     }],
     credits: { enabled: false }
-  });
+  };
+
+  if (containerId === 'stakingh') {
+    chartConfig.plotOptions = {
+      series: {
+        color: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [[0, '#77dd77'], [1, '#ff6961']]
+        },
+        stickyTracking: true,
+        dragDrop: {
+          draggableY: true,
+          dragMaxY: 100,
+          dragMinY: 0,
+          liveRedraw: true
+        },
+        point: {
+          events: {
+            drag: function(e) {
+              const point = e.target;
+              if (point.x <= currentCycle + 1) {
+                e.newPoint.y = point.y;
+                return;
+              }
+              const newValue = e.newPoint.y;
+              const series = point.series;
+              const updatedData = series.data.map((p, i) => ({
+                x: p.x,
+                y: i >= point.index ? parseFloat(newValue) : p.y
+              }));
+              series.setData(updatedData, true, {
+                duration: 800,
+                easing: 'easeOutBounce'
+              });
+              updateIssuanceChart(updatedData);
+            }
+          }
+        }
+      }
+    };
+  }
+
+  Highcharts.chart(containerId, chartConfig);
 }
 
 function updateIssuanceChart(newStakingData) {
-  const issuanceDataQ = newStakingData.map(point => ({
-    x: point.x,
-    y: issuanceRateQ(point.x, point.y)+0.24
-  }));
-
-  Highcharts.charts.forEach(chart => {
-    if (chart && chart.renderTo && chart.renderTo.id === 'issuance')
-      chart.series[0].setData(issuanceDataQ, true);
+  const issuanceChart = Highcharts.charts.find(chart => 
+    chart && chart.renderTo && chart.renderTo.id === 'issuanceh'
+  );
+  
+  if (!issuanceChart) return;
+  
+  const originalData = issuanceChart.series[0].options.data;
+  
+  const updatedData = originalData.map(point => {
+    if (point.x > currentCycle) {
+      const stakingPoint = newStakingData.find(sp => sp.x === point.x);
+      if (stakingPoint) {
+        return {
+          x: point.x,
+          y: issuanceRateQ(point.x, stakingPoint.y / 100)
+        };
+      }
+    }
+    return point;
   });
+  
+  issuanceChart.series[0].setData(updatedData, true);
 }
 
 function processIssuanceData(data) {
@@ -1109,8 +995,7 @@ function createTVLChart() {
 
 
 function main(ratio) {
-  const issuanceChart = createIssuanceChart(ratio);
-  const stakeChart = createStakeChart(ratio, updateIssuanceChart);
+  createHistoricalCharts(ratio);
   createDALSupportChart();
   createBurnedSupplyChart();
   createTotalAccountsChart();
@@ -1134,17 +1019,10 @@ function main(ratio) {
 
 document.addEventListener('DOMContentLoaded', async function() {
   try {
-    if (location.hash != "") {
-      const ratio = atob(location.hash.substring(1)).split(",");
-      // Still need to fetch data for other charts
-      aggregatedDataCache = await fetchAggregatedData();
-      main(ratio);
-    } else {
+
       const ratios = await initializeRatios();
       main(ratios);
-    }
     
-    createHistoricalCharts();
   } catch (error) {
     console.error('Error during initialization:', error);
   }
