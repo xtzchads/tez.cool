@@ -7,9 +7,6 @@ let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
 let totalTVL;
 
-// Add this JavaScript code after loading Highcharts but before creating any charts
-// Place this in your main.js file or in a <script> tag
-
 Highcharts.setOptions({
     chart: {
         style: {
