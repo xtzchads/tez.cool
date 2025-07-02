@@ -2,7 +2,7 @@
 const TRANSITION_PERIOD = 50;
 const INITIAL_PERIOD = 10;
 const AI_ACTIVATION_CYCLE = 748;
-const WORKER_URL = 'https://ai.tez.cool/api/v1/getData';
+const WORKER_URL = 'https://tez.cool/api/v1/getData';
 let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
 let totalTVL;
