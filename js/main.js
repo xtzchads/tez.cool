@@ -304,7 +304,7 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
           }
         },
         { 
-          name: 'Jeets', 
+          name: 'Passive', 
           y: jeetsPercentage, 
           color: {
             radialGradient: {
