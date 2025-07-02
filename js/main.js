@@ -7,6 +7,70 @@ let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
 let totalTVL;
 
+// Add this JavaScript code after loading Highcharts but before creating any charts
+// Place this in your main.js file or in a <script> tag
+
+Highcharts.setOptions({
+    chart: {
+        style: {
+            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+        }
+    },
+    title: {
+        style: {
+            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+        }
+    },
+    subtitle: {
+        style: {
+            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+        }
+    },
+    xAxis: {
+        labels: {
+            style: {
+                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+            }
+        },
+        title: {
+            style: {
+                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+            }
+        }
+    },
+    yAxis: {
+        labels: {
+            style: {
+                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+            }
+        },
+        title: {
+            style: {
+                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+            }
+        }
+    },
+    legend: {
+        itemStyle: {
+            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+        }
+    },
+    tooltip: {
+        style: {
+            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+        }
+    },
+    plotoptions: {
+        series: {
+            dataLabels: {
+                style: {
+                    fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+                }
+            }
+        }
+    }
+});
+
 function computeExtremum(cycle, initialValue, finalValue) {
   const initialLimit = AI_ACTIVATION_CYCLE + INITIAL_PERIOD;
   const transLimit = initialLimit + TRANSITION_PERIOD + 1;
@@ -183,7 +247,7 @@ function createVerticalLines(chart, positions) {
 
 function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedAPY, delegatedAPY) {
   const jeetsPercentage = Math.max(0, 100 - totalStakedPercentage - totalDelegatedPercentage);
-
+  
   Highcharts.chart('chart-container4', {
     chart: {
       backgroundColor: 'rgba(0,0,0,0)',
@@ -196,20 +260,81 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
     tooltip: {
       pointFormat: '<b>{point.name}: {point.y}%</b>'
     },
+    plotOptions: {
+      pie: {
+        allowPointSelect: true,
+        cursor: 'pointer',
+        states: {
+          hover: {
+            brightness: 0.1 // Slight brightness increase on hover
+          }
+        }
+      }
+    },
     series: [{
       name: 'Ratios',
       data: [
-        { name: 'Staked ('+stakedAPY+'% APY)', y: totalStakedPercentage, color: Highcharts.getOptions().colors[1] },
-        { name: 'Delegated ('+delegatedAPY+'% APY)', y: totalDelegatedPercentage, color: Highcharts.getOptions().colors[2] },
-        { name: 'Jeets', y: jeetsPercentage, color: '#FF5733' }
+        { 
+          name: 'Staked ('+stakedAPY+'% APY)', 
+          y: totalStakedPercentage, 
+          color: {
+            radialGradient: {
+              cx: 0.5,
+              cy: 0.5,
+              r: 0.8
+            },
+            stops: [
+              [0, 'hsla(220, 85%, 70%, 0.9)'], // Blue gradient with transparency
+              [0.5, 'hsla(220, 75%, 55%, 0.8)'],
+              [1, 'hsla(220, 65%, 40%, 0.7)']
+            ]
+          }
+        },
+        { 
+          name: 'Delegated ('+delegatedAPY+'% APY)', 
+          y: totalDelegatedPercentage, 
+          color: {
+            radialGradient: {
+              cx: 0.5,
+              cy: 0.5,
+              r: 0.8
+            },
+            stops: [
+              [0, 'hsla(280, 85%, 70%, 0.9)'], // Purple gradient with transparency
+              [0.5, 'hsla(280, 75%, 55%, 0.8)'],
+              [1, 'hsla(280, 65%, 40%, 0.7)']
+            ]
+          }
+        },
+        { 
+          name: 'Jeets', 
+          y: jeetsPercentage, 
+          color: {
+            radialGradient: {
+              cx: 0.5,
+              cy: 0.5,
+              r: 0.8
+            },
+            stops: [
+              [0, 'hsla(10, 85%, 70%, 0.9)'], // Red gradient with transparency
+              [0.5, 'hsla(10, 75%, 55%, 0.8)'],
+              [1, 'hsla(10, 65%, 40%, 0.7)']
+            ]
+          }
+        }
       ],
       showInLegend: false,
       dataLabels: {
         enabled: true,
         format: '{point.name}',
-        style: { color: '#ffffff', fontSize: '14px' }
+        style: { 
+          color: '#ffffff', 
+          fontSize: '14px',
+          textOutline: '1px contrast' // Better text visibility
+        }
       },
-      borderColor: 'transparent'
+      borderColor: 'rgba(255,255,255,0.2)',
+      borderWidth: 2
     }],
     exporting: { enabled: false },
     credits: { enabled: false }
@@ -956,13 +1081,27 @@ function createTVLChart() {
     const tvlValues = series.values[1];
     const layers = series.values[2];
     
-    const pieData = projects.map((project, index) => ({
-      name: `${project}`,
-      y: tvlValues[index],
-      color: index < Highcharts.getOptions().colors.length ? 
-        Highcharts.getOptions().colors[index] : 
-        `hsl(${(index * 25) % 360}, 70%, 50%)`
-    }));
+    // Create gradient colors with transparency for each slice
+    const pieData = projects.map((project, index) => {
+      const hue = (index * 45) % 360; // Spread colors across spectrum
+      
+      return {
+        name: `${project}`,
+        y: tvlValues[index],
+        color: {
+          radialGradient: {
+            cx: 0.5,
+            cy: 0.5,
+            r: 0.8
+          },
+          stops: [
+            [0, `hsla(${hue}, 85%, 70%, 0.9)`], // Semi-transparent center
+            [0.5, `hsla(${hue}, 75%, 55%, 0.8)`], // More transparent middle
+            [1, `hsla(${hue}, 65%, 40%, 0.7)`] // Most transparent edge
+          ]
+        }
+      };
+    });
     
     totalTVL = tvlValues.reduce((sum, value) => sum + value, 0);
     
@@ -975,12 +1114,23 @@ function createTVLChart() {
         text: 'DeFi TVL',
         style: { color: '#ffffff', fontSize: '24px' }
       },
-	  subtitle: {
-  text: `Total: $${totalTVL.toLocaleString()}`,
-  style: { color: '#cccccc', fontSize: '16px' }
-},
+      subtitle: {
+        text: `Total: $${totalTVL.toLocaleString()}`,
+        style: { color: '#cccccc', fontSize: '16px' }
+      },
       tooltip: {
         pointFormat: 'Share: {point.percentage:.1f}%'
+      },
+      plotOptions: {
+        pie: {
+          allowPointSelect: true,
+          cursor: 'pointer',
+          states: {
+            hover: {
+              brightness: 0.1 // Slight brightness increase on hover
+            }
+          }
+        }
       },
       series: [{
         name: 'TVL',
@@ -989,10 +1139,15 @@ function createTVLChart() {
         dataLabels: {
           enabled: true,
           format: '{point.name}<br/>${point.y:,.0f}',
-          style: { color: '#ffffff', fontSize: '12px' },
+          style: { 
+            color: '#ffffff', 
+            fontSize: '12px',
+            textOutline: '1px contrast' // Better text visibility
+          },
           distance: 20
         },
-        borderColor: 'transparent'
+        borderColor: 'rgba(255,255,255,0.2)',
+        borderWidth: 2
       }],
       exporting: { enabled: false },
       credits: { enabled: false }
