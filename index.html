@@ -611,36 +611,46 @@
          }
          
          adjustContainerHeight() {
-        const mainContainer = document.querySelector('.container.scrollable-content');
-        if (!mainContainer) return;
+    const mainContainer = document.querySelector('.container.scrollable-content');
+    if (!mainContainer) return;
+    
+    if (this.currentView === 'home') {
+        mainContainer.style.height = 'auto';
+        mainContainer.style.minHeight = '100vh';
+        mainContainer.style.maxHeight = 'none';
+        mainContainer.style.overflow = 'auto';
         
+        // Restore saved scroll position
+        mainContainer.scrollTop = this.savedScrollPosition;
+    } else {
+        const viewportHeight = window.innerHeight;
+        
+        // Save current scroll position before switching
         if (this.currentView === 'home') {
-            mainContainer.style.height = 'auto';
-            mainContainer.style.minHeight = '100vh';
-            mainContainer.style.maxHeight = 'none';
-            mainContainer.style.overflow = 'auto';
-            
-            // Restore saved scroll position
-            mainContainer.scrollTop = this.savedScrollPosition;
-        } else {
-            const viewportHeight = window.innerHeight;
-            const headerElement = document.querySelector('.header-content');
-            const headerHeight = headerElement.offsetHeight;
-            
-            // Save current scroll position before switching
-            if (this.currentView === 'home') {
-                this.savedScrollPosition = mainContainer.scrollTop;
-            }
-            
-            // Reset scroll position for iframe views
-            mainContainer.scrollTop = 0;
-            
-            mainContainer.style.height = `${viewportHeight}px`;
-            mainContainer.style.minHeight = `${viewportHeight}px`;
-            mainContainer.style.maxHeight = `${viewportHeight}px`;
-            mainContainer.style.overflow = 'hidden';
+            this.savedScrollPosition = mainContainer.scrollTop;
         }
+        
+        // Reset scroll position for iframe views
+        mainContainer.scrollTop = 0;
+        
+        mainContainer.style.height = `${viewportHeight}px`;
+        mainContainer.style.minHeight = `${viewportHeight}px`;
+        mainContainer.style.maxHeight = `${viewportHeight}px`;
+        
+        // Use 'auto' instead of 'hidden' for Safari compatibility
+        // Or try 'visible' if auto doesn't work
+        mainContainer.style.overflow = 'auto';
+        
+        // Alternative: Use a different approach for Safari
+        // Detect Safari and handle differently
+        /*const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        if (isSafari) {
+            mainContainer.style.overflow = 'visible';
+            // Or completely remove overflow restriction for Safari
+            // mainContainer.style.overflow = '';
+        }*/
     }
+}
              
              preloadIframe(target, url) {
                  const iframe = document.getElementById(`${target}-iframe`);
