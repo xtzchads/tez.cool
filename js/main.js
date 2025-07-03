@@ -243,7 +243,7 @@ function createVerticalLines(chart, positions) {
 
 
 function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedAPY, delegatedAPY) {
-  const jeetsPercentage = Math.max(0, 100 - totalStakedPercentage - totalDelegatedPercentage);
+  const jeetsPercentage = Number(Math.max(0, 100 - totalStakedPercentage - totalDelegatedPercentage).toFixed(2));
   
   Highcharts.chart('chart-container4', {
     chart: {
@@ -255,7 +255,7 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
       style: { color: '#ffffff', fontSize: '24px' }
     },
     tooltip: {
-      pointFormat: '<b>{point.name}: {point.y}%</b>'
+      pointFormat: '<b>{point.y}%</b>'
     },
     plotOptions: {
       pie: {
