@@ -1065,10 +1065,10 @@ function processStakingData(data) {
   };
 }
 
-
 function createTVLChart() {
   try {
     const tvlData = aggregatedDataCache.tvlData;
+    console.log(aggregatedDataCache.tvlData)
     if (!tvlData || !tvlData.series || tvlData.series.length === 0) {
       console.error('No TVL data available');
       return;
@@ -1092,9 +1092,19 @@ function createTVLChart() {
     
     console.log(`Sum of ${targetProtocols.join(', ')}: $${specificProtocolsTVL.toLocaleString()}`);
     
+    // Generate unique colors with better distribution
+    const generateUniqueHue = (index, total) => {
+      // Use golden ratio to ensure good color distribution
+      const goldenRatio = 0.618033988749895;
+      return (index * goldenRatio * 360) % 360;
+    };
+    
     // Create gradient colors with transparency for each slice
     const pieData = projects.map((project, index) => {
-      const hue = (index * 45) % 360; // Spread colors across spectrum
+      const hue = generateUniqueHue(index, projects.length);
+      // Vary saturation and lightness slightly to ensure uniqueness
+      const saturation = 75 + (index % 3) * 10; // 75%, 85%, 95%
+      const lightness = 55 + (index % 4) * 5; // 55%, 60%, 65%, 70%
       
       return {
         name: `${project}`,
@@ -1106,9 +1116,9 @@ function createTVLChart() {
             r: 0.8
           },
           stops: [
-            [0, `hsla(${hue}, 85%, 70%, 0.9)`], // Semi-transparent center
-            [0.5, `hsla(${hue}, 75%, 55%, 0.8)`], // More transparent middle
-            [1, `hsla(${hue}, 65%, 40%, 0.7)`] // Most transparent edge
+            [0, `hsla(${hue}, ${saturation}%, ${lightness + 15}%, 0.9)`], // Lighter center
+            [0.5, `hsla(${hue}, ${saturation - 10}%, ${lightness}%, 0.8)`], // Medium middle
+            [1, `hsla(${hue}, ${saturation - 20}%, ${lightness - 15}%, 0.7)`] // Darker edge
           ]
         }
       };
@@ -1122,7 +1132,7 @@ function createTVLChart() {
         type: 'pie'
       },
       title: {
-        text: 'DeFi TVL (+RWA)',
+        text: 'DeFi TVL',
         style: { color: '#ffffff', fontSize: '24px' }
       },
       subtitle: {
