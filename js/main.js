@@ -6,6 +6,7 @@ const WORKER_URL = 'https://tez.cool/api/v1/getData';
 let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
 let totalTVL;
+let specificProtocolsTVL = 0;
 
 Highcharts.setOptions({
     chart: {
@@ -472,7 +473,7 @@ function createHistoricalTvlChart() {
  0.2
 );
 if (tezosData.length > 0) {
- tezosData[tezosData.length - 1][1] = totalTVL;
+ tezosData[tezosData.length - 1][1] = totalTVL-specificProtocolsTVL;
 }
     
     const series = [];
@@ -507,7 +508,7 @@ if (tezosData.length > 0) {
         backgroundColor: 'rgba(0,0,0,0)'
       },
       title: {
-        text: 'DeFi Growth (L1+L2)',
+        text: 'DeFi Growth (L1+L2-RWA)',
         style: { color: '#ffffff' }
       },
       xAxis: {
@@ -1064,10 +1065,10 @@ function processStakingData(data) {
   };
 }
 
+
 function createTVLChart() {
   try {
     const tvlData = aggregatedDataCache.tvlData;
-    
     if (!tvlData || !tvlData.series || tvlData.series.length === 0) {
       console.error('No TVL data available');
       return;
@@ -1076,7 +1077,20 @@ function createTVLChart() {
     const series = tvlData.series[0];
     const projects = series.values[0];
     const tvlValues = series.values[1];
+	
     const layers = series.values[2];
+    
+    // Calculate sum of specific protocols
+    const targetProtocols = ["Midas RWA", "Uranium.io", "Spiko"];
+    specificProtocolsTVL = 0;
+    
+    projects.forEach((project, index) => {
+      if (targetProtocols.includes(project)) {
+        specificProtocolsTVL += tvlValues[index];
+      }
+    });
+    
+    console.log(`Sum of ${targetProtocols.join(', ')}: $${specificProtocolsTVL.toLocaleString()}`);
     
     // Create gradient colors with transparency for each slice
     const pieData = projects.map((project, index) => {
@@ -1108,7 +1122,7 @@ function createTVLChart() {
         type: 'pie'
       },
       title: {
-        text: 'DeFi TVL',
+        text: 'DeFi TVL (+RWA)',
         style: { color: '#ffffff', fontSize: '24px' }
       },
       subtitle: {
