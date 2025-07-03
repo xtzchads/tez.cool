@@ -632,7 +632,8 @@ adjustContainerHeight() {
         mainContainer.style.overflow = 'auto';
     } else {
         const viewportHeight = window.innerHeight;
-        const headerHeight = 80;
+        const headerElement = document.querySelector('.header');
+        const headerHeight = headerElement ? headerElement.offsetHeight : 80;  // ← Dynamic header height
         
         mainContainer.style.height = `${viewportHeight}px`;
         mainContainer.style.minHeight = `${viewportHeight}px`;
