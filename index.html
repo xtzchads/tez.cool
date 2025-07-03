@@ -1,724 +1,711 @@
-<html lang="en"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Discover collection of open-source tools for Tezos enthusiasts">
-  <title>TezCool</title>
-  <script src="js/highcharts.js"></script>
-<script src="js/highcharts-more.js"></script>
-<script src="js/draggable-points.js"></script>
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/main.css?x=3.3">
-<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-      @import url("https://fonts.googleapis.com/css?family=Monda:400,500,600");
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="description" content="Discover collection of open-source tools for Tezos enthusiasts">
+      <title>TezCool</title>
+      <script src="js/highcharts.js"></script>
+      <script src="js/highcharts-more.js"></script>
+      <script src="js/draggable-points.js"></script>
+      <link rel="stylesheet" href="css/bootstrap.min.css">
+      <link rel="stylesheet" href="css/main.css?x=3.3">
+      <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+      <style>
+         @import url("https://fonts.googleapis.com/css?family=Monda:400,500,600");
+	
+         :root {
+         --colorful: rgba(239, 123, 227, 1);
+         --primary-gradient: linear-gradient(180deg, rgba(162, 124, 238, 1) 0%, rgba(127, 75, 231, 1) 100%);
+         --glass-bg: rgba(255, 255, 255, 0.01);
+         --glass-border: rgba(255, 255, 255, 0.26);
+         --text-primary: #ffffff;
+         --text-secondary: rgba(255, 255, 255, 0.7);
+         --text-muted: rgba(255, 255, 255, 0.5);
+         --shadow-glass: 11px 14px 39px rgba(5, 2, 13, 0.1), 45px 54px 70px rgba(5, 2, 13, 0.09), 100px 122px 95px rgba(5, 2, 13, 0.05);
+         --border-radius-sm: 16px;
+         --border-radius-md: 30px;
+         --spacing-xs: 8px;
+         --spacing-sm: 16px;
+         --spacing-md: 24px;
+         --spacing-lg: 32px;
+         --spacing-xl: 48px;
+         }
+   
+         .container.scrollable-content {
+         width: 100%;
+         min-height: 100vh;
+         padding-top: 80px;
+         overflow-y: auto;
+         box-sizing: border-box;
+         transition: all 0.3s ease;
+         }
 
-      /* CSS Variables */
-      :root {
-        --colorful: rgba(239, 123, 227, 1);
-        --primary-gradient: linear-gradient(180deg, rgba(162, 124, 238, 1) 0%, rgba(127, 75, 231, 1) 100%);
-        --glass-bg: rgba(255, 255, 255, 0.01);
-        --glass-border: rgba(255, 255, 255, 0.26);
-        --text-primary: #ffffff;
-        --text-secondary: rgba(255, 255, 255, 0.7);
-        --text-muted: rgba(255, 255, 255, 0.5);
-        --shadow-glass: 11px 14px 39px rgba(5, 2, 13, 0.1), 45px 54px 70px rgba(5, 2, 13, 0.09), 100px 122px 95px rgba(5, 2, 13, 0.05);
-        --border-radius-sm: 16px;
-        --border-radius-md: 30px;
-        --spacing-xs: 8px;
-        --spacing-sm: 16px;
-        --spacing-md: 24px;
-        --spacing-lg: 32px;
-        --spacing-xl: 48px;
-      }
-	  
-.container.scrollable-content {
-  width: 100%;
-  min-height: 100vh;
-  padding-top: 80px;
-  overflow-y: auto;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
-}
+         .title-section {
+         top: 80px;
+         left: 0;
+         right: 0;
+         z-index: 90;
+         backdrop-filter: blur(5px);
+         -webkit-backdrop-filter: blur(20px);
+         padding: var(--spacing-md) var(--spacing-sm);
+         text-align: center;
+         }
 
-/* Cursive Title Section */
-.title-section {
-  top: 80px;
-  left: 0;
-  right: 0;
-  z-index: 90;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(20px);
-  padding: var(--spacing-md) var(--spacing-sm);
-  text-align: center;
-}
+         * {
+         -webkit-font-smoothing: antialiased;
+         box-sizing: border-box;
+         }
 
-      /* Base Styles */
-      * {
-        -webkit-font-smoothing: antialiased;
-        box-sizing: border-box;
-      }
+         html, body {
+         margin: 0;
+         padding: 0;
+         width: 100%;
+         min-height: 100vh;
+         font-family: "Monda", Helvetica;
+         background: radial-gradient(50% 50% at 65% 50%, rgba(36, 26, 76, 1) 0%, rgba(9, 3, 28, 1) 100%);
+         overflow-x: hidden;
+         }
 
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        min-height: 100vh;
-        font-family: "Monda", Helvetica;
-        background: radial-gradient(50% 50% at 65% 50%, rgba(36, 26, 76, 1) 0%, rgba(9, 3, 28, 1) 100%);
-        overflow-x: hidden;
-      }
+         button:focus-visible {
+         outline: 2px solid #4a90e2 !important;
+         }
 
-      button:focus-visible {
-        outline: 2px solid #4a90e2 !important;
-      }
+         a {
+         text-decoration: none;
+         color: inherit;
+         }
 
-      a {
-        text-decoration: none;
-        color: inherit;
-      }
+         .glass-card {
+         background: var(--glass-bg);
+         backdrop-filter: blur(25px);
+         -webkit-backdrop-filter: blur(25px);
+         border-radius: var(--border-radius-md);
+         border: 1px solid var(--glass-border);
+         box-shadow: var(--shadow-glass);
+         }
 
-      /* Utility Classes */
-      .glass-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--glass-border);
-        box-shadow: var(--shadow-glass);
-      }
+         .btn-primary {
+         background: var(--primary-gradient);
+         border: 2px solid var(--glass-border);
+         border-radius: var(--border-radius-sm);
+         color: var(--text-primary);
+         cursor: pointer;
+         transition: all 0.3s ease;
+         font-family: "Monda", Helvetica;
+         font-weight: 500;
+         padding: var(--spacing-sm) var(--spacing-lg);
+         display: inline-flex;
+         align-items: center;
+         justify-content: center;
+         gap: 10px;
+         }
 
-      .btn-primary {
-        background: var(--primary-gradient);
-        border: 2px solid var(--glass-border);
-        border-radius: var(--border-radius-sm);
-        color: var(--text-primary);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-family: "Monda", Helvetica;
-        font-weight: 500;
-        padding: var(--spacing-sm) var(--spacing-lg);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-      }
+         .btn-primary:hover {
+         transform: translateY(-2px);
+         box-shadow: 0 8px 25px rgba(127, 75, 231, 0.3);
+         }
 
-      .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(127, 75, 231, 0.3);
-      }
+         .btn-secondary {
+         background: linear-gradient(0deg, rgba(24, 17, 44, 0.64) 0%, rgba(24, 17, 44, 0.64) 100%);
+         border: 1px solid var(--glass-border);
+         border-radius: var(--border-radius-sm);
+         color: #a27cee;
+         cursor: pointer;
+         transition: all 0.3s ease;
+         font-family: "Monda", Helvetica;
+         font-weight: 500;
+         padding: var(--spacing-sm) var(--spacing-lg);
+         }
 
-      .btn-secondary {
-        background: linear-gradient(0deg, rgba(24, 17, 44, 0.64) 0%, rgba(24, 17, 44, 0.64) 100%);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--border-radius-sm);
-        color: #a27cee;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-family: "Monda", Helvetica;
-        font-weight: 500;
-        padding: var(--spacing-sm) var(--spacing-lg);
-      }
+         .flex-center {
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         }
 
-      .flex-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+         .text-center {
+         text-align: center;
+         }
 
-      .text-center {
-        text-align: center;
-      }
+         .main-container {
+         width: 100%;
+         min-height: 100vh;
+         position: relative;
+         overflow-x: hidden;
+         }
 
-      /* Main Container */
-      .main-container {
-        width: 100%;
-        min-height: 100vh;
-        position: relative;
-        overflow-x: hidden;
-      }
+         .hero-section {
+         position: relative;
+         width: 100%;
+         min-height: 100vh;
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         justify-content: center;
+         background: radial-gradient(50% 50% at 65% 50%, rgba(36, 26, 76, 1) 0%, rgba(9, 3, 28, 1) 100%);
+         padding: var(--spacing-md);
+         }
 
-      /* Hero Section */
-      .hero-section {
-        position: relative;
-        width: 100%;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(50% 50% at 65% 50%, rgba(36, 26, 76, 1) 0%, rgba(9, 3, 28, 1) 100%);
-        padding: var(--spacing-md);
-      }
+         .hero-background {
+         position: absolute;
+         top: 0;
+         left: 0;
+         width: 100%;
+         height: 100%;
+         opacity: 0.3;
+         z-index: 0;
+         }
 
-      .hero-background {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0.3;
-        z-index: 0;
-      }
+         .hero-content {
+         position: relative;
+         z-index: 2;
+         text-align: center;
+         max-width: 800px;
+         margin: 0 auto;
+         }
 
-      .hero-content {
-        position: relative;
-        z-index: 2;
-        text-align: center;
-        max-width: 800px;
-        margin: 0 auto;
-      }
+         .hero-title {
+         font-size: clamp(2.5rem, 5vw, 5rem);
+         font-weight: 600;
+         color: var(--text-primary);
+         margin-bottom: var(--spacing-sm);
+         letter-spacing: -0.03em;
+         line-height: 1.1;
+         }
 
-      .hero-title {
-        font-size: clamp(2.5rem, 5vw, 5rem);
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--spacing-sm);
-        letter-spacing: -0.03em;
-        line-height: 1.1;
-      }
+         .hero-subtitle {
+         font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+         color: var(--text-secondary);
+         margin-bottom: var(--spacing-xl);
+         line-height: 1.4;
+         }
 
-      .hero-subtitle {
-        font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-        color: var(--text-secondary);
-        margin-bottom: var(--spacing-xl);
-        line-height: 1.4;
-      }
+         .header {
+         height: 80px;
+         width: 100%;
+         position: fixed;
+         top: 0;
+         left: 0;
+         right: 0;
+         background: transparent;
+         backdrop-filter: blur(20px);
+         -webkit-backdrop-filter: blur(20px);
+         border-bottom: 1px solid var(--glass-border);
+         padding: var(--spacing-sm) var(--spacing-md);
+         z-index: 100;
+         transition: all 0.3s ease;
+         display: flex;
+         align-items: center;
+         }
 
-      /* Header */
-      .header {
-        height: 80px;
-        width: 100%;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: transparent;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid var(--glass-border);
-        padding: var(--spacing-sm) var(--spacing-md);
-        z-index: 100;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-      }
+         .header-content {
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         max-width: 1400px;
+         margin: 0 auto;
+         width: 100%;
+         }
 
-      .header-content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        max-width: 1400px;
-        margin: 0 auto;
-        width: 100%;
-      }
+         .hero-cursive-title {
+         font-family: 'Comic Sans MS', 'Kalam', 'Marker Felt', 'Trebuchet MS', cursive;
+         font-weight: bold;
+         font-size: clamp(3rem, 7vw, 5rem);
+         font-weight: 400;
+         background: linear-gradient(135deg, #a27cee 0%, #7f4be7 50%, #ef7be3 100%);
+         -webkit-background-clip: text;
+         -webkit-text-fill-color: transparent;
+         background-clip: text;
+         text-align: center;
+         margin: 0 0 8px 0;
+         line-height: 1.1;
+         animation: glow 3s ease-in-out infinite alternate;
+         }
 
-      /* Cursive Title Styles */
-      .hero-cursive-title {
-        font-family: 'Comic Sans MS', 'Kalam', 'Marker Felt', 'Trebuchet MS', cursive;
-  	font-weight: bold;
-        font-size: clamp(3rem, 7vw, 5rem);
-        font-weight: 400;
-        background: linear-gradient(135deg, #a27cee 0%, #7f4be7 50%, #ef7be3 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-align: center;
-        margin: 0 0 8px 0;
-        line-height: 1.1;
-        animation: glow 3s ease-in-out infinite alternate;
-      }
+         .hero-cursive-subtitle {
+         font-size: clamp(1rem, 2vw, 1.3rem);
+         color: rgba(255, 255, 255, 0.8);
+         font-style: italic;
+         text-align: center;
+         margin: 0;
+         font-family: "Monda", Helvetica;
+         }
 
-      .hero-cursive-subtitle {
-        font-size: clamp(1rem, 2vw, 1.3rem);
-        color: rgba(255, 255, 255, 0.8);
-        font-style: italic;
-        text-align: center;
-        margin: 0;
-        font-family: "Monda", Helvetica;
-      }
+         @keyframes glow {
+         from { filter: drop-shadow(0 0 10px rgba(162, 124, 238, 0.3)); }
+         to { filter: drop-shadow(0 0 20px rgba(162, 124, 238, 0.6)); }
+         }
 
-      @keyframes glow {
-        from { filter: drop-shadow(0 0 10px rgba(162, 124, 238, 0.3)); }
-        to { filter: drop-shadow(0 0 20px rgba(162, 124, 238, 0.6)); }
-      }
+         .nav-menu {
+         display: flex;
+         align-items: center;
+         gap: var(--spacing-md);
+         list-style: none;
+         margin: 0;
+         padding: 0;
+         justify-content: center;
+         }
 
-      .nav-menu {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        justify-content: center;
-      }
+         .logo {
+         display: flex;
+         align-items: center;
+         gap: var(--spacing-sm);
+         }
 
-      .logo {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-      }
+         .logo-icon {
+         width: 48px;
+         height: 48px;
+         border-radius: var(--border-radius-sm);
+         border: 2px solid var(--glass-border);
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         background: var(--glass-bg);
+         }
 
-      .logo-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: var(--border-radius-sm);
-        border: 2px solid var(--glass-border);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--glass-bg);
-      }
+         .nav-item {
+         color: var(--text-primary);
+         font-size: 1rem;
+         font-weight: 400;
+         padding: var(--spacing-xs) var(--spacing-sm);
+         border-radius: var(--border-radius-sm);
+         transition: all 0.3s ease;
+         cursor: pointer;
+         position: relative;
+         }
 
-      .nav-item {
-        color: var(--text-primary);
-        font-size: 1rem;
-        font-weight: 400;
-        padding: var(--spacing-xs) var(--spacing-sm);
-        border-radius: var(--border-radius-sm);
-        transition: all 0.3s ease;
-        cursor: pointer;
-        position: relative;
-      }
+         .nav-item:hover {
+         background: var(--glass-bg);
+         color: #a27cee;
+         }
 
-      .nav-item:hover {
-        background: var(--glass-bg);
-        color: #a27cee;
-      }
+         .nav-item.active {
+         background: var(--primary-gradient);
+         color: var(--text-primary);
+         }
 
-      .nav-item.active {
-        background: var(--primary-gradient);
-        color: var(--text-primary);
-      }
+         .nav-item.loading::after {
+         content: "";
+         position: absolute;
+         top: 50%;
+         right: 8px;
+         width: 12px;
+         height: 12px;
+         border: 2px solid transparent;
+         border-top: 2px solid currentColor;
+         border-radius: 50%;
+         animation: spin 1s linear infinite;
+         transform: translateY(-50%);
+         }
 
-      /* Loading indicator for nav items */
-      .nav-item.loading::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        right: 8px;
-        width: 12px;
-        height: 12px;
-        border: 2px solid transparent;
-        border-top: 2px solid currentColor;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        transform: translateY(-50%);
-      }
+         @keyframes spin {
+         0% { transform: translateY(-50%) rotate(0deg); }
+         100% { transform: translateY(-50%) rotate(360deg); }
+         }
 
-      @keyframes spin {
-        0% { transform: translateY(-50%) rotate(0deg); }
-        100% { transform: translateY(-50%) rotate(360deg); }
-      }
+         .iframe-container {
+         position: absolute;
+         top: 0;
+         left: 0;
+         width: 100%;
+         height: calc(100vh);
+         opacity: 0;
+         transition: opacity 0.3s ease;
+         pointer-events: none;
+         }
 
-      /* Iframe Container */
-.iframe-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: calc(100vh);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
+         .iframe-container.active {
+         opacity: 1;
+         pointer-events: auto;
+         }
 
-.iframe-container.active {
-  opacity: 1;
-  pointer-events: auto;
-}
+         .iframe-container iframe {
+         width: 100%;
+         height: 100%;
+         border: none;
+         background: var(--glass-bg);
+         }
 
-.iframe-container iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  background: var(--glass-bg);
-}
+         .home-content {
+         transition: opacity 0.3s ease;
+         }
 
-      /* Home content styling */
-      .home-content {
-        transition: opacity 0.3s ease;
-      }
+         .home-content.hidden {
+         opacity: 0;
+         pointer-events: none;
+         }
 
-      .home-content.hidden {
-        opacity: 0;
-        pointer-events: none;
-      }
+         ::-webkit-scrollbar {
+         width: 8px;
+         }
 
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
+         ::-webkit-scrollbar-track {
+         background: rgba(255, 255, 255, 0.1);
+         }
 
-      ::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.1);
-      }
+         ::-webkit-scrollbar-thumb {
+         background: var(--primary-gradient);
+         border-radius: 4px;
+         }
 
-      ::-webkit-scrollbar-thumb {
-        background: var(--primary-gradient);
-        border-radius: 4px;
-      }
+         ::-webkit-scrollbar-thumb:hover {
+         background: rgba(162, 124, 238, 0.8);
+         }
 
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(162, 124, 238, 0.8);
-      }
+         @media (max-width: 1200px) {
+         .nav-menu {
+         gap: var(--spacing-sm);
+         }
+		
+         .nav-item {
+         font-size: 0.9rem;
+         padding: var(--spacing-xs);
+         }
+         }
 
-      /* Responsive adjustments */
-      @media (max-width: 1200px) {
-        .nav-menu {
-          gap: var(--spacing-sm);
-        }
-        
-        .nav-item {
-          font-size: 0.9rem;
-          padding: var(--spacing-xs);
-        }
-      }
+         @media (max-width: 1024px) {
+         .nav-menu {
+         gap: var(--spacing-xs);
+         }
+		
+         .nav-item {
+         font-size: 0.8rem;
+         padding: 6px var(--spacing-xs);
+         }
+         }
 
-      @media (max-width: 1024px) {
-        .nav-menu {
-          gap: var(--spacing-xs);
-        }
-        
-        .nav-item {
-          font-size: 0.8rem;
-          padding: 6px var(--spacing-xs);
-        }
-      }
+         @media (max-width: 768px) {
+         .header {
+         padding: var(--spacing-xs) var(--spacing-sm);
+         }
+		
+         .title-section {
+         padding: var(--spacing-sm) var(--spacing-xs);
+         }
+		
+         .container.scrollable-content {
+         padding-top: 80px;
+         }
+		
+         .nav-item {
+         font-size: 0.7rem;
+         padding: 4px 6px;
+         }
+         }
 
-      @media (max-width: 768px) {
-        .header {
-          padding: var(--spacing-xs) var(--spacing-sm);
-        }
-        
-        .title-section {
-          padding: var(--spacing-sm) var(--spacing-xs);
-        }
-        
-        .container.scrollable-content {
-          padding-top: 80px;
-        }
-        
-        .nav-item {
-          font-size: 0.7rem;
-          padding: 4px 6px;
-        }
-      }
+         @media (max-width: 640px) {
+         .nav-item {
+         font-size: 0.65rem;
+         padding: 4px;
+         }
+		
+         .nav-menu {
+         gap: 4px;
+         }
+		
+         .header {
+         height: 110px;
+         }
+		
+         .container.scrollable-content {
+         padding-top: 110px;
+         }
+         }
 
-      @media (max-width: 640px) {
-        .nav-item {
-          font-size: 0.65rem;
-          padding: 4px;
-        }
-        
-        .nav-menu {
-          gap: 4px;
-        }
-        
-        .header {
-          height: 110px;
-        }
-        
-        .container.scrollable-content {
-          padding-top: 110px;
-        }
-      }
+         @media (max-width: 480px) {
+         .header-content {
+         flex-wrap: wrap;
+         gap: var(--spacing-xs);
+         }
+		
+         .nav-menu {
+         order: 2;
+         width: 100%;
+         justify-content: center;
+         flex-wrap: wrap;
+         gap: var(--spacing-xs);
+         }
+		
+         .nav-item {
+         font-size: 0.7rem;
+         padding: 4px 8px;
+         }
+		
+         .header {
+         height: 130px;
+         }
+		
+         .container.scrollable-content {
+         padding-top: 130px;
+         }
+         }
 
-      @media (max-width: 480px) {
-        .header-content {
-          flex-wrap: wrap;
-          gap: var(--spacing-xs);
-        }
-        
-        .nav-menu {
-          order: 2;
-          width: 100%;
-          justify-content: center;
-          flex-wrap: wrap;
-          gap: var(--spacing-xs);
-        }
-        
-        .nav-item {
-          font-size: 0.7rem;
-          padding: 4px 8px;
-        }
-        
-        .header {
-          height: 130px;
-        }
-        
-        .container.scrollable-content {
-          padding-top: 130px;
-        }
-      }
+         .chart-placeholder {
+         background: var(--glass-bg);
+         border-radius: var(--border-radius-md);
+         border: 1px solid var(--glass-border);
+         padding: var(--spacing-md);
+         margin-bottom: var(--spacing-md);
+         align-items: center;
+         justify-content: center;
+         color: var(--text-secondary);
+         }
+      </style>
+   </head>
+   <body>
+      <div id="stars"></div>
+      <div id="stars2"></div>
+      <div id="stars3"></div>
+	
+      <header class="header">
+         <div class="header-content">
+            <nav class="nav-menu">
+               <div class="nav-item active" data-target="home">HOME</div>
+               <div class="nav-item" data-target="tezcalm" data-url="https://up.tez.cool/?v=1">TEZCALM</div>
+               <div class="nav-item" data-target="chadmap" data-url="https://tez.cool/map?q=20000&v=1">CHADMAP</div>
+               <div class="nav-item" data-target="eyeofchad" data-url="https://eye.tez.cool/frame.html?v=1">THE EYE OF CHAD</div>
+               <div class="nav-item" data-target="tezstake" data-url="https://stake.tez.cool/frame.html?v=1">TEZSTAKE</div>
+               <div class="nav-item" data-target="trollbox" data-url="https://trollbox.tez.cool" data-external="true">TEZTROLLBOX</div>
+            </nav>
+         </div>
+      </header>
+	
 
-      /* Chart placeholder styles */
-      .chart-placeholder {
-        background: var(--glass-bg);
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--glass-border);
-        padding: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
-        align-items: center;
-        justify-content: center;
-        color: var(--text-secondary);
-      }
-    </style>
-</head>
-<body>
-    <div id="stars"></div>
-    <div id="stars2"></div>
-    <div id="stars3"></div>
-    
-    <header class="header">
-      <div class="header-content">
-        <nav class="nav-menu">
-          <div class="nav-item active" data-target="home">HOME</div>
-          <div class="nav-item" data-target="tezcalm" data-url="https://up.tez.cool/?v=1">TEZCALM</div>
-		  <div class="nav-item" data-target="chadmap" data-url="https://tez.cool/map?q=20000&v=1">CHADMAP</div>
-		  <div class="nav-item" data-target="eyeofchad" data-url="https://eye.tez.cool/frame.html?v=1">THE EYE OF CHAD</div>
-           <div class="nav-item" data-target="tezstake" data-url="https://stake.tez.cool/frame.html?v=1">TEZSTAKE</div>
-<div class="nav-item" data-target="trollbox" data-url="https://trollbox.tez.cool" data-external="true">TEZTROLLBOX</div>
-        </nav>
-      </div>
-    </header>
-    
-
-    
-    <div class="container scrollable-content">
-        <div id="home-content" class="home-content">
-		<div class="row">
-		<div class="col-lg-12">
-		    <div class="title-section">
-      <h1 class="hero-cursive-title">TezosX</h1>
-      <p class="hero-cursive-subtitle">a new era of money</p>
-    </div></div>
-		</div>
+	
+      <div class="container scrollable-content">
+         <div id="home-content" class="home-content">
             <div class="row">
-                <div class="col-lg-6">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="stakingh">Loading...</div>
-                    </figure>
-                </div>
-                <div class="col-lg-6">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="issuanceh">Loading...</div>
-                    </figure>
-                </div>
+               <div class="col-lg-12">
+                  <div class="title-section">
+                     <h1 class="hero-cursive-title">TezosX</h1>
+                     <p class="hero-cursive-subtitle">a new era of money</p>
+                  </div>
+               </div>
             </div>
-            
             <div class="row">
-                <div class="col-lg-3">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="chart-container2">Loading...</div>
-                    </figure>
-                </div>
-                <div class="col-lg-3">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="chart-container">Loading...</div>
-                    </figure>
-                </div>
-                <div class="col-lg-3">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="chart-container5">Loading...</div>
-                    </figure>
-                </div>
-                <div class="col-lg-3">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="chart-container9">Loading...</div>
-                    </figure>
-                </div>
+               <div class="col-lg-6">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="stakingh">Loading...</div>
+                  </figure>
+               </div>
+               <div class="col-lg-6">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="issuanceh">Loading...</div>
+                  </figure>
+               </div>
             </div>
-            
-            <div class="row">
-                <div class="col-lg-4">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="chart-container8">Loading...</div>
-                    </figure>
-                </div>
-                <div class="col-lg-4">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="chart-container4">Loading...</div>
-                    </figure>
-                </div>
-                <div class="col-lg-4">
-                    <figure class="highcharts-figure chart-placeholder">
-                        <div id="tvl-chart-container">Loading...</div>
-                    </figure>
-                </div>
-            </div>
-        </div>
-        
-        <div id="tezcalm-container" class="iframe-container">
-            <iframe id="tezcalm-iframe" src="about:blank" title="TezCalm"></iframe>
-        </div>
-        <div id="chadmap-container" class="iframe-container">
-            <iframe id="chadmap-iframe" src="about:blank" title="ChadMap"></iframe>
-        </div>
-        <div id="tezstake-container" class="iframe-container">
-            <iframe id="tezstake-iframe" src="about:blank" title="TezStake"></iframe>
-        </div>
-        
-        <div id="eyeofchad-container" class="iframe-container">
-            <iframe id="eyeofchad-iframe" src="about:blank" title="The Eye of Chad"></iframe>
-        </div>
-        
-        <div id="trollbox-container" class="iframe-container">
-            <iframe id="trollbox-iframe" src="about:blank" title="TezTrollbox"></iframe>
-        </div>
-    </div>
-
-	    <script>
-        class NavigationManager {
-            constructor() {
-                this.navItems = document.querySelectorAll('.nav-item');
-                this.homeContent = document.getElementById('home-content');
-                this.iframeContainers = document.querySelectorAll('.iframe-container');
-                this.preloadedIframes = new Set();
-                this.currentView = 'home';
-                
-                this.init();
-            }
-            
-init() {
-    this.navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            const target = item.dataset.target;
-            const url = item.dataset.url;
-            const isExternal = item.dataset.external === 'true';
-            
-            if (isExternal && url) {
-                window.open(url, '_blank');
-                return;
-            }
-            
-            if (target && target !== this.currentView) {
-                this.navigateTo(target, url, item);
-            }
-        });
-    });
-    
-    window.addEventListener('resize', () => {
-        if (this.currentView !== 'home') {
-            this.adjustContainerHeight();
-        }
-    });
-    
-    setTimeout(() => {
-        this.preloadIframes();
-    }, 2000);
-}
-            
-preloadIframes() {
-    this.navItems.forEach(item => {
-        const target = item.dataset.target;
-        const url = item.dataset.url;
-        const isExternal = item.dataset.external === 'true';
-        
-        if (url && target !== 'home' && !isExternal && !this.preloadedIframes.has(target)) {
-            this.preloadIframe(target, url);
-        }
-    });
-}
 			
-adjustContainerHeight() {
-    const mainContainer = document.querySelector('.container.scrollable-content');
-    if (!mainContainer) return;
-    
-    if (this.currentView === 'home') {
-        mainContainer.style.height = 'auto';
-        mainContainer.style.minHeight = '100vh';
-        mainContainer.style.maxHeight = 'none';
-        mainContainer.style.overflow = 'auto';
-    } else {
-        const viewportHeight = window.innerHeight;
-        const headerElement = document.querySelector('.header');
-        const headerHeight = headerElement ? headerElement.offsetHeight : 80;  // ← Dynamic header height
-        
-        mainContainer.style.height = `${viewportHeight}px`;
-        mainContainer.style.minHeight = `${viewportHeight}px`;
-        mainContainer.style.maxHeight = `${viewportHeight}px`;
-        mainContainer.style.overflow = 'hidden';
-        mainContainer.style.paddingTop = `${headerHeight}px`;
-    }
-}
-            
-            preloadIframe(target, url) {
-                const iframe = document.getElementById(`${target}-iframe`);
-                if (iframe) {
-                    // Set loading state
-                    const navItem = document.querySelector(`[data-target="${target}"]`);
-                    if (navItem) {
-                        navItem.classList.add('loading');
-                    }
-                    
-                    iframe.onload = () => {
-                        this.preloadedIframes.add(target);
-                        if (navItem) {
-                            navItem.classList.remove('loading');
-                        }
-                        console.log(`Preloaded: ${target}`);
-                    };
-                    
-                    iframe.onerror = () => {
-                        if (navItem) {
-                            navItem.classList.remove('loading');
-                        }
-                        console.warn(`Failed to preload: ${target}`);
-                    };
-                    
-                    iframe.src = url;
-                }
-            }
-            
-            navigateTo(target, url, clickedItem) {
-    this.navItems.forEach(item => item.classList.remove('active'));
-    clickedItem.classList.add('active');
-    
-    if (target === 'home') {
-        this.homeContent.classList.remove('hidden');
-        this.iframeContainers.forEach(container => {
-            container.classList.remove('active');
-        });
-    } else {
-        this.homeContent.classList.add('hidden');
-        this.iframeContainers.forEach(container => {
-            container.classList.remove('active');
-        });
-        
-        const targetContainer = document.getElementById(`${target}-container`);
-        const targetIframe = document.getElementById(`${target}-iframe`);
-        
-        if (targetContainer && targetIframe) {
-            if (!this.preloadedIframes.has(target) && targetIframe.src === 'about:blank') {
-                clickedItem.classList.add('loading');
-                targetIframe.onload = () => {
-                    clickedItem.classList.remove('loading');
-                    this.preloadedIframes.add(target);
-                };
-                targetIframe.src = url;
-            }
-            
-            targetContainer.classList.add('active');
-        }
-    }
-    
-    this.currentView = target;
-    setTimeout(() => {
-        this.adjustContainerHeight();
-    }, 100);
-}
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            new NavigationManager();
-            
-            setTimeout(() => {
-                console.log('Charts would be initialized here');
-            }, 1000);
-        });
-       
-    </script>
-	<script src="js/main.js?v=106"></script>
+            <div class="row">
+               <div class="col-lg-3">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="chart-container2">Loading...</div>
+                  </figure>
+               </div>
+               <div class="col-lg-3">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="chart-container">Loading...</div>
+                  </figure>
+               </div>
+               <div class="col-lg-3">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="chart-container5">Loading...</div>
+                  </figure>
+               </div>
+               <div class="col-lg-3">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="chart-container9">Loading...</div>
+                  </figure>
+               </div>
+            </div>
+			
+            <div class="row">
+               <div class="col-lg-4">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="chart-container8">Loading...</div>
+                  </figure>
+               </div>
+               <div class="col-lg-4">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="chart-container4">Loading...</div>
+                  </figure>
+               </div>
+               <div class="col-lg-4">
+                  <figure class="highcharts-figure chart-placeholder">
+                     <div id="tvl-chart-container">Loading...</div>
+                  </figure>
+               </div>
+            </div>
+         </div>
+		
+         <div id="tezcalm-container" class="iframe-container">
+            <iframe id="tezcalm-iframe" src="about:blank" title="TezCalm"></iframe>
+         </div>
+         <div id="chadmap-container" class="iframe-container">
+            <iframe id="chadmap-iframe" src="about:blank" title="ChadMap"></iframe>
+         </div>
+         <div id="tezstake-container" class="iframe-container">
+            <iframe id="tezstake-iframe" src="about:blank" title="TezStake"></iframe>
+         </div>
+		
+         <div id="eyeofchad-container" class="iframe-container">
+            <iframe id="eyeofchad-iframe" src="about:blank" title="The Eye of Chad"></iframe>
+         </div>
+		
+         <div id="trollbox-container" class="iframe-container">
+            <iframe id="trollbox-iframe" src="about:blank" title="TezTrollbox"></iframe>
+         </div>
+      </div>
 
-</body></html>
+      <script>
+         class NavigationManager {
+             constructor() {
+                 this.navItems = document.querySelectorAll('.nav-item');
+                 this.homeContent = document.getElementById('home-content');
+                 this.iframeContainers = document.querySelectorAll('.iframe-container');
+                 this.preloadedIframes = new Set();
+                 this.currentView = 'home';
+                 
+                 this.init();
+             }
+             
+         init() {
+         this.navItems.forEach(item => {
+         item.addEventListener('click', (e) => {
+             const target = item.dataset.target;
+             const url = item.dataset.url;
+             const isExternal = item.dataset.external === 'true';
+             
+             if (isExternal && url) {
+                 window.open(url, '_blank');
+                 return;
+             }
+             
+             if (target && target !== this.currentView) {
+                 this.navigateTo(target, url, item);
+             }
+         });
+         });
+         
+         window.addEventListener('resize', () => {
+         if (this.currentView !== 'home') {
+             this.adjustContainerHeight();
+         }
+         });
+         
+         setTimeout(() => {
+         this.preloadIframes();
+         }, 2000);
+         }
+             
+         preloadIframes() {
+         this.navItems.forEach(item => {
+         const target = item.dataset.target;
+         const url = item.dataset.url;
+         const isExternal = item.dataset.external === 'true';
+         
+         if (url && target !== 'home' && !isExternal && !this.preloadedIframes.has(target)) {
+             this.preloadIframe(target, url);
+         }
+         });
+         }
+         
+         adjustContainerHeight() {
+         const mainContainer = document.querySelector('.container.scrollable-content');
+         if (!mainContainer) return;
+         
+         if (this.currentView === 'home') {
+         mainContainer.style.height = 'auto';
+         mainContainer.style.minHeight = '100vh';
+         mainContainer.style.maxHeight = 'none';
+         mainContainer.style.overflow = 'auto';
+         } else {
+         const viewportHeight = window.innerHeight;
+         const headerElement = document.querySelector('.header');
+         const headerHeight = headerElement ? headerElement.offsetHeight : 80;
+         
+         mainContainer.style.height = `${viewportHeight}px`;
+         mainContainer.style.minHeight = `${viewportHeight}px`;
+         mainContainer.style.maxHeight = `${viewportHeight}px`;
+         mainContainer.style.overflow = 'hidden';
+         mainContainer.style.paddingTop = `${headerHeight}px`;
+         }
+         }
+             
+             preloadIframe(target, url) {
+                 const iframe = document.getElementById(`${target}-iframe`);
+                 if (iframe) {
+                     // Set loading state
+                     const navItem = document.querySelector(`[data-target="${target}"]`);
+                     if (navItem) {
+                         navItem.classList.add('loading');
+                     }
+                     
+                     iframe.onload = () => {
+                         this.preloadedIframes.add(target);
+                         if (navItem) {
+                             navItem.classList.remove('loading');
+                         }
+                         console.log(`Preloaded: ${target}`);
+                     };
+                     
+                     iframe.onerror = () => {
+                         if (navItem) {
+                             navItem.classList.remove('loading');
+                         }
+                         console.warn(`Failed to preload: ${target}`);
+                     };
+                     
+                     iframe.src = url;
+                 }
+             }
+             
+             navigateTo(target, url, clickedItem) {
+         this.navItems.forEach(item => item.classList.remove('active'));
+         clickedItem.classList.add('active');
+         
+         if (target === 'home') {
+         this.homeContent.classList.remove('hidden');
+         this.iframeContainers.forEach(container => {
+             container.classList.remove('active');
+         });
+         } else {
+         this.homeContent.classList.add('hidden');
+         this.iframeContainers.forEach(container => {
+             container.classList.remove('active');
+         });
+         
+         const targetContainer = document.getElementById(`${target}-container`);
+         const targetIframe = document.getElementById(`${target}-iframe`);
+         
+         if (targetContainer && targetIframe) {
+             if (!this.preloadedIframes.has(target) && targetIframe.src === 'about:blank') {
+                 clickedItem.classList.add('loading');
+                 targetIframe.onload = () => {
+                     clickedItem.classList.remove('loading');
+                     this.preloadedIframes.add(target);
+                 };
+                 targetIframe.src = url;
+             }
+             
+             targetContainer.classList.add('active');
+         }
+         }
+         
+         this.currentView = target;
+         setTimeout(() => {
+         this.adjustContainerHeight();
+         }, 100);
+         }
+         }
+         
+         document.addEventListener('DOMContentLoaded', () => {
+             new NavigationManager();
+             
+             setTimeout(() => {
+                 console.log('Charts would be initialized here');
+             }, 1000);
+         });
+      </script>
+      <script src="js/main.js?v=106"></script>
+   </body>
+</html>
