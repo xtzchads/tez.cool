@@ -621,13 +621,13 @@
          } else {
          const viewportHeight = window.innerHeight;
          const headerElement = document.querySelector('.header-content');
-         const headerHeight = headerElement.offsetHeight+30;
+         const headerHeight = headerElement.offsetHeight;
          
          mainContainer.style.height = `${viewportHeight}px`;
          mainContainer.style.minHeight = `${viewportHeight}px`;
          mainContainer.style.maxHeight = `${viewportHeight}px`;
          mainContainer.style.overflow = 'hidden';
-         mainContainer.style.paddingTop = `${headerHeight}px`;
+         //mainContainer.style.paddingTop = `${headerHeight}px`;
          }
          }
              
