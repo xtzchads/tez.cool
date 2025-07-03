@@ -1,9 +1,8 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TezMoon Simulator">
+  <meta name="description" content="Discover collection of open-source tools for Tezos enthusiasts">
   <title>TezTools</title>
-  <link href='https://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
   <script src="js/highcharts.js"></script>
 <script src="js/highcharts-more.js"></script>
 <script src="js/draggable-points.js"></script>
@@ -38,6 +37,18 @@
   overflow-y: auto;
   box-sizing: border-box;
   transition: all 0.3s ease;
+}
+
+/* Cursive Title Section */
+.title-section {
+  top: 80px;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: var(--spacing-md) var(--spacing-sm);
+  text-align: center;
 }
 
       /* Base Styles */
@@ -201,6 +212,35 @@
         width: 100%;
       }
 
+      /* Cursive Title Styles */
+      .hero-cursive-title {
+        font-family: 'Comic Sans Bold', cursive;
+        font-size: clamp(3rem, 7vw, 5rem);
+        font-weight: 400;
+        background: linear-gradient(135deg, #a27cee 0%, #7f4be7 50%, #ef7be3 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        margin: 0 0 8px 0;
+        line-height: 1.1;
+        animation: glow 3s ease-in-out infinite alternate;
+      }
+
+      .hero-cursive-subtitle {
+        font-size: clamp(1rem, 2vw, 1.3rem);
+        color: rgba(255, 255, 255, 0.8);
+        font-style: italic;
+        text-align: center;
+        margin: 0;
+        font-family: "Monda", Helvetica;
+      }
+
+      @keyframes glow {
+        from { filter: drop-shadow(0 0 10px rgba(162, 124, 238, 0.3)); }
+        to { filter: drop-shadow(0 0 20px rgba(162, 124, 238, 0.6)); }
+      }
+
       .nav-menu {
         display: flex;
         align-items: center;
@@ -349,6 +389,14 @@
           padding: var(--spacing-xs) var(--spacing-sm);
         }
         
+        .title-section {
+          padding: var(--spacing-sm) var(--spacing-xs);
+        }
+        
+        .container.scrollable-content {
+          padding-top: 160px;
+        }
+        
         .nav-item {
           font-size: 0.7rem;
           padding: 4px 6px;
@@ -363,6 +411,14 @@
         
         .nav-menu {
           gap: 4px;
+        }
+        
+        .header {
+          height: 110px;
+        }
+        
+        .container.scrollable-content {
+          padding-top: 170px;
         }
       }
 
@@ -383,6 +439,14 @@
         .nav-item {
           font-size: 0.7rem;
           padding: 4px 8px;
+        }
+        
+        .header {
+          height: 130px;
+        }
+        
+        .container.scrollable-content {
+          padding-top: 150px;
         }
       }
 
@@ -417,8 +481,17 @@
       </div>
     </header>
     
+
+    
     <div class="container scrollable-content">
         <div id="home-content" class="home-content">
+		<div class="row">
+		<div class="col-lg-12">
+		    <div class="title-section">
+      <h1 class="hero-cursive-title">TezosX</h1>
+      <p class="hero-cursive-subtitle">a new era of money</p>
+    </div></div>
+		</div>
             <div class="row">
                 <div class="col-lg-6">
                     <figure class="highcharts-figure chart-placeholder">
@@ -557,7 +630,7 @@ adjustContainerHeight() {
         mainContainer.style.overflow = 'auto';
     } else {
         const viewportHeight = window.innerHeight;
-        const headerHeight = 100;
+        const headerHeight = 140;
         
         mainContainer.style.height = `${viewportHeight}px`;
         mainContainer.style.minHeight = `${viewportHeight}px`;
