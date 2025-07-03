@@ -639,16 +639,16 @@
         
         // Use 'auto' instead of 'hidden' for Safari compatibility
         // Or try 'visible' if auto doesn't work
-        mainContainer.style.overflow = 'auto';
+        //mainContainer.style.overflow = 'auto';
         
         // Alternative: Use a different approach for Safari
         // Detect Safari and handle differently
-        /*const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         if (isSafari) {
             mainContainer.style.overflow = 'visible';
             // Or completely remove overflow restriction for Safari
             // mainContainer.style.overflow = '';
-        }*/
+        }
     }
 }
              
