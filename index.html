@@ -312,11 +312,14 @@
          opacity: 0;
          transition: opacity 0.3s ease;
          pointer-events: none;
+		 -webkit-overflow-scrolling: touch;
          }
 
          .iframe-container.active {
          opacity: 1;
          pointer-events: auto;
+		 -webkit-overflow-scrolling: touch;
+		 touch-action: auto;
          }
 
          .iframe-container iframe {
@@ -324,6 +327,9 @@
          height: 100%;
          border: none;
          background: var(--glass-bg);
+		 -webkit-overflow-scrolling: touch;
+		 touch-action: auto;
+    pointer-events: auto;
          }
 
          .home-content {
@@ -385,7 +391,32 @@
 		
          .container.scrollable-content {
          padding-top: 80px;
+		 -webkit-overflow-scrolling: touch;
+    touch-action: auto;
          }
+
+.container.scrollable-content:has(.iframe-container.active),
+.container.scrollable-content.iframe-active {
+
+    pointer-events: none;
+    touch-action: none;
+}
+
+.container.scrollable-content:has(.iframe-container.active) .iframe-container.active,
+.container.scrollable-content.iframe-active .iframe-container.active {
+    pointer-events: auto;
+    touch-action: auto;
+}
+
+.container.scrollable-content.iframe-active {
+    pointer-events: none;
+    touch-action: none;
+}
+
+.container.scrollable-content.iframe-active .iframe-container.active {
+    pointer-events: auto;
+    touch-action: auto;
+}
 		
          .nav-item {
          font-size: 0.7rem;
