@@ -559,14 +559,15 @@
       <script>
          class NavigationManager {
              constructor() {
-                 this.navItems = document.querySelectorAll('.nav-item');
-                 this.homeContent = document.getElementById('home-content');
-                 this.iframeContainers = document.querySelectorAll('.iframe-container');
-                 this.preloadedIframes = new Set();
-                 this.currentView = 'home';
-                 
-                 this.init();
-             }
+        this.navItems = document.querySelectorAll('.nav-item');
+        this.homeContent = document.getElementById('home-content');
+        this.iframeContainers = document.querySelectorAll('.iframe-container');
+        this.preloadedIframes = new Set();
+        this.currentView = 'home';
+        this.savedScrollPosition = 0; // Store home page scroll position
+        
+        this.init();
+    }
              
          init() {
          this.navItems.forEach(item => {
@@ -610,26 +611,36 @@
          }
          
          adjustContainerHeight() {
-         const mainContainer = document.querySelector('.container.scrollable-content');
-         if (!mainContainer) return;
-         
-         if (this.currentView === 'home') {
-         mainContainer.style.height = 'auto';
-         mainContainer.style.minHeight = '100vh';
-         mainContainer.style.maxHeight = 'none';
-         mainContainer.style.overflow = 'auto';
-         } else {
-         const viewportHeight = window.innerHeight;
-         const headerElement = document.querySelector('.header-content');
-         const headerHeight = headerElement.offsetHeight;
-         
-         mainContainer.style.height = `${viewportHeight}px`;
-         mainContainer.style.minHeight = `${viewportHeight}px`;
-         mainContainer.style.maxHeight = `${viewportHeight}px`;
-         mainContainer.style.overflow = 'hidden';
-         //mainContainer.style.paddingTop = `${headerHeight}px`;
-         }
-         }
+        const mainContainer = document.querySelector('.container.scrollable-content');
+        if (!mainContainer) return;
+        
+        if (this.currentView === 'home') {
+            mainContainer.style.height = 'auto';
+            mainContainer.style.minHeight = '100vh';
+            mainContainer.style.maxHeight = 'none';
+            mainContainer.style.overflow = 'auto';
+            
+            // Restore saved scroll position
+            mainContainer.scrollTop = this.savedScrollPosition;
+        } else {
+            const viewportHeight = window.innerHeight;
+            const headerElement = document.querySelector('.header-content');
+            const headerHeight = headerElement.offsetHeight;
+            
+            // Save current scroll position before switching
+            if (this.currentView === 'home') {
+                this.savedScrollPosition = mainContainer.scrollTop;
+            }
+            
+            // Reset scroll position for iframe views
+            mainContainer.scrollTop = 0;
+            
+            mainContainer.style.height = `${viewportHeight}px`;
+            mainContainer.style.minHeight = `${viewportHeight}px`;
+            mainContainer.style.maxHeight = `${viewportHeight}px`;
+            mainContainer.style.overflow = 'hidden';
+        }
+    }
              
              preloadIframe(target, url) {
                  const iframe = document.getElementById(`${target}-iframe`);
@@ -660,42 +671,50 @@
              }
              
              navigateTo(target, url, clickedItem) {
-         this.navItems.forEach(item => item.classList.remove('active'));
-         clickedItem.classList.add('active');
-         
-         if (target === 'home') {
-         this.homeContent.classList.remove('hidden');
-         this.iframeContainers.forEach(container => {
-             container.classList.remove('active');
-         });
-         } else {
-         this.homeContent.classList.add('hidden');
-         this.iframeContainers.forEach(container => {
-             container.classList.remove('active');
-         });
-         
-         const targetContainer = document.getElementById(`${target}-container`);
-         const targetIframe = document.getElementById(`${target}-iframe`);
-         
-         if (targetContainer && targetIframe) {
-             if (!this.preloadedIframes.has(target) && targetIframe.src === 'about:blank') {
-                 clickedItem.classList.add('loading');
-                 targetIframe.onload = () => {
-                     clickedItem.classList.remove('loading');
-                     this.preloadedIframes.add(target);
-                 };
-                 targetIframe.src = url;
-             }
-             
-             targetContainer.classList.add('active');
-         }
-         }
-         
-         this.currentView = target;
-         setTimeout(() => {
-         this.adjustContainerHeight();
-         }, 100);
-         }
+        // Save scroll position when leaving home
+        if (this.currentView === 'home' && target !== 'home') {
+            const mainContainer = document.querySelector('.container.scrollable-content');
+            if (mainContainer) {
+                this.savedScrollPosition = mainContainer.scrollTop;
+            }
+        }
+        
+        this.navItems.forEach(item => item.classList.remove('active'));
+        clickedItem.classList.add('active');
+        
+        if (target === 'home') {
+            this.homeContent.classList.remove('hidden');
+            this.iframeContainers.forEach(container => {
+                container.classList.remove('active');
+            });
+        } else {
+            this.homeContent.classList.add('hidden');
+            this.iframeContainers.forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            const targetContainer = document.getElementById(`${target}-container`);
+            const targetIframe = document.getElementById(`${target}-iframe`);
+            
+            if (targetContainer && targetIframe) {
+                if (!this.preloadedIframes.has(target) && targetIframe.src === 'about:blank') {
+                    clickedItem.classList.add('loading');
+                    targetIframe.onload = () => {
+                        clickedItem.classList.remove('loading');
+                        this.preloadedIframes.add(target);
+                    };
+                    targetIframe.src = url;
+                }
+                
+                targetContainer.classList.add('active');
+            }
+        }
+        
+        this.currentView = target;
+        setTimeout(() => {
+            this.adjustContainerHeight();
+        }, 100);
+    }
          }
          
          document.addEventListener('DOMContentLoaded', () => {
