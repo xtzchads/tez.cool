@@ -312,9 +312,11 @@
          opacity: 0;
          transition: opacity 0.3s ease;
          pointer-events: none;
+		 
          }
 
          .iframe-container.active {
+		 -webkit-overflow-scrolling: touch;
          opacity: 1;
          pointer-events: auto;
          }
@@ -324,6 +326,7 @@
          height: 100%;
          border: none;
          background: var(--glass-bg);
+		 -webkit-overflow-scrolling: touch;
          }
 
          .home-content {
