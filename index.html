@@ -304,19 +304,14 @@
          }
 
          .iframe-container {
-position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: calc(100vh);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-            
-            /* Safari-specific fixes */
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            -webkit-overflow-scrolling: touch;
+         position: absolute;
+         top: 0;
+         left: 0;
+         width: 100%;
+         height: calc(100vh);
+         opacity: 0;
+         transition: opacity 0.3s ease;
+         pointer-events: none;
          }
 
          .iframe-container.active {
@@ -325,19 +320,10 @@ position: absolute;
          }
 
          .iframe-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: var(--glass-bg);
-            
-            /* Critical Safari fixes */
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            -webkit-overflow-scrolling: touch;
-            touch-action: auto;
-            
-            /* Ensure proper rendering */
-            will-change: transform;
+         width: 100%;
+         height: 100%;
+         border: none;
+         background: var(--glass-bg);
          }
 
          .home-content {
@@ -623,28 +609,6 @@ position: absolute;
          }
          });
          }
-		 
-		 handleSafariScrolling(target) {
-    const iframe = document.getElementById(`${target}-iframe`);
-    const container = document.getElementById(`${target}-container`);
-    
-    if (iframe && container) {
-        // Apply Safari-specific fixes
-        iframe.style.transform = 'translateZ(0)';
-        iframe.style.webkitTransform = 'translateZ(0)';
-        iframe.style.touchAction = 'auto';
-        
-        // Focus the iframe for better interaction
-        setTimeout(() => {
-            iframe.focus();
-        }, 100);
-        
-        // Add click handler to ensure focus
-        container.addEventListener('click', () => {
-            iframe.focus();
-        });
-    }
-}
          
          adjustContainerHeight() {
         const mainContainer = document.querySelector('.container.scrollable-content');
@@ -706,54 +670,51 @@ position: absolute;
                  }
              }
              
-navigateTo(target, url, clickedItem) {
-    // Save scroll position when leaving home
-    if (this.currentView === 'home' && target !== 'home') {
-        const mainContainer = document.querySelector('.container.scrollable-content');
-        if (mainContainer) {
-            this.savedScrollPosition = mainContainer.scrollTop;
-        }
-    }
-    
-    this.navItems.forEach(item => item.classList.remove('active'));
-    clickedItem.classList.add('active');
-    
-    if (target === 'home') {
-        this.homeContent.classList.remove('hidden');
-        this.iframeContainers.forEach(container => {
-            container.classList.remove('active');
-        });
-    } else {
-        this.homeContent.classList.add('hidden');
-        this.iframeContainers.forEach(container => {
-            container.classList.remove('active');
-        });
-        
-        const targetContainer = document.getElementById(`${target}-container`);
-        const targetIframe = document.getElementById(`${target}-iframe`);
-        
-        if (targetContainer && targetIframe) {
-            if (!this.preloadedIframes.has(target) && targetIframe.src === 'about:blank') {
-                clickedItem.classList.add('loading');
-                targetIframe.onload = () => {
-                    clickedItem.classList.remove('loading');
-                    this.preloadedIframes.add(target);
-                };
-                targetIframe.src = url;
+             navigateTo(target, url, clickedItem) {
+        // Save scroll position when leaving home
+        if (this.currentView === 'home' && target !== 'home') {
+            const mainContainer = document.querySelector('.container.scrollable-content');
+            if (mainContainer) {
+                this.savedScrollPosition = mainContainer.scrollTop;
             }
-            
-            targetContainer.classList.add('active');
-            
-            // ADD THIS LINE HERE - right after making the container active
-            this.handleSafariScrolling(target);
         }
+        
+        this.navItems.forEach(item => item.classList.remove('active'));
+        clickedItem.classList.add('active');
+        
+        if (target === 'home') {
+            this.homeContent.classList.remove('hidden');
+            this.iframeContainers.forEach(container => {
+                container.classList.remove('active');
+            });
+        } else {
+            this.homeContent.classList.add('hidden');
+            this.iframeContainers.forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            const targetContainer = document.getElementById(`${target}-container`);
+            const targetIframe = document.getElementById(`${target}-iframe`);
+            
+            if (targetContainer && targetIframe) {
+                if (!this.preloadedIframes.has(target) && targetIframe.src === 'about:blank') {
+                    clickedItem.classList.add('loading');
+                    targetIframe.onload = () => {
+                        clickedItem.classList.remove('loading');
+                        this.preloadedIframes.add(target);
+                    };
+                    targetIframe.src = url;
+                }
+                
+                targetContainer.classList.add('active');
+            }
+        }
+        
+        this.currentView = target;
+        setTimeout(() => {
+            this.adjustContainerHeight();
+        }, 100);
     }
-    
-    this.currentView = target;
-    setTimeout(() => {
-        this.adjustContainerHeight();
-    }, 100);
-}
          }
          
          document.addEventListener('DOMContentLoaded', () => {
@@ -763,21 +724,6 @@ navigateTo(target, url, clickedItem) {
                  console.log('Charts would be initialized here');
              }, 1000);
          });
-		 
-		 document.addEventListener('DOMContentLoaded', () => {
-    const iframes = document.querySelectorAll('.iframe-container iframe');
-    
-    iframes.forEach(iframe => {
-        // Apply transform hack
-        iframe.style.transform = 'translateZ(0)';
-        iframe.style.webkitTransform = 'translateZ(0)';
-        iframe.style.touchAction = 'auto';
-        
-        // Focus on interaction
-        iframe.addEventListener('mouseenter', () => iframe.focus());
-        iframe.parentElement.addEventListener('click', () => iframe.focus());
-    });
-});
       </script>
       <script src="js/main.js?v=111"></script>
    </body>
