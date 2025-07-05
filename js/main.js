@@ -1068,7 +1068,6 @@ function processStakingData(data) {
 function createTVLChart() {
   try {
     const tvlData = aggregatedDataCache.tvlData;
-    console.log(aggregatedDataCache.tvlData)
     if (!tvlData || !tvlData.series || tvlData.series.length === 0) {
       console.error('No TVL data available');
       return;
@@ -1090,11 +1089,8 @@ function createTVLChart() {
       }
     });
     
-    console.log(`Sum of ${targetProtocols.join(', ')}: $${specificProtocolsTVL.toLocaleString()}`);
-    
-    // Generate unique colors with better distribution
+
     const generateUniqueHue = (index, total) => {
-      // Use golden ratio to ensure good color distribution
       const goldenRatio = 0.618033988749895;
       return (index * goldenRatio * 360) % 360;
     };
