@@ -1128,7 +1128,7 @@ function createTVLChart() {
         type: 'pie'
       },
       title: {
-        text: 'DeFi TVL (+RWA)',
+        text: 'DeFi NET TVL (+RWA)',
         style: { color: '#ffffff', fontSize: '24px' }
       },
       subtitle: {
