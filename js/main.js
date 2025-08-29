@@ -448,7 +448,7 @@ function recursivelyRemoveDips(data, threshold = 0.2) {
        continue;
      }
      
-     const prevValue = newResult[newResult.length - 1][1]; // Use last kept point
+     const prevValue = newResult[newResult.length - 1][1];
      const currentValue = result[i][1];
      const dipPercent = (prevValue - currentValue) / prevValue;
      
@@ -468,13 +468,16 @@ function recursivelyRemoveDips(data, threshold = 0.2) {
 
 function createHistoricalTvlChart() {
   try {
-    const tezosData = recursivelyRemoveDips(
- aggregatedDataCache.combinedTvlChart.filter(item => item[0] > 1655769600000),
- 0.2
-);
-if (tezosData.length > 0) {
- tezosData[tezosData.length - 1][1] = totalTVL-specificProtocolsTVL;
-}
+    let rawData = aggregatedDataCache.combinedTvlChart
+      .filter(item => item[0] > 1655769600000000)
+      .map(item => [item[0] / 1000, item[1]])
+      .sort((a, b) => a[0] - b[0]);
+    
+    const tezosData = recursivelyRemoveDips(rawData, 0.2);
+    
+    if (tezosData.length > 0) {
+      tezosData[tezosData.length - 1][1] = totalTVL - specificProtocolsTVL;
+    }
     
     const series = [];
 
@@ -531,6 +534,7 @@ if (tezosData.length > 0) {
       },
       plotOptions: {
         series: {
+			connectNulls: false,
           marker: { enabled: false },
           lineWidth: 2,
           states: { hover: { lineWidthPlus: 0 } }
