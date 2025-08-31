@@ -264,9 +264,9 @@ function createBakerElement(baker) {
     div.innerHTML = `
         <div class="baker-avatar">
             <img 
-                src="https://services.tzkt.io/v1/avatars/${baker.address}" 
-                alt="${baker.name}"
-                onerror="this.style.display='none'" onclick="window.open('https://tzkt.io/${baker.address}', '_blank')"
+                src="https://services.tzkt.io/v1/avatars/${escapeHTML(baker.address)}" 
+                alt="${escapeHTML(baker.name)}"
+                onerror="this.style.display='none'" onclick="window.open('https://tzkt.io/${escapeHTML(baker.address)}', '_blank')"
             />
         </div>
         <div class="baker-tooltip">
