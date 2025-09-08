@@ -643,7 +643,7 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
 
 function createDALSupportChart() {
     try {
-        const data = aggregatedDataCache.dalHistoryData;
+        const data = aggregatedDataCache.dalHistoryData.slice(0, -2);
         
         const latestCycle = data[data.length - 1]?.cycle || currentCycle;
         
@@ -1506,3 +1506,4 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
