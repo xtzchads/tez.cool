@@ -62,6 +62,8 @@ setupEventListeners() {
             e.target.value = '0';
         } else if (value < 0) {
             e.target.value = '0';
+        } else if (value > 10000000000) {
+            e.target.value = '10000000000';
         } else {
             e.target.value = value.toString();
         }
@@ -104,8 +106,8 @@ setupEventListeners() {
             console.error('Error updating APY values:', error);
             this.stakingAPY = 10;
             this.delegationAPY = 3.4;
-            if (this.stakingApyDisplay) this.stakingApyDisplay.textContent = '5.50%';
-            if (this.delegationApyDisplay) this.delegationApyDisplay.textContent = '5.20%';
+            if (this.stakingApyDisplay) this.stakingApyDisplay.textContent = '10%';
+            if (this.delegationApyDisplay) this.delegationApyDisplay.textContent = '3.4%';
         }
     }
     
@@ -1672,5 +1674,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
