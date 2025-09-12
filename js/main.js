@@ -6,6 +6,172 @@ let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
 let totalTVL;
 let specificProtocolsTVL = 0;
+let stakingSimulator;
+
+function initializeStakingSimulator() {
+    stakingSimulator = new StakingSimulator();
+}
+
+class StakingSimulator {
+    constructor() {
+        this.xtzInput = null;
+        this.bakerFeeInput = null;
+        this.daysSlider = null;
+        this.daysDisplay = null;
+        this.stakingApyDisplay = null;
+        this.delegationApyDisplay = null;
+        this.stakingRewardsDisplay = null;
+        this.delegationRewardsDisplay = null;
+        this.stakingTotalDisplay = null;
+        this.delegationTotalDisplay = null;
+        
+        this.stakingAPY = 0;
+        this.delegationAPY = 0;
+        
+        this.init();
+    }
+    
+    init() {
+        setTimeout(() => {
+            this.bindElements();
+            if (this.xtzInput && this.daysSlider && this.bakerFeeInput) {
+                this.setupEventListeners();
+                this.updateAPYValues();
+                this.calculateRewards();
+            }
+        }, 100);
+    }
+    
+    bindElements() {
+        this.xtzInput = document.getElementById('xtz-amount');
+        this.bakerFeeInput = document.getElementById('baker-fee');
+        this.daysSlider = document.getElementById('days-slider');
+        this.daysDisplay = document.getElementById('days-display');
+        this.stakingApyDisplay = document.getElementById('staking-apy');
+        this.delegationApyDisplay = document.getElementById('delegation-apy');
+        this.stakingRewardsDisplay = document.getElementById('staking-rewards');
+        this.delegationRewardsDisplay = document.getElementById('delegation-rewards');
+        this.stakingTotalDisplay = document.getElementById('staking-total');
+        this.delegationTotalDisplay = document.getElementById('delegation-total');
+    }
+    
+setupEventListeners() {
+    this.xtzInput.addEventListener('input', (e) => {
+        let value = parseFloat(e.target.value);
+        if (isNaN(value)) {
+            e.target.value = '0';
+        } else if (value < 0) {
+            e.target.value = '0';
+        } else {
+            e.target.value = value.toString();
+        }
+        this.calculateRewards();
+    });
+    this.bakerFeeInput.addEventListener('input', (e) => {
+        let value = parseFloat(e.target.value);
+        if (isNaN(value)) {
+            e.target.value = '0';
+        } else if (value < 0) {
+            e.target.value = '0';
+        } else if (value > 100) {
+            e.target.value = '100';
+        } else {
+            e.target.value = value.toString();
+        }
+        this.calculateRewards();
+    });
+    this.daysSlider.addEventListener('input', () => {
+        this.daysDisplay.textContent = this.daysSlider.value;
+        this.calculateRewards();
+    });
+}
+    
+    updateAPYValues() {
+        try {
+            if (aggregatedDataCache && aggregatedDataCache.homeData && aggregatedDataCache.homeData.stakingData) {
+                const stakingData = aggregatedDataCache.homeData.stakingData;
+                this.stakingAPY = stakingData.stakingApy || 0;
+                this.delegationAPY = stakingData.delegationApy || 0;
+                
+                if (this.stakingApyDisplay) {
+                    this.stakingApyDisplay.textContent = `${this.stakingAPY.toFixed(2)}%`;
+                }
+                if (this.delegationApyDisplay) {
+                    this.delegationApyDisplay.textContent = `${this.delegationAPY.toFixed(2)}%`;
+                }
+            }
+        } catch (error) {
+            console.error('Error updating APY values:', error);
+            this.stakingAPY = 10;
+            this.delegationAPY = 3.4;
+            if (this.stakingApyDisplay) this.stakingApyDisplay.textContent = '5.50%';
+            if (this.delegationApyDisplay) this.delegationApyDisplay.textContent = '5.20%';
+        }
+    }
+    
+    formatNumber(num) {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(num);
+    }
+    
+    calculateCompoundRewards(principal, annualRate, days, bakerFeePercent = 0) {
+    const netAnnualRate = (annualRate / 100) * (1 - bakerFeePercent / 100);
+    const dailyCompoundRate = Math.pow(1 + netAnnualRate, 1/365) - 1;
+    const finalAmount = principal * Math.pow(1 + dailyCompoundRate, days);
+    
+    return finalAmount - principal;
+}
+    
+calculateRewards() {
+    if (!this.xtzInput || !this.daysSlider || !this.bakerFeeInput) return;
+    
+    const principal = parseFloat(this.xtzInput.value) || 0;
+    const days = parseInt(this.daysSlider.value) || 0;
+    const bakerFee = parseFloat(this.bakerFeeInput.value) || 0;
+    
+    if (principal <= 0) {
+        this.updateDisplays(0, 0, 0, 0);
+        return;
+    }
+    const effectiveStakingAPY = this.stakingAPY * (1 - bakerFee / 100);
+    const effectiveDelegationAPY = this.delegationAPY * (1 - bakerFee / 100);
+    if (this.stakingApyDisplay) {
+        this.stakingApyDisplay.textContent = `${effectiveStakingAPY.toFixed(2)}%`;
+    }
+    if (this.delegationApyDisplay) {
+        this.delegationApyDisplay.textContent = `${effectiveDelegationAPY.toFixed(2)}%`;
+    }
+    const stakingRewards = this.calculateCompoundRewards(principal, this.stakingAPY, days, bakerFee);
+    const delegationRewards = this.calculateCompoundRewards(principal, this.delegationAPY, days, bakerFee);
+    
+    const stakingTotal = principal + stakingRewards;
+    const delegationTotal = principal + delegationRewards;
+    
+    this.updateDisplays(stakingRewards, stakingTotal, delegationRewards, delegationTotal);
+}
+    
+    updateDisplays(stakingRewards, stakingTotal, delegationRewards, delegationTotal) {
+        if (this.stakingRewardsDisplay) {
+            this.stakingRewardsDisplay.textContent = `+${this.formatNumber(stakingRewards)} XTZ`;
+        }
+        if (this.stakingTotalDisplay) {
+            this.stakingTotalDisplay.textContent = `${this.formatNumber(stakingTotal)} XTZ`;
+        }
+        if (this.delegationRewardsDisplay) {
+            this.delegationRewardsDisplay.textContent = `+${this.formatNumber(delegationRewards)} XTZ`;
+        }
+        if (this.delegationTotalDisplay) {
+            this.delegationTotalDisplay.textContent = `${this.formatNumber(delegationTotal)} XTZ`;
+        }
+    }
+    
+    refreshAPYValues() {
+        this.updateAPYValues();
+        this.calculateRewards();
+    }
+}
 
 class NavigationManager {
     constructor() {
@@ -229,7 +395,7 @@ function renderBakers(bakers) {
     
     const sortedBakers = bakers
         .filter(baker => baker.status === 'active')
-        .filter(baker => baker.staking && baker.staking.enabled) // Filter out disabled staking
+        .filter(baker => baker.staking && baker.staking.enabled)
         .sort((a, b) => {
             const aEstimatedApy = a.staking.estimatedApy || 0;
             const bEstimatedApy = b.staking.estimatedApy || 0;
@@ -239,7 +405,7 @@ function renderBakers(bakers) {
     
     sortedBakers.forEach(baker => {
         const bakerElement = createBakerElement(baker);
-        if (bakerElement) { // Only append if element exists
+        if (bakerElement) { 
             bakersGrid.appendChild(bakerElement);
         }
     });
@@ -1488,7 +1654,7 @@ function main(ratio) {
     } catch (error) {
         console.error('Error creating pie chart:', error);
     }
-    
+        initializeStakingSimulator();
 
     if (aggregatedDataCache && aggregatedDataCache.bakers) {
         renderBakers(aggregatedDataCache.bakers);
