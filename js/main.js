@@ -62,8 +62,8 @@ setupEventListeners() {
             e.target.value = '0';
         } else if (value < 0) {
             e.target.value = '0';
-        } else if (value > 10000000000) {
-            e.target.value = '10000000000';
+        } else if (value > parseInt(latestData.totalSupply/1000000-latestData.totalSupply/1000000*aggregatedDataCache.currentStakingRatio)) {
+                e.target.value = parseInt(latestData.totalSupply/1000000-latestData.totalSupply/1000000*aggregatedDataCache.currentStakingRatio);
         } else {
             e.target.value = value.toString();
         }
@@ -1674,6 +1674,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
