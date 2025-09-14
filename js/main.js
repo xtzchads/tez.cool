@@ -66,7 +66,7 @@ setupEventListeners() {
         //} else if (value > parseInt(latestData.totalSupply/1000000-latestData.totalSupply/1000000*aggregatedDataCache.currentStakingRatio)) {
         //        e.target.value = parseInt(latestData.totalSupply/1000000-latestData.totalSupply/1000000*aggregatedDataCache.currentStakingRatio);
         //let's cheat abit here so we don't have to account impact of added stake on issuance - by limiting max input amount to 1M
-        else if (value > 1000000) {
+        } else if (value > 1000000) {
                 e.target.value = '1000000';
         } else {
             e.target.value = value.toString();
@@ -1678,6 +1678,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
