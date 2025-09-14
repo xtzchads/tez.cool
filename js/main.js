@@ -58,6 +58,7 @@ class StakingSimulator {
 setupEventListeners() {
     this.xtzInput.addEventListener('input', (e) => {
         let value = parseFloat(e.target.value);
+        const latestData = aggregatedDataCache.historicalCycleData[aggregatedDataCache.historicalCycleData.length - 1];
         if (isNaN(value)) {
             e.target.value = '0';
         } else if (value < 0) {
@@ -1674,6 +1675,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
