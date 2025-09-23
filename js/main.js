@@ -346,50 +346,89 @@ function setupSmartTooltipPositioning() {
         
         bakerItems.forEach(item => {
             const itemRect = item.getBoundingClientRect();
+            const tooltip = item.querySelector('.baker-tooltip');
             
-
+            if (!tooltip) return;
+            
             item.classList.remove('tooltip-left', 'tooltip-right', 'tooltip-top', 'tooltip-bottom');
+            tooltip.style.minWidth = '';
             
             if (isMobile) {
-
                 const spaceAbove = itemRect.top;
                 const spaceBelow = viewportHeight - itemRect.bottom;
                 const tooltipHeight = 150;
                 
                 if (spaceBelow >= tooltipHeight) {
                     item.classList.add('tooltip-bottom');
+                    adjustTooltipWidthForVertical(item, tooltip, viewportWidth);
                 } else if (spaceAbove >= tooltipHeight) {
                     item.classList.add('tooltip-top');
+                    adjustTooltipWidthForVertical(item, tooltip, viewportWidth);
                 } else {
-                   
                     const spaceOnRight = viewportWidth - itemRect.right;
                     const tooltipWidth = 240;
                     
                     if (spaceOnRight >= tooltipWidth) {
                         item.classList.add('tooltip-right');
+                        adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, 'right');
                     } else {
                         item.classList.add('tooltip-left');
+                        adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, 'left');
                     }
                 }
             } else {
-                
                 const spaceOnRight = viewportWidth - itemRect.right;
                 const tooltipWidth = 320;
                 
                 if (spaceOnRight >= tooltipWidth) {
                     item.classList.add('tooltip-right');
+                    adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, 'right');
                 } else {
                     item.classList.add('tooltip-left');
+                    adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, 'left');
                 }
             }
         });
     };
     
+    function adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, position) {
+        const itemRect = item.getBoundingClientRect();
+        const tooltipGap = 12;
+        const viewportPadding = 20;
+        
+        let availableWidth;
+        
+        if (position === 'right') {
+            availableWidth = viewportWidth - itemRect.right - tooltipGap - viewportPadding;
+        } else {
+            availableWidth = itemRect.left - tooltipGap - viewportPadding;
+        }
+        const isMobile = viewportWidth <= 640;
+        const defaultMinWidth = isMobile ? 200 : 280;
+        if (availableWidth < defaultMinWidth) {
+            const adjustedWidth = Math.max(180, availableWidth);
+            tooltip.style.minWidth = adjustedWidth + 'px';
+        }
+    }
     
+    function adjustTooltipWidthForVertical(item, tooltip, viewportWidth) {
+        const itemRect = item.getBoundingClientRect();
+        const viewportPadding = 20;
+        
+        const itemCenter = itemRect.left + (itemRect.width / 2);
+        const maxWidthFromCenter = Math.min(
+            itemCenter - viewportPadding,
+            viewportWidth - itemCenter - viewportPadding 
+        ) * 2;
+        
+        const defaultMinWidth = 250;
+        if (maxWidthFromCenter < defaultMinWidth) {
+            const adjustedWidth = Math.max(180, maxWidthFromCenter);
+            tooltip.style.minWidth = adjustedWidth + 'px';
+        }
+    }
     updateTooltipPositions();
     window.addEventListener('resize', updateTooltipPositions);
-    
-    
     const observer = new MutationObserver(updateTooltipPositions);
     observer.observe(bakersGrid, { childList: true });
 }
