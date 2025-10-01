@@ -68,9 +68,7 @@ setupEventListeners() {
         //let's cheat abit here so we don't have to account impact of added stake on issuance - by limiting max input amount to 1M
         } else if (value > 1000000) {
                 e.target.value = '1000000';
-        } else {
-            e.target.value = value.toString();
-        }
+        } 
         this.calculateRewards();
     });
     this.bakerFeeInput.addEventListener('input', (e) => {
@@ -81,9 +79,7 @@ setupEventListeners() {
             e.target.value = '0';
         } else if (value > 100) {
             e.target.value = '100';
-        } else {
-            e.target.value = value.toString();
-        }
+        } 
         this.calculateRewards();
     });
     this.daysSlider.addEventListener('input', () => {
@@ -1708,6 +1704,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
