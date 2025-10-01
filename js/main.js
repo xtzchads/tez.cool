@@ -265,21 +265,12 @@ class NavigationManager {
         const iframe = document.getElementById(`${target}-iframe`);
         if (iframe) {
             const navItem = document.querySelector(`[data-target="${target}"]`);
-            if (navItem) {
-                navItem.classList.add('loading');
-            }
             
             iframe.onload = () => {
                 this.preloadedIframes.add(target);
-                if (navItem) {
-                    navItem.classList.remove('loading');
-                }
             };
             
             iframe.onerror = () => {
-                if (navItem) {
-                    navItem.classList.remove('loading');
-                }
                 console.warn(`Failed to preload: ${target}`);
             };
             
@@ -1717,6 +1708,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
