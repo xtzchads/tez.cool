@@ -57,32 +57,34 @@ class StakingSimulator {
     
 setupEventListeners() {
     this.xtzInput.addEventListener('input', (e) => {
-    let value = parseFloat(e.target.value);
+    let inputValue = e.target.value.replace(',', '.');
+    let value = parseFloat(inputValue);
     
     if (isNaN(value) || value < 0) {
         e.target.value = '0';
     } else if (value > 1000000) {
         e.target.value = '1000000';
-    } else if (e.target.value.includes('.')) {
-        const parts = e.target.value.split('.');
+    } else if (inputValue.includes('.')) {
+        const parts = inputValue.split('.');
         if (parts[1] && parts[1].length > 6) {
-            e.target.value = value.toFixed(6);
+            e.target.value = parts[0] + '.' + parts[1].substring(0, 6);
         }
     }
     this.calculateRewards();
 });
 
 this.bakerFeeInput.addEventListener('input', (e) => {
-    let value = parseFloat(e.target.value);
+    let inputValue = e.target.value.replace(',', '.');
+    let value = parseFloat(inputValue);
     
     if (isNaN(value) || value < 0) {
         e.target.value = '0';
     } else if (value > 100) {
         e.target.value = '100';
-    } else if (e.target.value.includes('.')) {
-        const parts = e.target.value.split('.');
+    } else if (inputValue.includes('.')) {
+        const parts = inputValue.split('.');
         if (parts[1] && parts[1].length > 2) {
-            e.target.value = value.toFixed(2);
+            e.target.value = parts[0] + '.' + parts[1].substring(0, 2);
         }
     }
     this.calculateRewards();
@@ -1710,6 +1712,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
