@@ -57,31 +57,37 @@ class StakingSimulator {
     
 setupEventListeners() {
     this.xtzInput.addEventListener('input', (e) => {
-        let value = parseFloat(e.target.value);
-        const latestData = aggregatedDataCache.historicalCycleData[aggregatedDataCache.historicalCycleData.length - 1];
-        if (isNaN(value)) {
-            e.target.value = '0';
-        } else if (value < 0) {
-            e.target.value = '0';
-        //} else if (value > parseInt(latestData.totalSupply/1000000-latestData.totalSupply/1000000*aggregatedDataCache.currentStakingRatio)) {
-        //        e.target.value = parseInt(latestData.totalSupply/1000000-latestData.totalSupply/1000000*aggregatedDataCache.currentStakingRatio);
-        //let's cheat abit here so we don't have to account impact of added stake on issuance - by limiting max input amount to 1M
-        } else if (value > 1000000) {
-                e.target.value = '1000000';
-        } 
-        this.calculateRewards();
-    });
-    this.bakerFeeInput.addEventListener('input', (e) => {
-        let value = parseFloat(e.target.value);
-        if (isNaN(value)) {
-            e.target.value = '0';
-        } else if (value < 0) {
-            e.target.value = '0';
-        } else if (value > 100) {
-            e.target.value = '100';
-        } 
-        this.calculateRewards();
-    });
+    let value = parseFloat(e.target.value);
+    
+    if (isNaN(value) || value < 0) {
+        e.target.value = '0';
+    } else if (value > 1000000) {
+        e.target.value = '1000000';
+    } else if (e.target.value.includes('.')) {
+        const parts = e.target.value.split('.');
+        if (parts[1] && parts[1].length > 6) {
+            e.target.value = value.toFixed(6);
+        }
+    }
+    this.calculateRewards();
+});
+
+this.bakerFeeInput.addEventListener('input', (e) => {
+    let value = parseFloat(e.target.value);
+    
+    if (isNaN(value) || value < 0) {
+        e.target.value = '0';
+    } else if (value > 100) {
+        e.target.value = '100';
+    } else if (e.target.value.includes('.')) {
+        const parts = e.target.value.split('.');
+        if (parts[1] && parts[1].length > 2) {
+            e.target.value = value.toFixed(2);
+        }
+    }
+    this.calculateRewards();
+});
+    
     this.daysSlider.addEventListener('input', () => {
         this.daysDisplay.textContent = this.daysSlider.value;
         this.calculateRewards();
@@ -1704,6 +1710,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
