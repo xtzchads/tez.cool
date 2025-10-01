@@ -57,6 +57,7 @@ class StakingSimulator {
     
 setupEventListeners() {
     this.xtzInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/^0+(?=\d)/, '');
     let inputValue = e.target.value.replace(',', '.');
     let value = parseFloat(inputValue);
     
@@ -74,6 +75,7 @@ setupEventListeners() {
 });
 
 this.bakerFeeInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/^0+(?=\d)/, '');
     let inputValue = e.target.value.replace(',', '.');
     let value = parseFloat(inputValue);
     
@@ -1712,6 +1714,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
