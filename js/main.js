@@ -1332,7 +1332,7 @@ function createHistoricalCharts(ratio) {
             ...issuanceData.ratios,
             ...ratio.map((ratioValue, index) => ({
                 cycle: currentCycle + index,
-                issuance: issuanceRateQ(index + currentCycle, ratioValue)+0.247
+                issuance: issuanceRateQ(index + currentCycle, ratioValue)+0.245
             }))
         ];
         
@@ -1530,7 +1530,7 @@ function updateIssuanceChart(newStakingData) {
             if (stakingPoint) {
                 return {
                     x: point.x,
-                    y: issuanceRateQ(point.x, stakingPoint.y / 100)+0.247
+                    y: issuanceRateQ(point.x, stakingPoint.y / 100)+0.245
                 };
             }
         }
@@ -1715,6 +1715,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
