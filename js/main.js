@@ -1,6 +1,7 @@
 const TRANSITION_PERIOD = 50;
 const INITIAL_PERIOD = 10;
 const AI_ACTIVATION_CYCLE = 748;
+const LB_SUBSIDY = 2628000;
 const WORKER_URL = 'https://tez.cool/api/v1/getData';
 let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
@@ -1331,7 +1332,7 @@ function createHistoricalCharts(ratio) {
             ...issuanceData.ratios,
             ...ratio.map((ratioValue, index) => ({
                 cycle: currentCycle + index,
-                issuance: issuanceRateQ(index + currentCycle, ratioValue)
+                issuance: issuanceRateQ(index + currentCycle, ratioValue)+0.247
             }))
         ];
         
@@ -1529,7 +1530,7 @@ function updateIssuanceChart(newStakingData) {
             if (stakingPoint) {
                 return {
                     x: point.x,
-                    y: issuanceRateQ(point.x, stakingPoint.y / 100)
+                    y: issuanceRateQ(point.x, stakingPoint.y / 100)+0.247
                 };
             }
         }
@@ -1714,6 +1715,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
