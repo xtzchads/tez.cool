@@ -1429,7 +1429,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
             gridLineWidth: 0,
             title: { text: null },
             min: 0,
-            max: containerId === 'issuanceh' ? 10.25 : 50,
+            max: containerId === 'issuanceh' ? 11 : 50,
             tickInterval: 1
         },
         tooltip: {
@@ -1715,6 +1715,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
 
 
 
