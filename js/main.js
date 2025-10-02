@@ -921,7 +921,7 @@ function createDALSupportChart() {
                     align: 'right',
                     verticalAlign: 'bottom',
                 },
-                lineWidth: 3,
+                lineWidth: 2,
                 marker: { enabled: false },
                 color: {
                     linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
@@ -1454,7 +1454,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
             },
             name: title,
             data: data.map(dataMapper),
-            lineWidth: 3,
+            lineWidth: 2,
             dataLabels: {
                 enabled: true,
                 formatter: function() {
