@@ -1082,7 +1082,7 @@ function createHistoricalTvlChart() {
         style: {
             fontFamily: '"Monda", Helvetica, Arial, sans-serif'
         },
-				valueSuffix: ' USD'
+				valuePrefix: '$'
     },
             xAxis: {
                 type: 'datetime',
@@ -1721,7 +1721,7 @@ function createTVLChart() {
                 style: { color: '#ffffff', fontSize: '24px' }
             },
             subtitle: {
-                text: `Total: ${totalTVL.toLocaleString()} USD`,
+                text: `Total: $${totalTVL.toLocaleString()}`,
                 style: { color: '#22c55e', fontSize: '16px' }
             },
             tooltip: {
@@ -1837,6 +1837,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
