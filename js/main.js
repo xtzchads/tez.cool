@@ -1797,6 +1797,17 @@ async function createEcosystemChart() {
             },
 			{
                 fields: {
+                    Project: "IguanaDEX",
+                    Logline: "Etherlink DEX",
+                    Website: "https://www.iguanadex.com/",
+                    Tags: ["defi"],
+                    Status: "active",
+                    IsFeatured: false,
+                    Logo: [{ url: "https://raw.githubusercontent.com/IguanaDEX/assets/main/iguana_brand_assets/icon.webp" }]
+                }
+            },
+			{
+                fields: {
                     Project: "Stacy.fi",
                     Logline: "Staking platform which allows users to earn staking rewards on Tezos while maintaining full liquidity of their funds, by holding stXTZ tokens",
                     Website: "https://stacy.fi/",
@@ -2437,6 +2448,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
