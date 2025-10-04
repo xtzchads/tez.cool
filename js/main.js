@@ -1356,11 +1356,12 @@ function createTimeSeriesChart(containerId, title, data, formatter, isCumulative
             labels: { enabled: false }
         },
 tooltip: {
-        outside: true,
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
+    outside: true,
+    style: {
+        fontFamily: '"Monda", Helvetica, Arial, sans-serif'
     },
+    valueDecimals: 6
+},
         plotOptions: {
             series: {
                 marker: { enabled: false },
@@ -1836,6 +1837,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
