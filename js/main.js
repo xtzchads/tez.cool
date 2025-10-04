@@ -979,7 +979,7 @@ function recursivelyRemoveDips(data, threshold = 0.2) {
 function createHistoricalTvlChart() {
     try {
         let rawData = aggregatedDataCache.combinedTvlChart
-            .filter(item => item[0] > 1655769600000000)
+            .filter(item => item[0] > 1598918400000000)
             .map(item => [item[0] / 1000, item[1]])
             .sort((a, b) => a[0] - b[0]);
         
