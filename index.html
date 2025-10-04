@@ -9,10 +9,18 @@
       <script src="js/highcharts-more.js"></script>
       <script src="js/draggable-points.js"></script>
       <link rel="stylesheet" href="css/bootstrap.min.css">
-      <link rel="stylesheet" href="css/main.css?x=3.11">
+      <link rel="stylesheet" href="css/main.css?x=3.10">
       <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
    </head>
    <body>
+   <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-container">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring-inner"></div>
+        <div class="spinner-dot"></div>
+    </div>
+    <div class="loading-text">LOADING</div>
+</div>
       <div id="stars"></div>
       <div id="stars2"></div>
       <div id="stars3"></div>
@@ -61,11 +69,19 @@
                      <div id="chart-container2">Loading...</div>
                   </figure>
                </div>
-               <div class="col-lg-3">
-                  <figure class="highcharts-figure chart-placeholder">
-                     <div id="chart-container">Loading...</div>
-                  </figure>
-               </div>
+<div class="col-lg-3">
+   <figure class="highcharts-figure chart-placeholder">
+      <div class="chart-with-controls">
+         <div class="chart-timeframe-buttons-b">
+            <button class="timeframe-btn" data-timeframe="1y">1Y</button>
+            <button class="timeframe-btn" data-timeframe="3y">3Y</button>
+            <button class="timeframe-btn" data-timeframe="5y">5Y</button>
+            <button class="timeframe-btn active" data-timeframe="cumulative">ALL (cumulative)</button>
+         </div>
+         <div id="chart-container">Loading...</div>
+      </div>
+   </figure>
+</div>
 		   <div class="col-lg-3">
                   <figure class="highcharts-figure chart-placeholder">
                      <div id="chart-container8">Loading...</div>
@@ -357,6 +373,6 @@
             <iframe id="trollbox-iframe" src="about:blank" title="TezTrollbox"></iframe>
          </div>
       </div>
-      <script src="js/main.js?v=135"></script>
+      <script src="js/main.js?v=133"></script>
    </body>
 </html>
