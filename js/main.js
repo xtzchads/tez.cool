@@ -1816,6 +1816,17 @@ async function createEcosystemChart() {
                     IsFeatured: false,
                     Logo: [{ url: "https://stacy.fi/stxtz-logo.svg" }]
                 }
+            },
+			{
+                fields: {
+                    Project: "Reaper Actual",
+                    Logline: "An Open-World Persistent Shooter",
+                    Website: "https://reaperactual.com/",
+                    Tags: ["gaming"],
+                    Status: "active",
+                    IsFeatured: false,
+                    Logo: [{ url: "https://reaperactual.com/favicon.ico" }]
+                }
             }
 		];
 		const allProjects = [...projects, ...manualProjects];
@@ -2448,6 +2459,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
