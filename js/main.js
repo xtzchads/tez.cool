@@ -2147,6 +2147,11 @@ async function createEcosystemChart() {
                 polar: true,
                 height: window.innerWidth < 768 ? 500 : 700,
                 backgroundColor: 'rgba(0,0,0,0)',
+				panning: {
+            enabled: false
+        },
+        panKey: 'shift',
+        zoomType: undefined,
                 events: {
                     load() {
                         const chart = this;
@@ -2443,6 +2448,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
