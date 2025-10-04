@@ -1827,6 +1827,17 @@ async function createEcosystemChart() {
                     IsFeatured: false,
                     Logo: [{ url: "https://reaperactual.com/favicon.ico" }]
                 }
+            },
+			{
+                fields: {
+                    Project: "bootloader.art",
+                    Logline: "An open-source experimental on-chain long-form generative art platform built on Tezos",
+                    Website: "https://bootloader.art/",
+                    Tags: ["nft"],
+                    Status: "active",
+                    IsFeatured: false,
+                    Logo: [{ url: "https://bootloader.art/favicon.ico" }]
+                }
             }
 		];
 		const allProjects = [...projects, ...manualProjects];
@@ -2459,6 +2470,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
