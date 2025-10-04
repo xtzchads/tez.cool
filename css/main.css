@@ -6,7 +6,6 @@
     position: relative;
     width: 100%;
 }
-
 .chart-timeframe-buttons {
     position: absolute;
     top: 15px;
@@ -21,7 +20,6 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
-
 .timeframe-btn {
     background: transparent;
     border: none;
@@ -34,27 +32,27 @@
     transition: all 0.2s ease;
     min-width: 45px;
 }
-
 .timeframe-btn:hover {
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
 }
-
 .timeframe-btn:focus {
     outline: none;
 }
-
 .timeframe-btn.active {
     background: rgba(162, 124, 238, 0.3);
     color: var(--text-primary);
     font-weight: 600;
 }
-
 @media (max-width: 768px) {
     .chart-timeframe-buttons {
-        top: 10px;
-        right: 10px;
+        position: relative;
+        top: 0;
+        right: 0;
+        left: 0;
+        margin: 0 auto 10px auto;
         padding: 3px;
+        width: fit-content;
     }
     
     .timeframe-btn {
@@ -63,5 +61,3 @@
         min-width: 40px;
     }
 }
-
-
