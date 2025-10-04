@@ -250,7 +250,7 @@
     margin-top: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
     padding: 0 15px;
-	background: var(--glass-bg);
+    background: var(--glass-bg);
     border-radius: var(--border-radius-md);
     border: 1px solid var(--glass-border);
     padding: var(--spacing-md);
@@ -258,4 +258,12 @@
     align-items: center;
     justify-content: center;
     color: var(--text-secondary);
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch;
+    overflow: visible;
 }
+
+#ecosystem-chart-container * {
+    touch-action: pan-y !important;
+}
+
