@@ -1720,8 +1720,8 @@ function createTVLChart() {
                 style: { color: '#ffffff', fontSize: '24px' }
             },
             subtitle: {
-                text: `Total: ${totalTVL.toLocaleString()}`,
-                style: { color: '#cccccc', fontSize: '16px' }
+                text: `Total: ${totalTVL.toLocaleString()} USD`,
+                style: { color: '#ffffff', fontSize: '16px' }
             },
             tooltip: {
                 pointFormat: 'Share: {point.percentage:.1f}%'
@@ -1839,6 +1839,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
