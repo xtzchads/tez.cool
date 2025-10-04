@@ -1362,7 +1362,8 @@ tooltip: {
         fontFamily: '"Monda", Helvetica, Arial, sans-serif'
     },
     valueDecimals: 0,
-	valueSuffix: ' XTZ'
+	valueSuffix: ' XTZ',
+	xDateFormat: '%b %Y'
 },
         plotOptions: {
             series: {
@@ -1824,12 +1825,9 @@ if (burnedSupplyContainer) {
             this.classList.add('active');
             currentBurnedSupplyTimeframe = this.dataset.timeframe;
             createBurnedSupplyChart();
-            setTimeout(centerBurnedButtons, 50);
         });
     });
     
-    setTimeout(centerBurnedButtons, 500);
-    window.addEventListener('resize', centerBurnedButtons);
 }
         
     } catch (error) {
@@ -1839,6 +1837,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
