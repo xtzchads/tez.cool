@@ -1081,7 +1081,8 @@ function createHistoricalTvlChart() {
         outside: true,
         style: {
             fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
+        },
+				valueSuffix: ' USD'
     },
             xAxis: {
                 type: 'datetime',
@@ -1837,6 +1838,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
