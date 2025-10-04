@@ -9,7 +9,7 @@
       <script src="js/highcharts-more.js"></script>
       <script src="js/draggable-points.js"></script>
       <link rel="stylesheet" href="css/bootstrap.min.css">
-      <link rel="stylesheet" href="css/main.css?x=3.10">
+      <link rel="stylesheet" href="css/main.css?x=3.11">
       <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
    </head>
    <body>
@@ -85,9 +85,15 @@
                      <div id="chart-container4">Loading...</div>
                   </figure>
                </div>
-		   <div class="col-lg-4">
+ <div class="col-lg-4">
                   <figure class="highcharts-figure chart-placeholder">
-                     <div id="chart-container9">Loading...</div>
+                     <div class="chart-with-controls">
+                        <div class="chart-timeframe-buttons">
+						<button class="timeframe-btn active" data-timeframe="3y">3Y</button>
+                        <button class="timeframe-btn" data-timeframe="5y">5Y</button>
+                        </div>
+                        <div id="chart-container9">Loading...</div>
+                     </div>
                   </figure>
                </div>
                <div class="col-lg-4">
