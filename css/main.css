@@ -2,7 +2,66 @@
 @media screen and (min-width: 2560px) {
     body { zoom: 2; }
 }
+.chart-with-controls {
+    position: relative;
+    width: 100%;
+}
 
+.chart-timeframe-buttons {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 4px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
 
+.timeframe-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: "Monda", Helvetica;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 45px;
+}
+
+.timeframe-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+.timeframe-btn:focus {
+    outline: none;
+}
+
+.timeframe-btn.active {
+    background: rgba(162, 124, 238, 0.3);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .chart-timeframe-buttons {
+        top: 10px;
+        right: 10px;
+        padding: 3px;
+    }
+    
+    .timeframe-btn {
+        padding: 3px 10px;
+        font-size: 0.75rem;
+        min-width: 40px;
+    }
+}
 
 
