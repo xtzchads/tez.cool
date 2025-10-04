@@ -1849,6 +1849,17 @@ async function createEcosystemChart() {
                     IsFeatured: false,
                     Logo: [{ url: "https://tezex.io/assets/favicon.ico" }]
                 }
+            },
+			{
+                fields: {
+                    Project: "StableTez",
+                    Logline: "StableTez is an effort by Tezos community members, services partners, and financial-backers of the project to provide Tezos-on-chain stable assets for financial instruments and for economically-efficient Tezos-token trading.",
+                    Website: "https://stabletez.com/",
+                    Tags: ["defi"],
+                    Status: "active",
+                    IsFeatured: false,
+                    Logo: [{ url: "https://stabletez.com/favicon.ico" }]
+                }
             }
 		];
 		const allProjects = [...projects, ...manualProjects];
@@ -2481,6 +2492,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
