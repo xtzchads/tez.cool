@@ -8,6 +8,7 @@ let currentCycle, forecasted, tmp = 0, tmp1;
 let totalTVL;
 let specificProtocolsTVL = 0;
 let stakingSimulator;
+let currentTVLTimeframe = '3y';
 
 function initializeStakingSimulator() {
     stakingSimulator = new StakingSimulator();
@@ -978,8 +979,15 @@ function recursivelyRemoveDips(data, threshold = 0.2) {
 
 function createHistoricalTvlChart() {
     try {
+        const timestampFilters = {
+            '5y': 1598918400000000,
+            '3y': 1655769600000000
+        };
+        
+        const filterTimestamp = timestampFilters[currentTVLTimeframe];
+        
         let rawData = aggregatedDataCache.combinedTvlChart
-            .filter(item => item[0] > 1598918400000000)
+            .filter(item => item[0] > filterTimestamp)
             .map(item => [item[0] / 1000, item[1]])
             .sort((a, b) => a[0] - b[0]);
         
@@ -1710,6 +1718,16 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         const ratios = await initializeRatios();
         main(ratios);
+        
+        const timeframeButtons = document.querySelectorAll('.timeframe-btn');
+        timeframeButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                timeframeButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTVLTimeframe = this.dataset.timeframe;
+                createHistoricalTvlChart();
+            });
+        });
         
     } catch (error) {
         console.error('Error during initialization:', error);
