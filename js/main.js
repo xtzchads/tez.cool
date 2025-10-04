@@ -952,7 +952,7 @@ function createBurnedSupplyChart() {
             const timeRanges = {
                 '1y': 365 * 24 * 60 * 60 * 1000,
                 '3y': 3 * 365 * 24 * 60 * 60 * 1000,
-                '5y': 5 * 365 * 24 * 60 * 60 * 1000
+                '7y': 7 * 365 * 24 * 60 * 60 * 1000
             };
             
             const timeRange = timeRanges[currentBurnedSupplyTimeframe];
@@ -1837,6 +1837,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
