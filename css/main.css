@@ -241,3 +241,21 @@
         padding: 5px 6px;
     }
 }
+
+
+#ecosystem-chart-container {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    padding: 0 15px;
+	background: var(--glass-bg);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--glass-border);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
