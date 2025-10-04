@@ -9,6 +9,7 @@ let totalTVL;
 let specificProtocolsTVL = 0;
 let stakingSimulator;
 let currentTVLTimeframe = '3y';
+let currentBurnedSupplyTimeframe = 'cumulative';
 
 function initializeStakingSimulator() {
     stakingSimulator = new StakingSimulator();
@@ -940,7 +941,52 @@ function createDALSupportChart() {
 function createBurnedSupplyChart() {
     try {
         const seriesData = aggregatedDataCache.burnedSupplyData;
-        createTimeSeriesChart('chart-container', 'Burned Supply', seriesData, value => `${(value / 1000000).toFixed(2)}M`);
+        
+        let processedData;
+        let isCumulative = currentBurnedSupplyTimeframe === 'cumulative';
+        
+        if (isCumulative) {
+            processedData = seriesData;
+        } else {
+            const now = Date.now();
+            const timeRanges = {
+                '1y': 365 * 24 * 60 * 60 * 1000,
+                '3y': 3 * 365 * 24 * 60 * 60 * 1000,
+                '5y': 5 * 365 * 24 * 60 * 60 * 1000
+            };
+            
+            const timeRange = timeRanges[currentBurnedSupplyTimeframe];
+            const startTime = now - timeRange;
+            
+            const dataWithoutLatest = seriesData.slice(1);
+            const filteredData = dataWithoutLatest.filter(point => point[0] >= startTime);
+            
+            if (filteredData.length < 2) {
+                processedData = seriesData;
+            } else {
+                const sortedData = [...filteredData].sort((a, b) => a[0] - b[0]);
+                
+                processedData = [];
+                for (let i = 1; i < sortedData.length; i++) {
+                    const diff = sortedData[i][1] - sortedData[i-1][1];
+                    processedData.push([sortedData[i][0], diff]);
+                }
+                processedData.reverse();
+            }
+        }
+        
+        // Format function based on timeframe
+        const formatter = isCumulative 
+            ? value => `${(value / 1000000).toFixed(2)}M`
+            : value => `${(value / 1000).toFixed(2)}K`;
+        
+        createTimeSeriesChart(
+            'chart-container', 
+            'Burned Supply', 
+            processedData, 
+            formatter,
+            isCumulative
+        );
     } catch (error) {
         console.error('Error loading burned supply data:', error);
     }
@@ -1031,6 +1077,12 @@ function createHistoricalTvlChart() {
                 text: 'DeFi Growth (L1+L2-RWA)',
                 style: { color: '#ffffff' }
             },
+			tooltip: {
+        outside: true,
+        style: {
+            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+        }
+    },
             xAxis: {
                 type: 'datetime',
                 lineColor: '#ffffff',
@@ -1274,7 +1326,15 @@ function createTotalTransactionsChart() {
     }
 }
 
-function createTimeSeriesChart(containerId, title, data, formatter) {
+function createTimeSeriesChart(containerId, title, data, formatter, isCumulative = true) {
+    let highPoint = null;
+    let lowPoint = null;
+    
+    if (!isCumulative && data.length > 0) {
+        highPoint = data.reduce((max, point) => point[1] > max[1] ? point : max, data[0]);
+        lowPoint = data.reduce((min, point) => point[1] < min[1] ? point : min, data[0]);
+    }
+    
     Highcharts.chart(containerId, {
         chart: {
             type: 'spline',
@@ -1295,6 +1355,12 @@ function createTimeSeriesChart(containerId, title, data, formatter) {
             title: { text: null },
             labels: { enabled: false }
         },
+tooltip: {
+        outside: true,
+        style: {
+            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+        }
+    },
         plotOptions: {
             series: {
                 marker: { enabled: false },
@@ -1319,7 +1385,17 @@ function createTimeSeriesChart(containerId, title, data, formatter) {
             dataLabels: {
                 enabled: true,
                 formatter: function() {
-                    return this.point.index === 0 ? formatter(this.y) : null;
+                    if (isCumulative) {
+                        return this.point.index === 0 ? formatter(this.y) : null;
+                    } else {
+                        if (highPoint && this.point.x === highPoint[0] && this.point.y === highPoint[1]) {
+                            return `High: ${formatter(this.y)}`;
+                        }
+                        if (lowPoint && this.point.x === lowPoint[0] && this.point.y === lowPoint[1]) {
+                            return `Low: ${formatter(this.y)}`;
+                        }
+                        return null;
+                    }
                 },
                 align: 'right',
                 verticalAlign: 'bottom',
@@ -1713,25 +1789,50 @@ function main(ratio) {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
+	
     try {
         new NavigationManager();
 
         const ratios = await initializeRatios();
         main(ratios);
         
-        const timeframeButtons = document.querySelectorAll('.timeframe-btn');
-        timeframeButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                timeframeButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentTVLTimeframe = this.dataset.timeframe;
-                createHistoricalTvlChart();
+        const tvlContainer = document.querySelector('#chart-container9').closest('.chart-with-controls');
+        if (tvlContainer) {
+            const tvlButtons = tvlContainer.querySelectorAll('.timeframe-btn');
+            tvlButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tvlButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTVLTimeframe = this.dataset.timeframe;
+                    createHistoricalTvlChart();
+                });
             });
+        }
+        
+const burnedSupplyContainer = document.querySelector('#chart-container').closest('.chart-with-controls');
+if (burnedSupplyContainer) {
+    const burnedSupplyButtons = burnedSupplyContainer.querySelectorAll('.timeframe-btn');
+    const burnedButtonsContainer = burnedSupplyContainer.querySelector('.chart-timeframe-buttons');
+
+    
+    burnedSupplyButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            burnedSupplyButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentBurnedSupplyTimeframe = this.dataset.timeframe;
+            createBurnedSupplyChart();
+            setTimeout(centerBurnedButtons, 50);
         });
+    });
+    
+    setTimeout(centerBurnedButtons, 500);
+    window.addEventListener('resize', centerBurnedButtons);
+}
         
     } catch (error) {
         console.error('Error during initialization:', error);
     }
+	document.getElementById('loadingOverlay').classList.add('hidden');
 });
 
 
