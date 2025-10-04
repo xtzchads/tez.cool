@@ -1838,6 +1838,17 @@ async function createEcosystemChart() {
                     IsFeatured: false,
                     Logo: [{ url: "https://bootloader.art/favicon.ico" }]
                 }
+            },
+			{
+                fields: {
+                    Project: "TEZEX",
+                    Logline: "TEZEX (Tezos Exchange) is a decentralized, open-source initiative developed by StableTech, a consortium of key entities within the Tezos ecosystem committed to enhancing and expanding open decentralized finance (DeFi) on Tezos.",
+                    Website: "https://tezex.io/",
+                    Tags: ["defi"],
+                    Status: "active",
+                    IsFeatured: false,
+                    Logo: [{ url: "https://tezex.io/assets/favicon.ico" }]
+                }
             }
 		];
 		const allProjects = [...projects, ...manualProjects];
@@ -2470,6 +2481,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
