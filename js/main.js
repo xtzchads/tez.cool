@@ -1361,7 +1361,8 @@ tooltip: {
     style: {
         fontFamily: '"Monda", Helvetica, Arial, sans-serif'
     },
-    valueDecimals: 6
+    valueDecimals: 6,
+	valueSuffix: ' XTZ'
 },
         plotOptions: {
             series: {
@@ -1838,6 +1839,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
