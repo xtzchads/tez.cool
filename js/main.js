@@ -2215,7 +2215,7 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
             pane: {
                 startAngle: 0,
                 innerSize: window.innerWidth < 768 ? '35%' : '30%',
-                size: window.innerWidth < 480 ? '90%' : '95%',
+                size: window.innerWidth < 480 ? '100%' : '95%',
                 background: [{
                     backgroundColor: 'rgba(255, 255, 255, 0.03)',
                     borderWidth: 1,
