@@ -1911,7 +1911,7 @@ async function createEcosystemChart() {
                 const angleStep = anglePerTag / (itemsInThisRow + 1);
                 const angle = sectionStartAngle + angleStep * (col + 1);
                 
-                let bubbleSize = 35;
+                let bubbleSize = window.innerWidth < 480 ? 20 : (window.innerWidth < 768 ? 28 : 35);
                 
                 let logoUrl = null;
                 if (project.fields.Logo && project.fields.Logo.length > 0) {
@@ -2104,9 +2104,8 @@ async function createEcosystemChart() {
         }
 
         function fillCenter(count, label, chart, customLabel) {
-            const isSmallScreen = window.innerWidth < 768;
-            const countSize = isSmallScreen ? '28px' : '48px';
-            const labelSize = isSmallScreen ? '10px' : '14px';
+const countSize = window.innerWidth < 480 ? '20px' : (window.innerWidth < 768 ? '28px' : '48px');
+const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '10px' : '14px');
             
             const labelText = `
                 <div style="text-align: center; pointer-events: none;">
@@ -2147,11 +2146,6 @@ async function createEcosystemChart() {
                 polar: true,
                 height: window.innerWidth < 768 ? 500 : 700,
                 backgroundColor: 'rgba(0,0,0,0)',
-				panning: {
-            enabled: false
-        },
-        panKey: 'shift',
-        zoomType: undefined,
                 events: {
                     load() {
                         const chart = this;
@@ -2221,7 +2215,7 @@ async function createEcosystemChart() {
             pane: {
                 startAngle: 0,
                 innerSize: window.innerWidth < 768 ? '35%' : '30%',
-                size: '95%',
+                size: window.innerWidth < 480 ? '90%' : '95%',
                 background: [{
                     backgroundColor: 'rgba(255, 255, 255, 0.03)',
                     borderWidth: 1,
@@ -2288,9 +2282,9 @@ async function createEcosystemChart() {
                     }
                 },
                 bubble: {
-                    minSize: 12,
-                    maxSize: 25
-                },
+    minSize: window.innerWidth < 480 ? 6 : 12,
+    maxSize: window.innerWidth < 480 ? 12 : 25
+},
                 pie: {
                     startAngle: 0,
                     states: {
@@ -2448,7 +2442,6 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
-
 
 
 
