@@ -1832,8 +1832,11 @@ if (burnedSupplyContainer) {
     } catch (error) {
         console.error('Error during initialization:', error);
     }
-	document.getElementById('loadingOverlay').classList.add('hidden');
+	const overlay = document.getElementById('loadingOverlay');
+	overlay.style.opacity = '0';
+	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
