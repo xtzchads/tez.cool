@@ -1984,69 +1984,79 @@ async function createEcosystemChart() {
                             window.open(point.custom.website, '_blank');
                         }
                     });
-                    
+
                     group.element.addEventListener('mouseenter', function(e) {
-                        if (point.customBorderCircle) {
-                            point.customBorderCircle.attr({ opacity: 1 });
+                        if (window.innerWidth >= 768) {
+                            if (point.customBorderCircle) {
+                                point.customBorderCircle.attr({ opacity: 1 });
+                            }
+                            
+                            const customTooltip = document.getElementById('custom-tooltip');
+                            const logoHtml = point.custom.logoUrl ? 
+                                `<img src="${point.custom.logoUrl}" style="width: 32px; height: 32px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px;" />` : '';
+                            customTooltip.innerHTML = `
+                                ${logoHtml}
+                                <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">
+                                    ${point.name}
+                                </div>
+                                <div style="color: rgba(255, 255, 255, 0.7); font-size: 12px; margin-bottom: 4px;">
+                                    ${point.custom.logline}
+                                </div>
+                                <div style="color: ${point.color}; font-size: 11px; text-transform: uppercase;">
+                                    ${point.custom.displayTag}
+                                </div>
+                            `;
+                            customTooltip.style.display = 'block';
                         }
-                        
-                        const customTooltip = document.getElementById('custom-tooltip');
-                        const logoHtml = point.custom.logoUrl ? 
-                            `<img src="${point.custom.logoUrl}" style="width: 32px; height: 32px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px;" />` : '';
-                        customTooltip.innerHTML = `
-                            ${logoHtml}
-                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">
-                                ${point.name}
-                            </div>
-                            <div style="color: rgba(255, 255, 255, 0.7); font-size: 12px; margin-bottom: 4px;">
-                                ${point.custom.logline}
-                            </div>
-                            <div style="color: ${point.color}; font-size: 11px; text-transform: uppercase;">
-                                ${point.custom.displayTag}
-                            </div>
-                        `;
-                        customTooltip.style.display = 'block';
                     });
                     
                     group.element.addEventListener('mousemove', function(e) {
-                        const customTooltip = document.getElementById('custom-tooltip');
-                        const container = document.getElementById('ecosystem-chart-container');
-                        const rect = container.getBoundingClientRect();
-                        
-                        let left = e.clientX - rect.left + 10;
-                        let top = e.clientY - rect.top + 10;
-                        
-                        const tooltipWidth = customTooltip.offsetWidth;
-                        const tooltipHeight = customTooltip.offsetHeight;
-                        
-                        if (left + tooltipWidth > rect.width) {
-                            left = e.clientX - rect.left - tooltipWidth - 10;
+                        if (window.innerWidth >= 768) {
+                            const customTooltip = document.getElementById('custom-tooltip');
+                            const container = document.getElementById('ecosystem-chart-container');
+                            const rect = container.getBoundingClientRect();
+                            
+                            let left = e.clientX - rect.left + 10;
+                            let top = e.clientY - rect.top + 10;
+                            
+                            const tooltipWidth = customTooltip.offsetWidth;
+                            const tooltipHeight = customTooltip.offsetHeight;
+                            
+                            if (left + tooltipWidth > rect.width) {
+                                left = e.clientX - rect.left - tooltipWidth - 10;
+                            }
+                            
+                            if (top + tooltipHeight > rect.height) {
+                                top = e.clientY - rect.top - tooltipHeight - 10;
+                            }
+                            
+                            if (left < 0) {
+                                left = 10;
+                            }
+                            
+                            if (top < 0) {
+                                top = 10;
+                            }
+                            
+                            customTooltip.style.left = left + 'px';
+                            customTooltip.style.top = top + 'px';
                         }
-                        
-                        if (top + tooltipHeight > rect.height) {
-                            top = e.clientY - rect.top - tooltipHeight - 10;
-                        }
-                        
-                        if (left < 0) {
-                            left = 10;
-                        }
-                        
-                        if (top < 0) {
-                            top = 10;
-                        }
-                        
-                        customTooltip.style.left = left + 'px';
-                        customTooltip.style.top = top + 'px';
                     });
                     
                     group.element.addEventListener('mouseleave', function() {
-                        if (point.customBorderCircle) {
-                            point.customBorderCircle.attr({ opacity: 0 });
+                        if (window.innerWidth >= 768) {
+                            if (point.customBorderCircle) {
+                                point.customBorderCircle.attr({ opacity: 0 });
+                            }
+                            
+                            const customTooltip = document.getElementById('custom-tooltip');
+                            customTooltip.style.display = 'none';
                         }
-                        
-                        const customTooltip = document.getElementById('custom-tooltip');
-                        customTooltip.style.display = 'none';
                     });
+
+                    group.element.addEventListener('touchstart', function(e) {
+                        e.stopPropagation();
+                    }, { passive: true });
                     
                     point.customImageGroup = group;
 
@@ -2183,7 +2193,6 @@ async function createEcosystemChart() {
                         const pieSeries = chart.series[1];
                         
                         if (pieSeries) {
-                            // Count only projects that are rendered (in processedProjects set)
                             pieSeries.customLabel = fillCenter(
                                 processedProjects.size,
                                 'TOTAL PROJECTS',
