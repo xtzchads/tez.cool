@@ -1808,11 +1808,6 @@ async function createEcosystemChart() {
             }
 		];
 		const allProjects = [...projects, ...manualProjects];
-        console.log('Total projects loaded:', allProjects.length);
-        console.log('Projects from API:', projects.length);
-        console.log('Manual projects:', manualProjects.length);
-        console.log('Hanji in allProjects:', allProjects.find(p => p.fields.Project === "Hanji"));
-        console.log('Sample API project structure:', projects[0]);
         
         const tagMapping = {
             'defi': 'defi',
@@ -2442,6 +2437,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
