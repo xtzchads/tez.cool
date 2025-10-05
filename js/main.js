@@ -1820,7 +1820,7 @@ async function createEcosystemChart() {
 			{
                 fields: {
                     Project: "Reaper Actual",
-                    Logline: "An Open-World Persistent Shooter",
+                    Logline: "Reaper Actual is an upcoming AAA open-world persistent shooter being developed by veterans from the shooter and MMO genres, leveraging the Etherlink blockchain to enable player ownership and trading of in-game assets",
                     Website: "https://reaperactual.com/",
                     Tags: ["gaming"],
                     Status: "active",
@@ -2541,3 +2541,4 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
