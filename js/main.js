@@ -1998,6 +1998,7 @@ async function createEcosystemChart() {
                 count: projectsByTag[tag].length
             }
         }));
+		
 
         function renderCustomLogos(chart) {
             const bubbleSeries = chart.series[0];
@@ -2232,7 +2233,6 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
                         const pieSeries = chart.series[1];
                         
                         if (pieSeries) {
-                            // Count only projects that are rendered (in processedProjects set)
                             pieSeries.customLabel = fillCenter(
                                 processedProjects.size,
                                 'TOTAL PROJECTS',
@@ -2285,7 +2285,8 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
                 labels: {
                     enabled: false
                 },
-                lineWidth: 0
+                lineWidth: 0,
+				
             },
             yAxis: {
                 tickInterval: 10,
@@ -2344,7 +2345,49 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
             },
             series: [{
                 name: 'Projects',
-                data: bubbleData
+                data: bubbleData,
+                point: {
+                    events: {
+                        mouseOver() {
+                            const selectedTag = this.custom.tag;
+                            const chart = this.series.chart;
+                            const bubbleSeries = chart.series[0];
+                            const pieSeries = chart.series[1];
+
+                            bubbleSeries.points.forEach(point => {
+                                if (point.custom.tag !== selectedTag) {
+                                    if (point.graphic) point.graphic.attr({ opacity: 0.2 });
+                                    if (point.customImageGroup) point.customImageGroup.attr({ opacity: 0.2 });
+                                }
+                            });
+
+                            const matchingCount = bubbleSeries.points.filter(p => p.custom.tag === selectedTag).length;
+                            pieSeries.customLabel = fillCenter(
+                                matchingCount,
+                                this.custom.displayTag.toUpperCase(),
+                                chart,
+                                pieSeries.customLabel
+                            );
+                        },
+                        mouseOut() {
+                            const chart = this.series.chart;
+                            const bubbleSeries = chart.series[0];
+                            const pieSeries = chart.series[1];
+
+                            bubbleSeries.points.forEach(point => {
+                                if (point.graphic) point.graphic.attr({ opacity: 1 });
+                                if (point.customImageGroup) point.customImageGroup.attr({ opacity: 1 });
+                            });
+
+                            pieSeries.customLabel = fillCenter(
+                                processedProjects.size,
+                                'TOTAL PROJECTS',
+                                chart,
+                                pieSeries.customLabel
+                            );
+                        }
+                    }
+                }
             }, {
                 type: 'pie',
                 dataLabels: {
@@ -2492,35 +2535,3 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
