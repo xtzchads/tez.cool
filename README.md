@@ -9,7 +9,7 @@ TezCool aggregates and visualizes key Tezos blockchain data in one place. Whethe
 ## Features
 
 ### Network Analytics
-- **Historical staking ratio and issuance Tracking** - Monitor inflation rates from genesis through present day with future projections. You can simulate future values by moving dotted part of staking ratio curve
+- **Historical staking ratio and issuance tracking** - Monitor inflation rates from genesis through present day with future projections. You can simulate future values by moving dotted part of staking ratio curve
 - **Staking Metrics** - Real-time view of network staking ratios and participation
 - **Account Growth** - Track total accounts across Tezos L1 and Etherlink L2
 - **Transaction Volume** - Cumulative transaction data for both layers
