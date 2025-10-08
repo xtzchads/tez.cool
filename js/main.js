@@ -1419,7 +1419,7 @@ function createHistoricalCharts(ratio) {
         const issuanceDataWithRatio = [
             ...issuanceData.ratios,
             ...ratio.map((ratioValue, index) => ({
-                cycle: currentCycle + index,
+                cycle: currentCycle + index +1,
                 issuance: issuanceRateQ(index + currentCycle, ratioValue)+0.245
             }))
         ];
@@ -1432,7 +1432,7 @@ function createHistoricalCharts(ratio) {
         const stakingDataWithRatio = [
             ...stakingData.ratios, 
             ...ratio.map((ratioValue, index) => ({
-                cycle: currentCycle + index, 
+                cycle: currentCycle + index +1, 
                 staking: 0,
                 ratio: ratioValue
             }))
