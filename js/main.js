@@ -1,7 +1,7 @@
 const TRANSITION_PERIOD = 50;
 const INITIAL_PERIOD = 10;
 const AI_ACTIVATION_CYCLE = 748;
-const LB_SUBSIDY = 2628000;
+const LB_SUBSIDY = 2628000000000;
 const WORKER_URL = 'https://tez.cool/api/v1/getData';
 let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
@@ -2452,6 +2452,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
