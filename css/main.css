@@ -267,3 +267,27 @@
     touch-action: pan-y !important;
 }
 
+thanks-item .baker-avatar {
+    transition: all 0.3s ease;
+}
+
+.thanks-item:hover .baker-avatar {
+    transform: scale(1.15);
+    box-shadow: 0 0 20px rgba(162, 124, 238, 0.6);
+    border-color: rgba(162, 124, 238, 0.8);
+}
+
+.thanks-item .baker-avatar::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.thanks-item:hover .baker-avatar::before {
+    opacity: 1;
+}
