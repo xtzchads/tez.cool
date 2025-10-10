@@ -1772,108 +1772,8 @@ async function createEcosystemChart() {
                 '<div style="color: #ff6961; text-align: center; padding: 50px;">No ecosystem data available</div>';
             return;
         }
-		const manualProjects = [
-            {
-                fields: {
-                    Project: "Hanji",
-                    Logline: "An on-chain orderbook exchange",
-                    Website: "https://hanji.io/",
-                    Tags: ["defi"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://hanji.io/favicon.ico" }]
-                }
-            },
-			{
-                fields: {
-                    Project: "Superlend",
-                    Logline: "Lending and borrowing infrastructure for onchain finance",
-                    Website: "https://www.superlend.xyz/",
-                    Tags: ["defi"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://cdn.prod.website-files.com/66b4b895de74b3850215d606/66b4bf621d6b1197c6f7e210_faviconsuperlend.png" }]
-                }
-            },
-			{
-                fields: {
-                    Project: "IguanaDEX",
-                    Logline: "Etherlink DEX",
-                    Website: "https://www.iguanadex.com/",
-                    Tags: ["defi"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://raw.githubusercontent.com/IguanaDEX/assets/main/iguana_brand_assets/icon.webp" }]
-                }
-            },
-			{
-                fields: {
-                    Project: "Stacy.fi",
-                    Logline: "Staking platform which allows users to earn staking rewards on Tezos while maintaining full liquidity of their funds, by holding stXTZ tokens",
-                    Website: "https://stacy.fi/",
-                    Tags: ["defi"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://stacy.fi/stxtz-logo.svg" }]
-                }
-            },
-			{
-                fields: {
-                    Project: "Reaper Actual",
-                    Logline: "Reaper Actual is an upcoming AAA open-world persistent shooter being developed by veterans from the shooter and MMO genres, leveraging the Etherlink blockchain to enable player ownership and trading of in-game assets",
-                    Website: "https://reaperactual.com/",
-                    Tags: ["gaming"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://reaperactual.com/favicon.ico" }]
-                }
-            },
-			{
-                fields: {
-                    Project: "Appleville",
-                    Logline: "An onchain farm on Etherlink",
-                    Website: "https://app.appleville.xyz/",
-                    Tags: ["gaming"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://app.appleville.xyz/favicon.ico" }]
-                }
-            },
-			{
-                fields: {
-                    Project: "bootloader.art",
-                    Logline: "An open-source experimental on-chain long-form generative art platform built on Tezos",
-                    Website: "https://bootloader.art/",
-                    Tags: ["nft"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://bootloader.art/favicon.ico" }]
-                }
-            },
-			{
-                fields: {
-                    Project: "TEZEX",
-                    Logline: "TEZEX (Tezos Exchange) is a decentralized, open-source initiative developed by StableTech, a consortium of key entities within the Tezos ecosystem committed to enhancing and expanding open decentralized finance (DeFi) on Tezos.",
-                    Website: "https://tezex.io/",
-                    Tags: ["defi"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://tezex.io/assets/favicon.ico" }]
-                }
-            },
-			{
-                fields: {
-                    Project: "StableTez",
-                    Logline: "StableTez is an effort by Tezos community members, services partners, and financial-backers of the project to provide Tezos-on-chain stable assets for financial instruments and for economically-efficient Tezos-token trading.",
-                    Website: "https://stabletez.com/",
-                    Tags: ["defi"],
-                    Status: "active",
-                    IsFeatured: false,
-                    Logo: [{ url: "https://stabletez.com/favicon.ico" }]
-                }
-            }
-		];
-		const allProjects = [...projects, ...manualProjects];
+		
+		const allProjects = [...projects];
         
         const tagMapping = {
             'defi': 'defi',
@@ -2552,6 +2452,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
