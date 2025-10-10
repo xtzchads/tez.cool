@@ -1419,7 +1419,7 @@ function createHistoricalCharts(ratio) {
             ...issuanceData.ratios,
             ...ratio.map((ratioValue, index) => ({
                 cycle: currentCycle + index +1,
-                issuance: issuanceRateQ(index + currentCycle, ratioValue)+0.245
+                issuance: issuanceRateQ(index + currentCycle, ratioValue)+LB_SUBSIDY/data[currentCycle].totalSupply*100
             }))
         ];
         
@@ -1617,7 +1617,7 @@ function updateIssuanceChart(newStakingData) {
             if (stakingPoint) {
                 return {
                     x: point.x,
-                    y: issuanceRateQ(point.x, stakingPoint.y / 100)+0.245
+                    y: issuanceRateQ(point.x, stakingPoint.y / 100)+LB_SUBSIDY/data[currentCycle].totalSupply*100
                 };
             }
         }
@@ -2452,6 +2452,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
