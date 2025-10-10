@@ -1966,7 +1966,7 @@ async function createEcosystemChart() {
                 let logoUrl = null;
                 if (project.fields.Logo && project.fields.Logo.length > 0) {
 					const url = project.fields.Logo[0].url;
-                    logoUrl = url.startsWith('http://')||url.startsWith('https://')?url:'https://tezos.com'+url;
+                    logoUrl = url.startsWith('http://')||url.startsWith('https://')?url:window.location.origin+url;
                 }
                 
                 bubbleData.push({
@@ -2541,5 +2541,6 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
