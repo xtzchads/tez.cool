@@ -1,997 +1,1015 @@
 {
-            "ecosystem": [
-                {
-                    "fields": {
-                        "Project": "Kolibri",
-                        "Logline": "Kolibri is an algorithmic stablecoin built on the Tezos blockchain by Hover Labs.",
-                        "Logo": [{
-                            "url": "/icons/ksHUBcj2Vbm7VK3kKww54uh0pI-CbJre-tGUHWrZ6Gg.svg"
-                        }],
-                        "Tags": ["stablecoins"],
-                        "Status": "active",
-                        "Website": "https://kolibri.finance/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "BattleTabs",
-                        "Logline": "Play an innovative take on battleships with your friends",
-                        "Logo": [{
-                            "url": "/icons/i97BfWiobjPcUM_9pWdPmvV0MhxKW1PxZjr7ez0kgRE.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://battletabs.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Crunchy",
-                        "Logline": "Crunchy provides DeFi services and solutions on Tezos to projects",
-                        "Logo": [{
-                            "url": "/icons/iHwM3AiY9nJiGyzkjDSzlqJEiCRMiQM5GrDXbR2KZpA.webp"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://crunchy.network/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Here & Now",
-                        "Logline": "Founded by Michael Beets, Here & Now creates artistic immersive experiences and live films.",
-                        "Logo": [{
-                            "url": "/icons/0zqIlFRvurHctV17RWc35_c9tEZwc7t8CFh3rhyMpFc.webp"
-                        }],
-                        "Tags": ["community"],
-                        "Status": "active",
-                        "Website": "https://hereandnow.events/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "PiXL",
-                        "Logline": "PiXL is the first evolving NFT play-to-earn RPG game. It's a love letter to Tezos - the technology, the artists, the community and the planet.",
-                        "Logo": [{
-                            "url": "/icons/sZRkjI5M17Z-lVSuYN7UPonts1KiVsVFjr7J7Dapy7g.webp"
-                        }],
-                        "Tags": ["gaming", "nft", "community"],
-                        "Status": "active",
-                        "Website": "https://pixl.xyz/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "SmartPy",
-                        "Logline": "The SmartPy language is available through a Python library for building and analyzing Tezos smart contracts.",
-                        "Logo": [{
-                            "url": "/icons/IDbJipScJIdePBRa-hHv1yjCsPOvuVTuhyz7bfKk-vU.svg"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://smartpy.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TzStamp",
-                        "Logline": "Trusted timestamping on the Tezos blockchain.",
-                        "Logo": [{
-                            "url": "/icons/jwskAKh5dir9oJ2HyRI8TqwbzTpT1n9aYgLR9PFY28U.webp"
-                        }],
-                        "Tags": ["community"],
-                        "Status": "active",
-                        "Website": "https://tzstamp.io"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Plenty",
-                        "Logline": "A decentralized exchange and cross chain bridge that offers a seamless user experience.",
-                        "Logo": [{
-                            "url": "/icons/2qLPKzLuoaqSTYNwS-CBe08pH2V5bhwLvpGQD_ApBZI.webp"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://app.plenty.network/swap?from=XTZ&to="
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "uUSD",
-                        "Logline": "A USD-pegged stable token on the Youves marketplace.",
-                        "Logo": [{
-                            "url": "/icons/yZtB6Caaf6eR83lBZRvodSwNji0gsFXdWhc9Pt-eHTo.svg"
-                        }],
-                        "Tags": ["stablecoins"],
-                        "Status": "active",
-                        "Website": "https://youves.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TheVerseVerse",
-                        "Logline": "theVERSEverse is a poetry NFT gallery where poem = work of art.",
-                        "Logo": [{
-                            "url": "/icons/xhCrnKDmAo5NxvhbxfDEYn0DuOmWn0oBIXymn8ppUBo.webp"
-                        }],
-                        "Tags": ["nft", "community"],
-                        "Status": "active",
-                        "Website": "https://theverseverse.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Battlerise",
-                        "Logline": "An innovative rogue-like RPG with NFT characters and items",
-                        "Logo": [{
-                            "url": "/icons/OW6A1FQJml7YlKuI8ySKSWiUJ7IvQBuudWb9umY-Jro.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://www.battlerise.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "CryptoNoises",
-                        "Logline": "CryptoNoises Bot for Discord and Telegram analyzes Tezos Blockchain and informs you about your activity and activity of other users",
-                        "Logo": [{
-                            "url": "/icons/DZ0XTT1A9pzBXWzetZrcUUX9WQq1ViZSvDLUgJMZOhU.webp"
-                        }],
-                        "Tags": ["nft"],
-                        "Status": "active",
-                        "Website": "https://cryptonoises.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Acurast",
-                        "Logline": "The Universe in Web3 - Data Delivered on Demand",
-                        "Logo": [{
-                            "url": "/icons/MJgL4O4lqeArmwP_2x368Ai533MvSQa6L7AHXuTgydk.svg"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://acurast.com"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TrackMind",
-                        "Logline": "AI-based racing simulator with NFT rewards.",
-                        "Logo": [{
-                            "url": "/icons/FIs0a3b5NAmvXBy2AsABjLiU8RF2ebomaY4wshYdEpA.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://trackmind.tech"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Objkt.com",
-                        "Logline": "Objkt.com is a massive NFT marketplace showcasing NFTs from across the Tezos ecosystem.",
-                        "Logo": [{
-                            "url": "/icons/O6NtdB015MCq5J0Wf8lVnzavM6FhjWzHxiEamf9Yn6E.svg"
-                        }],
-                        "Tags": ["nft"],
-                        "Status": "active",
-                        "Website": "https://objkt.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Youves",
-                        "Logline": "A tool on Tezos for asset creation and management.",
-                        "Logo": [{
-                            "url": "/icons/g4kRbenrQ8ro3wRw5kZPyMgMgWMtYaRoWJEKIPmz03I.svg"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://youves.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Cricket Stars",
-                        "Logline": "Cricket strategy game with a strong grassroots community",
-                        "Logo": [{
-                            "url": "/icons/88U5FXynh_3V9xVlQJxiyqnVQpF-h8k65aHd3X4z_WQ.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://play.google.com/store/apps/details?id=com.golivegames.cricketstar"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "ANAVER.SE",
-                        "Logline": "The anaverse is an open context to load and display generative NFTs minted on platforms such as fx(hash)",
-                        "Logo": [{
-                            "url": "/icons/DPbcbMeqYxHfznIpd1ze8e1Go0qVxBSU8A1jTmEwPEk.svg"
-                        }],
-                        "Tags": ["nft"],
-                        "Status": "active",
-                        "Website": "https://anaver.se/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "UnicornDAO",
-                        "Logline": "Unicorn DAO empowers women and LGBTQ+ individuals by harnessing web3's potential for a more diverse community and collecting their art.",
-                        "Logo": [{
-                            "url": "/icons/qH7CNTwOXsbK44bXOEsj_iZzJ3nOUcVstg8A-j0HfjI.webp"
-                        }],
-                        "Tags": ["community", "nft"],
-                        "Status": "active",
-                        "Website": "https://unicorndao.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TezGov",
-                        "Logline": "A Tezos proposal governance and baker tools swiss army knife.",
-                        "Logo": [{
-                            "url": "/icons/iRZVUhnGG4FikCp3bcFOiFEyPjBUvI3rSLo6Mcwhl_Q.webp"
-                        }],
-                        "Tags": ["baking", "community"],
-                        "Status": "active",
-                        "Website": "https://docs.tez.capital/tezgov/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Stables",
-                        "Logline": "Get ready to saddle up and race into the Web3. #OwnPlayThrill with your digital horse.",
-                        "Logo": [{
-                            "url": "/icons/cdJDd-zZvsZcRoHSTLk_hkk99Z7kdR-5WJYI08-nJds.jpg"
-                        }],
-                        "Tags": ["community", "nft", "gaming"],
-                        "Status": "active",
-                        "Website": "https://www.playstables.io"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "USDTZ",
-                        "Logline": "Liquidity for Tezos Trading: scalable, on-chain, programmable",
-                        "Logo": [{
-                            "url": "/icons/sgpwTQotJEw_alQA79wmtq5O2hFVlPHDEX4p6_rQlDA.webp"
-                        }],
-                        "Tags": ["stablecoins"],
-                        "Status": "active",
-                        "Website": "https://usdtz.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "DipDup",
-                        "Logline": "DipDup is a modular indexing framework for creating powerful dapp-specific APIs.",
-                        "Logo": [{
-                            "url": "/icons/IBogluB6xsPH5UJ4W7Ho3vWN9Fm7t6PQr0KVmAAK3uc.webp"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://dipdup.io"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Infinity Wallet",
-                        "Logline": "The best all-in-one non-custodial wallet for cross-border payments, access to DeFi, and web3 browser to access the world of Web3 and DApps.",
-                        "Logo": [{
-                            "url": "/icons/2MRLfQRl7nkXuP6D5OiXBT1WAGSmr5NRUNCzD1v1vJA.svg"
-                        }],
-                        "Tags": ["defi", "nft"],
-                        "Status": "active",
-                        "Website": "https://infinitywallet.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Altme",
-                        "Logline": "Altme is a robust decentralized identity (DID) solution.",
-                        "Logo": [{
-                            "url": "/icons/ZA_NOFhVKx7BsET4RngNQ7LKo1Wz3WptWE8JWZrXX8o.webp"
-                        }],
-                        "Tags": ["did"],
-                        "Status": "active",
-                        "Website": "https://altme.io"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Datadog",
-                        "Logline": "Provides the observability service for Tezos CI, providing monitoring of servers through their SaaS-based data analytics platform",
-                        "Logo": [{
-                            "url": "/icons/KpJ5r9Am8iG2yC-1Z1NfKatMuyPAOsoWaSqlPCRkRFY.png"
-                        }],
-                        "Tags": ["partner"],
-                        "Status": "active",
-                        "Website": "https://www.datadoghq.com"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "MatterDeFi",
-                        "Logline": "Sustainable yield farming via automatic buyback-and-burn.",
-                        "Logo": [{
-                            "url": "/icons/r-jgljYoCBtOBpVOo4Igqrk-5jeIvEY8T9Yk9zaoe_U.webp"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://matterdefi.xyz/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Dogamí",
-                        "Logline": "Into the Petaverse! Adopt. Raise. Earn.",
-                        "Logo": [{
-                            "url": "/icons/1ptHgtZIyk68MCFlDa0UEwbIpUOTGy3r1EJmUUStbRM.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://dogami.com"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TzKT",
-                        "Logline": "Tezos blockchain explorer and API with high data detalization",
-                        "Logo": [{
-                            "url": "/icons/PP8aRd6QVuqk8ASfqxFBexkng8qHEbLYta73KLPJFAg.svg"
-                        }],
-                        "Tags": ["blockexplorers"],
-                        "Status": "active",
-                        "Website": "https://tzkt.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Kiln",
-                        "Logline": "Kiln is an application for baking on Tezos.",
-                        "Logo": [{
-                            "url": "/icons/cM3LLfmZfpJXI971IqACmKZwDtZGHAiqBlapZWMmISY.svg"
-                        }],
-                        "Tags": ["baking"],
-                        "Status": "active",
-                        "Website": "https://tezos-kiln.net"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Tezos Domains",
-                        "Logline": "Tezos Domains allows you to associate domain names like alice.tez with Tezos addresses and other information.",
-                        "Logo": [{
-                            "url": "/icons/yFvACHCcSFhpwDccmYvIfV1XtDdAltEcm9JGDFoHgvA.webp"
-                        }],
-                        "Tags": ["did"],
-                        "Status": "active",
-                        "Website": "https://tezos.domains/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Billy",
-                        "Logline": "The web3 event platform to grow and engage your communities.",
-                        "Logo": [{
-                            "url": "/icons/sFIiTAl1yI7ekKhbYXPMwXG2iWqJVk3zBPhEyijBEmQ.webp"
-                        }],
-                        "Tags": ["community"],
-                        "Status": "active",
-                        "Website": "https://www.billyapp.live/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "QuipuSwap",
-                        "Logline": "QuipuSwap is an open-source AMM protocol that provides an interface for the seamless exchange of Tezos tokens.",
-                        "Logo": [{
-                            "url": "/icons/NffuRxqChUInZaA321sS3mAMI0wxVSMR13zIbqfdiSQ.svg"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://quipuswap.com/swap"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TzFlow",
-                        "Logline": "This app displays the live Tezos mempool contents and its history as seen in a single representative node.",
-                        "Logo": [{
-                            "url": "/icons/vxyVYjImKU7lSDKlhneiFILGQ7Tfzcg3Pj00EWkjWhs.webp"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://tzflow.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Tezos Unity SDK",
-                        "Logline": "Quick & easy SDK for integrating Unity games with Tezos.",
-                        "Logo": [{
-                            "url": "/icons/mjcNIkI6m4D2BPsI4K-QER9th5eKAEHDETMtOr7gi3g.webp"
-                        }],
-                        "Tags": ["devtools", "gaming"],
-                        "Status": "active",
-                        "Website": "https://tezos.com/unity"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TezBake",
-                        "Logline": "A Tezos baking tool for both novices and pros.",
-                        "Logo": [{
-                            "url": "/icons/5wDlaSDgB4zYOCm3UyTV9oqNorNEgo9U3fidQZZuoLw.webp"
-                        }],
-                        "Tags": ["baking"],
-                        "Status": "active",
-                        "Website": "https://docs.tez.capital/tezbake/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "PyTezos",
-                        "Logline": "Python SDK for Tezos. Micheline REPL and integration testing engine.",
-                        "Logo": [{
-                            "url": "/icons/2YKn_RlYRBUh7sGOy-R7RLt02WYQ5bWMGv6oELk7qX0.webp"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://pytezos.org"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Gravity",
-                        "Logline": "Gravity empowers individuals, organizations and international NGOs to create trusted digital identities that are private, portable, and persistent.",
-                        "Logo": [{
-                            "url": "/icons/hgED1D5BlTShULYcGkdUgykwt7jhjv6D6bazfAnbjd8.webp"
-                        }],
-                        "Tags": ["did"],
-                        "Status": "active",
-                        "Website": "https://www.gravity.earth/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Taquito",
-                        "Logline": "A TypeScript library suite for development on the Tezos blockchain.",
-                        "Logo": [{
-                            "url": "/icons/cmmQJ_5pVjwXpmIswRr9hqiDxNCvpMf5KfdQ7kvvVcg.webp"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://tezostaquito.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TezPay",
-                        "Logline": "A Tezos baking payment tool for both novices and pros.",
-                        "Logo": [{
-                            "url": "/icons/Jlzs6t9R2jZWU5YnFeBm7NRmzoUbRgbehPIOiO-CdSU.webp"
-                        }],
-                        "Tags": ["baking"],
-                        "Status": "active",
-                        "Website": "https://docs.tez.capital/tezpay/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "LigoLang",
-                        "Logline": "LIGO is a statically typed high-level smart-contract language that compiles down to Michelson.",
-                        "Logo": [{
-                            "url": "/icons/AVKBsv89pk4RMUo-v5scMgA5AUxJ8QlgpL9i5NMthV8.svg"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://ligolang.org/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "CTez",
-                        "Logline": "Ctez is a collateralized version of tez allowing you to use Tezos DeFi and delegate your tez simultaneously.",
-                        "Logo": [{
-                            "url": "/icons/tbVwS4mNKXo-VPp65TW1HB3VdHjU05nHxR14KZFxsbU.svg"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://ctez.app/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TezID",
-                        "Logline": "TezID is an identity oracle for Tezos.",
-                        "Logo": [{
-                            "url": "/icons/rg86bPkFhCIZzxiTFxzlxydqPiuOB3nQqPMwZ0Vb_YQ.svg"
-                        }],
-                        "Tags": ["did"],
-                        "Status": "active",
-                        "Website": "https://tezid.net/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "The Stack Report",
-                        "Logline": "Data-driven reporting from within the Tezos ecosystem.",
-                        "Logo": [{
-                            "url": "/icons/IRAmLsUvuVfIZ6w8_u1Q6G3yuL1WS-iF-VASjBsHvAY.webp"
-                        }],
-                        "Tags": ["community", "blockexplorers"],
-                        "Status": "active",
-                        "Website": "https://thestackreport.xyz"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Teia",
-                        "Logline": "Teia is a community managed NFT marketplace on Tezos",
-                        "Logo": [{
-                            "url": "/icons/1t5bWbo6HEelMfVSs1vPtNt_DsNMzbZFrQnnKudxqW4.webp"
-                        }],
-                        "Tags": ["nft", "community"],
-                        "Status": "active",
-                        "Website": "https://teia.art/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Tezotopia",
-                        "Logline": "Claim land and produce tokenized resources in this Blockchain Space Adventure. Tezotopia is an NFT game that allows you to become king or conqueror.",
-                        "Logo": [{
-                            "url": "/icons/goinuqctKysELYt4JjYDND-K-aw2sI3GKHS3CNKyQbE.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://tezotop.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Objkt.one",
-                        "Logline": "A curated platform run by Objkt focused on curated 1/1 artworks by artists from across the globe.",
-                        "Logo": [{
-                            "url": "/icons/4vCV7su6oj-KjctZSwRlZJqfmb-Et8fTJlpCdlVsbF4.svg"
-                        }],
-                        "Tags": ["nft"],
-                        "Status": "active",
-                        "Website": "https://objkt.one/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Better Call Dev",
-                        "Logline": "Tezos Smart Contract Explorer by Baking Bad with cross-network search and interaction engines.",
-                        "Logo": [{
-                            "url": "/icons/JxtRiMuDMfuCWhS052XvrtURiOugj4Q4QDtU35oa4wo.webp"
-                        }],
-                        "Tags": ["blockexplorers"],
-                        "Status": "active",
-                        "Website": "https://better-call.dev/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Emergent Properties",
-                        "Logline": "Generative+AI art platform and marketplace.",
-                        "Logo": [{
-                            "url": "/icons/ly9skeAVmlPpStilJUvLWlQrHl2Ijoo4ysLaI4WBwiY.webp"
-                        }],
-                        "Tags": ["nft"],
-                        "Status": "active",
-                        "Website": "https://emprops.ai/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Liquidity Baking (Sirius Token)",
-                        "Logline": "A liquidity pair-based token on Tezos.",
-                        "Logo": [{
-                            "url": "/icons/2bbTvSdPuq-ZaHHmfO0DFd2_dz0e_KzIw5HxkLNyD20.webp"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://siriustoken.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Yupana Finance",
-                        "Logline": "The open-source and non-custodial lending protocol on Tezos.",
-                        "Logo": [{
-                            "url": "/icons/_sI9-wdp6wBZf2tqNtwgpFnvP-Euqc35kcDZo6gzXoo.webp"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://yupana.finance/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Tweed",
-                        "Logline": "Create frictionless Web3 Experiences & onboard the world with self-custodial Wallets as a Service and NFT Checkout.",
-                        "Logo": [{
-                            "url": "/icons/d7-9fJMUhHPaT5u2CnUzIQOhYm__oJiHCTv80A7WtII.webp"
-                        }],
-                        "Tags": ["defi", "nft", "gaming"],
-                        "Status": "active",
-                        "Website": "https://paytweed.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Auto Hero",
-                        "Logline": "A thrilling side-scroller & 2D platform battle shooter",
-                        "Logo": [{
-                            "url": "/icons/xaFW_qbii7oOtgsVMzUI5-yMAVJAxr7rL7nA1XQJgR0.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://play.google.com/store/apps/details?id=com.anglesgames.auto.shoot.hero&hl=en_US"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Beacon",
-                        "Logline": "Connecting Tezos dApps with wallets.",
-                        "Logo": [{
-                            "url": "/icons/rMlWAA6WznkhzJasyqzYaDGTqdk2pSequwRwlGKoaBY.svg"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://walletbeacon.io"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "GetBlock",
-                        "Logline": "Blockchain RPC Provider. Simple and reliable API access to Tezos Blockchain",
-                        "Logo": [{
-                            "url": "/icons/dMfrwvcSq5Z_m-sM8zRZf-90SHMljmzw6tb5_Y69cSk.webp"
-                        }],
-                        "Tags": ["devtools"],
-                        "Status": "active",
-                        "Website": "https://getblock.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "3Route",
-                        "Logline": "3Route is a next generation DEXes aggregator that facilitates cost-efficient on-chain transactions across various DEXes in Tezos ecosystem.",
-                        "Logo": [{
-                            "url": "/icons/wD6enQfzBnb_JF_DTm6WbWBfVYOb44cS1FQO4uInI0A.svg"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://3route.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "SpicySwap",
-                        "Logline": "Next-generation DEX built on Tezos.",
-                        "Logo": [{
-                            "url": "/icons/A180hRr15ys6H6CQ8D7cbagIqDUOsdGuSle0Vg6tvFk.webp"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://spicyswap.xyz/#/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Electis",
-                        "Logline": "ELECTIS is a non-governmental organization based on the following principles: non-profit, open-source, and politically and philosophically neutral.",
-                        "Logo": [{
-                            "url": "/icons/GC3mOfM6DAfIUIHzxrAW0n4qQDNWJ94QGFrOk9idnuQ.svg"
-                        }],
-                        "Tags": ["community"],
-                        "Status": "active",
-                        "Website": "https://www.electis.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Kord.Fi",
-                        "Logline": "Lending and Leveraged Liquidity Baking platform on Tezos.",
-                        "Logo": [{
-                            "url": "/icons/ZgTv_FsqPM9AaFh_y3eTmcX6cTLAdrzwjtITfKtG9iQ.webp"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://kord.fi/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "xU3O8 | Uranium.io",
-                        "Logline": "xU3O8 enables digital ownership and transfer of uranium, supported by Curzon, Archax, with physical uranium stored in Cameco.",
-                        "Logo": [{
-                            "url": "/icons/yqSzgk12cAyVXPwEsJ7qXIIOyuCwFCUGy3Vx7n1P_Vk.png"
-                        }],
-                        "Tags": ["etherlink", "rwa"],
-                        "Status": "active",
-                        "Website": "https://uranium.io"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Sugar Gaming",
-                        "Logline": "A PVP match-3 game built by gaming industry veterans with over 60M downloads in their previous games.",
-                        "Logo": [{
-                            "url": "/icons/KcR2mmU9MtNFbQ5dR4zjsJO8WCGhUtXGTsPeUoEd5Hw.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://www.sugarverse.io/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Bitmark",
-                        "Logline": "Founded and run Feral File",
-                        "Logo": [{
-                            "url": "/icons/676hvgku6zr6SmhLl9NlC1VyJH-56DFTnPO0cUpxNZE.webp"
-                        }],
-                        "Tags": ["nft"],
-                        "Status": "active",
-                        "Website": "https://bitmark.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "PixelPotus",
-                        "Logline": "PixelPotus is a digital collectable competition built on the Tezos blockchain.",
-                        "Logo": [{
-                            "url": "/icons/zaQfKafoy1VYdJTpn5lYjeVQbgMs94guZZteiVciUeY.webp"
-                        }],
-                        "Tags": ["gaming"],
-                        "Status": "active",
-                        "Website": "https://www.pixelpotus.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "WAC Lab",
-                        "Logline": "The Web3 Innovation Lab for the Arts & Culture.",
-                        "Logo": [{
-                            "url": "/icons/S7BocGzh88M_tc4vXTDWmbnUGLf3XHxgvT-3NLXT3Pc.webp"
-                        }],
-                        "Tags": ["education"],
-                        "Status": "active",
-                        "Website": "https://wac-lab.xyz/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Wert",
-                        "Logline": "Payment tools for NFT and DeFi",
-                        "Logo": [{
-                            "url": "/icons/vuii-t_zzuSk_xgBIx7KB1HVuUAnViJmQwbSPbOSmKs.webp"
-                        }],
-                        "Tags": ["defi", "devtools", "nft"],
-                        "Status": "active",
-                        "Website": "https://wert.io"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "akaSwap",
-                        "Logline": "AkaSwap is Asia's first and largest NFT open marketplace on Tezos.",
-                        "Logo": [{
-                            "url": "/icons/2MLqasGh572eJTELcOzgMgI6AYnctyANlnF1R0Dow40.svg"
-                        }],
-                        "Tags": ["nft"],
-                        "Status": "active",
-                        "Website": "https://akaswap.com/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Tezos Packaging",
-                        "Logline": "Various forms of Tezos software distribution for Linux and macOS.",
-                        "Logo": [{
-                            "url": "/icons/7mE8CPCEk3tWsmoOFy9X4QJZuJdGCn3P_7vnFA9Hp-Y.webp"
-                        }],
-                        "Tags": ["baking"],
-                        "Status": "active",
-                        "Website": "https://github.com/serokell/tezos-packaging"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Smartlink",
-                        "Logline": "Smartlink is developing a sustainable ecosystem of decentralized escrow applications for Web3",
-                        "Logo": [{
-                            "url": "/icons/eyGQmVLCS7kGwJ5DxYVkkm-qt_p_WEegLzxeb6aijKs.webp"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://www.smartlink.so/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Skurpy",
-                        "Logline": "Skurpy is a social media & NFT marketplace built on Tezos – post, chat, buy & sell all in one place.",
-                        "Logo": [{
-                            "url": "/icons/lsoZ9tJ7OS-oaEMap-djGFBLMUNV1WdfoSstbkdjLm4.jpg"
-                        }],
-                        "Tags": ["nft"],
-                        "Status": "active",
-                        "Website": "https://skurpy.com"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TzVote",
-                        "Logline": "This application proposes different voting templates to support election diversity.",
-                        "Logo": [{
-                            "url": "/icons/jY0vnFtFa7mbCVPW3qJ66xhoq1cMfDoVa01BlNTGOIM.webp"
-                        }],
-                        "Tags": ["community", "devtools"],
-                        "Status": "active",
-                        "Website": "https://tzvote.marigold.dev"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "ArtMeta",
-                        "Logline": "Bringing digital art into the world",
-                        "Logo": [{
-                            "url": "/icons/pAnMSOHse0oV3WYF-RCEQEdXKdTvVI-viLiMIKrF_Hg.svg"
-                        }],
-                        "Tags": ["community"],
-                        "Status": "active",
-                        "Website": "https://www.artmeta.org/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "Tether-USDT",
-                        "Logline": "Tether's asset-backed stablecoin available natively on Tezos",
-                        "Logo": [{
-                            "url": "/icons/tZ6j9EK3Pt9zljHVKJuwLf0qlWtzr_Nv-XX0AhWRhdo.svg"
-                        }],
-                        "Tags": ["stablecoins"],
-                        "Status": "active",
-                        "Website": "https://tether.to/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "TezFin",
-                        "Logline": "A decentralized lending protocol enabling users to easily and borrow tokens like XTZ",
-                        "Logo": [{
-                            "url": "/icons/Li1LxZbdPgVEWmct-L2uQ3P0FOapuCzHNyl0jdwegMU.svg"
-                        }],
-                        "Tags": ["defi"],
-                        "Status": "active",
-                        "Website": "https://tezos.finance/"
-                    }
-                },
-                {
-                    "fields": {
-                        "Project": "XP.NETWORK",
-                        "Logline": "Multi-Chain NFT Bridge",
-                        "Logo": [{
-                            "url": "/icons/VtwB8zEJw4BNJq1vkiZs-HmrPdYDJtex9X3UmNNDR0Q.svg"
-                        }],
-                        "Tags": ["nft", "devtools"],
-                        "Status": "active",
-                        "Website": "https://bridge.xp.network"
-                    }
-                },
-                {
-                "fields": {
-                    "Project": "Hanji",
-                    "Logline": "An on-chain orderbook exchange",
-                    "Website": "https://hanji.io/",
-                    "Tags": ["defi"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://hanji.io/favicon.ico" }]
-                }
-            },
-			{
-                "fields": {
-                    "Project": "Superlend",
-                    "Logline": "Lending and borrowing infrastructure for onchain finance",
-                    "Website": "https://www.superlend.xyz/",
-                    "Tags": ["defi"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://cdn.prod.website-files.com/66b4b895de74b3850215d606/66b4bf621d6b1197c6f7e210_faviconsuperlend.png" }]
-                }
-            },
-			{
-                "fields": {
-                    "Project": "IguanaDEX",
-                    "Logline": "Etherlink DEX",
-                    "Website": "https://www.iguanadex.com/",
-                    "Tags": ["defi"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://raw.githubusercontent.com/IguanaDEX/assets/main/iguana_brand_assets/icon.webp" }]
-                }
-            },
-			{
-                "fields": {
-                    "Project": "Stacy.fi",
-                    "Logline": "Staking platform which allows users to earn staking rewards on Tezos while maintaining full liquidity of their funds, by holding stXTZ tokens",
-                    "Website": "https://stacy.fi/",
-                    "Tags": ["defi"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://stacy.fi/stxtz-logo.svg" }]
-                }
-            },
-			{
-                "fields": {
-                    "Project": "Reaper Actual",
-                    "Logline": "Reaper Actual is an upcoming AAA open-world persistent shooter being developed by veterans from the shooter and MMO genres, leveraging the Etherlink blockchain to enable player ownership and trading of in-game assets",
-                    "Website": "https://reaperactual.com/",
-                    "Tags": ["gaming"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://reaperactual.com/favicon.ico" }]
-                }
-            },
-			{
-                "fields": {
-                    "Project": "Appleville",
-                    "Logline": "An onchain farm on Etherlink",
-                    "Website": "https://app.appleville.xyz/",
-                    "Tags": ["gaming"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://app.appleville.xyz/favicon.ico" }]
-                }
-            },
-			{
-                "fields": {
-                    "Project": "bootloader.art",
-                    "Logline": "An open-source experimental on-chain long-form generative art platform built on Tezos",
-                    "Website": "https://bootloader.art/",
-                    "Tags": ["nft"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://bootloader.art/favicon.ico" }]
-                }
-            },
-			{
-                "fields": {
-                    "Project": "TEZEX",
-                    "Logline": "TEZEX (Tezos Exchange) is a decentralized, open-source initiative developed by StableTech, a consortium of key entities within the Tezos ecosystem committed to enhancing and expanding open decentralized finance (DeFi) on Tezos.",
-                    "Website": "https://tezex.io/",
-                    "Tags": ["defi"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://tezex.io/assets/favicon.ico" }]
-                }
-            },
-			{
-                "fields": {
-                    "Project": "StableTez",
-                    "Logline": "StableTez is an effort by Tezos community members, services partners, and financial-backers of the project to provide Tezos-on-chain stable assets for financial instruments and for economically-efficient Tezos-token trading.",
-                    "Website": "https://stabletez.com/",
-                    "Tags": ["defi"],
-                    "Status": "active",
-                    "Logo": [{ "url": "https://stabletez.com/favicon.ico" }]
-                }
+    "ecosystem": [{
+            "fields": {
+                "Project": "Kolibri",
+                "Logline": "Kolibri is an algorithmic stablecoin built on the Tezos blockchain by Hover Labs.",
+                "Logo": [{
+                        "url": "/icons/ksHUBcj2Vbm7VK3kKww54uh0pI-CbJre-tGUHWrZ6Gg.svg"
+                    }
+                ],
+                "Tags": ["stablecoins"],
+                "Status": "active",
+                "Website": "https://kolibri.finance/"
             }
-            ],
-            "tagsCount": {
-                "stablecoins": 4,
-                "gaming": 13,
-                "defi": 16,
-                "community": 13,
-                "nft": 17,
-                "devtools": 13,
-                "baking": 5,
-                "did": 4,
-                "partner": 1,
-                "blockexplorers": 3,
-                "etherlink": 1,
-                "rwa": 1,
-                "education": 1
+        }, {
+            "fields": {
+                "Project": "BattleTabs",
+                "Logline": "Play an innovative take on battleships with your friends",
+                "Logo": [{
+                        "url": "/icons/i97BfWiobjPcUM_9pWdPmvV0MhxKW1PxZjr7ez0kgRE.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://battletabs.com/"
             }
+        }, {
+            "fields": {
+                "Project": "Crunchy",
+                "Logline": "Crunchy provides DeFi services and solutions on Tezos to projects",
+                "Logo": [{
+                        "url": "/icons/iHwM3AiY9nJiGyzkjDSzlqJEiCRMiQM5GrDXbR2KZpA.webp"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://crunchy.network/"
+            }
+        }, {
+            "fields": {
+                "Project": "Here & Now",
+                "Logline": "Founded by Michael Beets, Here & Now creates artistic immersive experiences and live films.",
+                "Logo": [{
+                        "url": "/icons/0zqIlFRvurHctV17RWc35_c9tEZwc7t8CFh3rhyMpFc.webp"
+                    }
+                ],
+                "Tags": ["community"],
+                "Status": "active",
+                "Website": "https://hereandnow.events/"
+            }
+        }, {
+            "fields": {
+                "Project": "PiXL",
+                "Logline": "PiXL is the first evolving NFT play-to-earn RPG game. It's a love letter to Tezos - the technology, the artists, the community and the planet.",
+                "Logo": [{
+                        "url": "/icons/sZRkjI5M17Z-lVSuYN7UPonts1KiVsVFjr7J7Dapy7g.webp"
+                    }
+                ],
+                "Tags": ["gaming", "nft", "community"],
+                "Status": "active",
+                "Website": "https://pixl.xyz/"
+            }
+        }, {
+            "fields": {
+                "Project": "SmartPy",
+                "Logline": "The SmartPy language is available through a Python library for building and analyzing Tezos smart contracts.",
+                "Logo": [{
+                        "url": "/icons/IDbJipScJIdePBRa-hHv1yjCsPOvuVTuhyz7bfKk-vU.svg"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://smartpy.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "TzStamp",
+                "Logline": "Trusted timestamping on the Tezos blockchain.",
+                "Logo": [{
+                        "url": "/icons/jwskAKh5dir9oJ2HyRI8TqwbzTpT1n9aYgLR9PFY28U.webp"
+                    }
+                ],
+                "Tags": ["community"],
+                "Status": "active",
+                "Website": "https://tzstamp.io"
+            }
+        }, {
+            "fields": {
+                "Project": "Plenty",
+                "Logline": "A decentralized exchange and cross chain bridge that offers a seamless user experience.",
+                "Logo": [{
+                        "url": "/icons/2qLPKzLuoaqSTYNwS-CBe08pH2V5bhwLvpGQD_ApBZI.webp"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://app.plenty.network/swap?from=XTZ&to="
+            }
+        }, {
+            "fields": {
+                "Project": "uUSD",
+                "Logline": "A USD-pegged stable token on the Youves marketplace.",
+                "Logo": [{
+                        "url": "/icons/yZtB6Caaf6eR83lBZRvodSwNji0gsFXdWhc9Pt-eHTo.svg"
+                    }
+                ],
+                "Tags": ["stablecoins"],
+                "Status": "active",
+                "Website": "https://youves.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "TheVerseVerse",
+                "Logline": "theVERSEverse is a poetry NFT gallery where poem = work of art.",
+                "Logo": [{
+                        "url": "/icons/xhCrnKDmAo5NxvhbxfDEYn0DuOmWn0oBIXymn8ppUBo.webp"
+                    }
+                ],
+                "Tags": ["nft", "community"],
+                "Status": "active",
+                "Website": "https://theverseverse.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "Battlerise",
+                "Logline": "An innovative rogue-like RPG with NFT characters and items",
+                "Logo": [{
+                        "url": "/icons/OW6A1FQJml7YlKuI8ySKSWiUJ7IvQBuudWb9umY-Jro.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://www.battlerise.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "CryptoNoises",
+                "Logline": "CryptoNoises Bot for Discord and Telegram analyzes Tezos Blockchain and informs you about your activity and activity of other users",
+                "Logo": [{
+                        "url": "/icons/DZ0XTT1A9pzBXWzetZrcUUX9WQq1ViZSvDLUgJMZOhU.webp"
+                    }
+                ],
+                "Tags": ["nft"],
+                "Status": "active",
+                "Website": "https://cryptonoises.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "Acurast",
+                "Logline": "The Universe in Web3 - Data Delivered on Demand",
+                "Logo": [{
+                        "url": "/icons/MJgL4O4lqeArmwP_2x368Ai533MvSQa6L7AHXuTgydk.svg"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://acurast.com"
+            }
+        }, {
+            "fields": {
+                "Project": "TrackMind",
+                "Logline": "AI-based racing simulator with NFT rewards.",
+                "Logo": [{
+                        "url": "/icons/FIs0a3b5NAmvXBy2AsABjLiU8RF2ebomaY4wshYdEpA.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://trackmind.tech"
+            }
+        }, {
+            "fields": {
+                "Project": "Objkt.com",
+                "Logline": "Objkt.com is a massive NFT marketplace showcasing NFTs from across the Tezos ecosystem.",
+                "Logo": [{
+                        "url": "/icons/O6NtdB015MCq5J0Wf8lVnzavM6FhjWzHxiEamf9Yn6E.svg"
+                    }
+                ],
+                "Tags": ["nft"],
+                "Status": "active",
+                "Website": "https://objkt.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "Youves",
+                "Logline": "A tool on Tezos for asset creation and management.",
+                "Logo": [{
+                        "url": "/icons/g4kRbenrQ8ro3wRw5kZPyMgMgWMtYaRoWJEKIPmz03I.svg"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://youves.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "Cricket Stars",
+                "Logline": "Cricket strategy game with a strong grassroots community",
+                "Logo": [{
+                        "url": "/icons/88U5FXynh_3V9xVlQJxiyqnVQpF-h8k65aHd3X4z_WQ.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://play.google.com/store/apps/details?id=com.golivegames.cricketstar"
+            }
+        }, {
+            "fields": {
+                "Project": "ANAVER.SE",
+                "Logline": "The anaverse is an open context to load and display generative NFTs minted on platforms such as fx(hash)",
+                "Logo": [{
+                        "url": "/icons/DPbcbMeqYxHfznIpd1ze8e1Go0qVxBSU8A1jTmEwPEk.svg"
+                    }
+                ],
+                "Tags": ["nft"],
+                "Status": "active",
+                "Website": "https://anaver.se/"
+            }
+        }, {
+            "fields": {
+                "Project": "UnicornDAO",
+                "Logline": "Unicorn DAO empowers women and LGBTQ+ individuals by harnessing web3's potential for a more diverse community and collecting their art.",
+                "Logo": [{
+                        "url": "/icons/qH7CNTwOXsbK44bXOEsj_iZzJ3nOUcVstg8A-j0HfjI.webp"
+                    }
+                ],
+                "Tags": ["community", "nft"],
+                "Status": "active",
+                "Website": "https://unicorndao.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "TezGov",
+                "Logline": "A Tezos proposal governance and baker tools swiss army knife.",
+                "Logo": [{
+                        "url": "/icons/iRZVUhnGG4FikCp3bcFOiFEyPjBUvI3rSLo6Mcwhl_Q.webp"
+                    }
+                ],
+                "Tags": ["baking", "community"],
+                "Status": "active",
+                "Website": "https://docs.tez.capital/tezgov/"
+            }
+        }, {
+            "fields": {
+                "Project": "Stables",
+                "Logline": "Get ready to saddle up and race into the Web3. #OwnPlayThrill with your digital horse.",
+                "Logo": [{
+                        "url": "/icons/cdJDd-zZvsZcRoHSTLk_hkk99Z7kdR-5WJYI08-nJds.jpg"
+                    }
+                ],
+                "Tags": ["community", "nft", "gaming"],
+                "Status": "active",
+                "Website": "https://www.playstables.io"
+            }
+        }, {
+            "fields": {
+                "Project": "USDTZ",
+                "Logline": "Liquidity for Tezos Trading: scalable, on-chain, programmable",
+                "Logo": [{
+                        "url": "/icons/sgpwTQotJEw_alQA79wmtq5O2hFVlPHDEX4p6_rQlDA.webp"
+                    }
+                ],
+                "Tags": ["stablecoins"],
+                "Status": "active",
+                "Website": "https://usdtz.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "DipDup",
+                "Logline": "DipDup is a modular indexing framework for creating powerful dapp-specific APIs.",
+                "Logo": [{
+                        "url": "/icons/IBogluB6xsPH5UJ4W7Ho3vWN9Fm7t6PQr0KVmAAK3uc.webp"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://dipdup.io"
+            }
+        }, {
+            "fields": {
+                "Project": "Infinity Wallet",
+                "Logline": "The best all-in-one non-custodial wallet for cross-border payments, access to DeFi, and web3 browser to access the world of Web3 and DApps.",
+                "Logo": [{
+                        "url": "/icons/2MRLfQRl7nkXuP6D5OiXBT1WAGSmr5NRUNCzD1v1vJA.svg"
+                    }
+                ],
+                "Tags": ["defi", "nft"],
+                "Status": "active",
+                "Website": "https://infinitywallet.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "Altme",
+                "Logline": "Altme is a robust decentralized identity (DID) solution.",
+                "Logo": [{
+                        "url": "/icons/ZA_NOFhVKx7BsET4RngNQ7LKo1Wz3WptWE8JWZrXX8o.webp"
+                    }
+                ],
+                "Tags": ["did"],
+                "Status": "active",
+                "Website": "https://altme.io"
+            }
+        }, {
+            "fields": {
+                "Project": "Datadog",
+                "Logline": "Provides the observability service for Tezos CI, providing monitoring of servers through their SaaS-based data analytics platform",
+                "Logo": [{
+                        "url": "/icons/KpJ5r9Am8iG2yC-1Z1NfKatMuyPAOsoWaSqlPCRkRFY.png"
+                    }
+                ],
+                "Tags": ["partner"],
+                "Status": "active",
+                "Website": "https://www.datadoghq.com"
+            }
+        }, {
+            "fields": {
+                "Project": "MatterDeFi",
+                "Logline": "Sustainable yield farming via automatic buyback-and-burn.",
+                "Logo": [{
+                        "url": "/icons/r-jgljYoCBtOBpVOo4Igqrk-5jeIvEY8T9Yk9zaoe_U.webp"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://matterdefi.xyz/"
+            }
+        }, {
+            "fields": {
+                "Project": "Dogamí",
+                "Logline": "Into the Petaverse! Adopt. Raise. Earn.",
+                "Logo": [{
+                        "url": "/icons/1ptHgtZIyk68MCFlDa0UEwbIpUOTGy3r1EJmUUStbRM.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://dogami.com"
+            }
+        }, {
+            "fields": {
+                "Project": "TzKT",
+                "Logline": "Tezos blockchain explorer and API with high data detalization",
+                "Logo": [{
+                        "url": "/icons/PP8aRd6QVuqk8ASfqxFBexkng8qHEbLYta73KLPJFAg.svg"
+                    }
+                ],
+                "Tags": ["blockexplorers"],
+                "Status": "active",
+                "Website": "https://tzkt.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "Kiln",
+                "Logline": "Kiln is an application for baking on Tezos.",
+                "Logo": [{
+                        "url": "/icons/cM3LLfmZfpJXI971IqACmKZwDtZGHAiqBlapZWMmISY.svg"
+                    }
+                ],
+                "Tags": ["baking"],
+                "Status": "active",
+                "Website": "https://tezos-kiln.net"
+            }
+        }, {
+            "fields": {
+                "Project": "Tezos Domains",
+                "Logline": "Tezos Domains allows you to associate domain names like alice.tez with Tezos addresses and other information.",
+                "Logo": [{
+                        "url": "/icons/yFvACHCcSFhpwDccmYvIfV1XtDdAltEcm9JGDFoHgvA.webp"
+                    }
+                ],
+                "Tags": ["did"],
+                "Status": "active",
+                "Website": "https://tezos.domains/"
+            }
+        }, {
+            "fields": {
+                "Project": "Billy",
+                "Logline": "The web3 event platform to grow and engage your communities.",
+                "Logo": [{
+                        "url": "/icons/sFIiTAl1yI7ekKhbYXPMwXG2iWqJVk3zBPhEyijBEmQ.webp"
+                    }
+                ],
+                "Tags": ["community"],
+                "Status": "active",
+                "Website": "https://www.billyapp.live/"
+            }
+        }, {
+            "fields": {
+                "Project": "QuipuSwap",
+                "Logline": "QuipuSwap is an open-source AMM protocol that provides an interface for the seamless exchange of Tezos tokens.",
+                "Logo": [{
+                        "url": "/icons/NffuRxqChUInZaA321sS3mAMI0wxVSMR13zIbqfdiSQ.svg"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://quipuswap.com/swap"
+            }
+        }, {
+            "fields": {
+                "Project": "TzFlow",
+                "Logline": "This app displays the live Tezos mempool contents and its history as seen in a single representative node.",
+                "Logo": [{
+                        "url": "/icons/vxyVYjImKU7lSDKlhneiFILGQ7Tfzcg3Pj00EWkjWhs.webp"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://tzflow.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "Tezos Unity SDK",
+                "Logline": "Quick & easy SDK for integrating Unity games with Tezos.",
+                "Logo": [{
+                        "url": "/icons/mjcNIkI6m4D2BPsI4K-QER9th5eKAEHDETMtOr7gi3g.webp"
+                    }
+                ],
+                "Tags": ["devtools", "gaming"],
+                "Status": "active",
+                "Website": "https://tezos.com/unity"
+            }
+        }, {
+            "fields": {
+                "Project": "TezBake",
+                "Logline": "A Tezos baking tool for both novices and pros.",
+                "Logo": [{
+                        "url": "/icons/5wDlaSDgB4zYOCm3UyTV9oqNorNEgo9U3fidQZZuoLw.webp"
+                    }
+                ],
+                "Tags": ["baking"],
+                "Status": "active",
+                "Website": "https://docs.tez.capital/tezbake/"
+            }
+        }, {
+            "fields": {
+                "Project": "PyTezos",
+                "Logline": "Python SDK for Tezos. Micheline REPL and integration testing engine.",
+                "Logo": [{
+                        "url": "/icons/2YKn_RlYRBUh7sGOy-R7RLt02WYQ5bWMGv6oELk7qX0.webp"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://pytezos.org"
+            }
+        }, {
+            "fields": {
+                "Project": "Gravity",
+                "Logline": "Gravity empowers individuals, organizations and international NGOs to create trusted digital identities that are private, portable, and persistent.",
+                "Logo": [{
+                        "url": "/icons/hgED1D5BlTShULYcGkdUgykwt7jhjv6D6bazfAnbjd8.webp"
+                    }
+                ],
+                "Tags": ["did"],
+                "Status": "active",
+                "Website": "https://www.gravity.earth/"
+            }
+        }, {
+            "fields": {
+                "Project": "Taquito",
+                "Logline": "A TypeScript library suite for development on the Tezos blockchain.",
+                "Logo": [{
+                        "url": "/icons/cmmQJ_5pVjwXpmIswRr9hqiDxNCvpMf5KfdQ7kvvVcg.webp"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://tezostaquito.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "TezPay",
+                "Logline": "A Tezos baking payment tool for both novices and pros.",
+                "Logo": [{
+                        "url": "/icons/Jlzs6t9R2jZWU5YnFeBm7NRmzoUbRgbehPIOiO-CdSU.webp"
+                    }
+                ],
+                "Tags": ["baking"],
+                "Status": "active",
+                "Website": "https://docs.tez.capital/tezpay/"
+            }
+        }, {
+            "fields": {
+                "Project": "LigoLang",
+                "Logline": "LIGO is a statically typed high-level smart-contract language that compiles down to Michelson.",
+                "Logo": [{
+                        "url": "/icons/AVKBsv89pk4RMUo-v5scMgA5AUxJ8QlgpL9i5NMthV8.svg"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://ligolang.org/"
+            }
+        }, {
+            "fields": {
+                "Project": "CTez",
+                "Logline": "Ctez is a collateralized version of tez allowing you to use Tezos DeFi and delegate your tez simultaneously.",
+                "Logo": [{
+                        "url": "/icons/tbVwS4mNKXo-VPp65TW1HB3VdHjU05nHxR14KZFxsbU.svg"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://ctez.app/"
+            }
+        }, {
+            "fields": {
+                "Project": "TezID",
+                "Logline": "TezID is an identity oracle for Tezos.",
+                "Logo": [{
+                        "url": "/icons/rg86bPkFhCIZzxiTFxzlxydqPiuOB3nQqPMwZ0Vb_YQ.svg"
+                    }
+                ],
+                "Tags": ["did"],
+                "Status": "active",
+                "Website": "https://tezid.net/"
+            }
+        }, {
+            "fields": {
+                "Project": "The Stack Report",
+                "Logline": "Data-driven reporting from within the Tezos ecosystem.",
+                "Logo": [{
+                        "url": "/icons/IRAmLsUvuVfIZ6w8_u1Q6G3yuL1WS-iF-VASjBsHvAY.webp"
+                    }
+                ],
+                "Tags": ["community", "blockexplorers"],
+                "Status": "active",
+                "Website": "https://thestackreport.xyz"
+            }
+        }, {
+            "fields": {
+                "Project": "Teia",
+                "Logline": "Teia is a community managed NFT marketplace on Tezos",
+                "Logo": [{
+                        "url": "/icons/1t5bWbo6HEelMfVSs1vPtNt_DsNMzbZFrQnnKudxqW4.webp"
+                    }
+                ],
+                "Tags": ["nft", "community"],
+                "Status": "active",
+                "Website": "https://teia.art/"
+            }
+        }, {
+            "fields": {
+                "Project": "Tezotopia",
+                "Logline": "Claim land and produce tokenized resources in this Blockchain Space Adventure. Tezotopia is an NFT game that allows you to become king or conqueror.",
+                "Logo": [{
+                        "url": "/icons/goinuqctKysELYt4JjYDND-K-aw2sI3GKHS3CNKyQbE.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://tezotop.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "Objkt.one",
+                "Logline": "A curated platform run by Objkt focused on curated 1/1 artworks by artists from across the globe.",
+                "Logo": [{
+                        "url": "/icons/4vCV7su6oj-KjctZSwRlZJqfmb-Et8fTJlpCdlVsbF4.svg"
+                    }
+                ],
+                "Tags": ["nft"],
+                "Status": "active",
+                "Website": "https://objkt.one/"
+            }
+        }, {
+            "fields": {
+                "Project": "Better Call Dev",
+                "Logline": "Tezos Smart Contract Explorer by Baking Bad with cross-network search and interaction engines.",
+                "Logo": [{
+                        "url": "/icons/JxtRiMuDMfuCWhS052XvrtURiOugj4Q4QDtU35oa4wo.webp"
+                    }
+                ],
+                "Tags": ["blockexplorers"],
+                "Status": "active",
+                "Website": "https://better-call.dev/"
+            }
+        }, {
+            "fields": {
+                "Project": "Emergent Properties",
+                "Logline": "Generative+AI art platform and marketplace.",
+                "Logo": [{
+                        "url": "/icons/ly9skeAVmlPpStilJUvLWlQrHl2Ijoo4ysLaI4WBwiY.webp"
+                    }
+                ],
+                "Tags": ["nft"],
+                "Status": "active",
+                "Website": "https://emprops.ai/"
+            }
+        }, {
+            "fields": {
+                "Project": "Liquidity Baking (Sirius Token)",
+                "Logline": "A liquidity pair-based token on Tezos.",
+                "Logo": [{
+                        "url": "/icons/2bbTvSdPuq-ZaHHmfO0DFd2_dz0e_KzIw5HxkLNyD20.webp"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://siriustoken.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "Yupana Finance",
+                "Logline": "The open-source and non-custodial lending protocol on Tezos.",
+                "Logo": [{
+                        "url": "/icons/yupana.webp"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://yupana.finance/"
+            }
+        }, {
+            "fields": {
+                "Project": "Tweed",
+                "Logline": "Create frictionless Web3 Experiences & onboard the world with self-custodial Wallets as a Service and NFT Checkout.",
+                "Logo": [{
+                        "url": "/icons/d7-9fJMUhHPaT5u2CnUzIQOhYm__oJiHCTv80A7WtII.webp"
+                    }
+                ],
+                "Tags": ["defi", "nft", "gaming"],
+                "Status": "active",
+                "Website": "https://paytweed.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "Auto Hero",
+                "Logline": "A thrilling side-scroller & 2D platform battle shooter",
+                "Logo": [{
+                        "url": "/icons/xaFW_qbii7oOtgsVMzUI5-yMAVJAxr7rL7nA1XQJgR0.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://play.google.com/store/apps/details?id=com.anglesgames.auto.shoot.hero&hl=en_US"
+            }
+        }, {
+            "fields": {
+                "Project": "Beacon",
+                "Logline": "Connecting Tezos dApps with wallets.",
+                "Logo": [{
+                        "url": "/icons/rMlWAA6WznkhzJasyqzYaDGTqdk2pSequwRwlGKoaBY.svg"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://walletbeacon.io"
+            }
+        }, {
+            "fields": {
+                "Project": "GetBlock",
+                "Logline": "Blockchain RPC Provider. Simple and reliable API access to Tezos Blockchain",
+                "Logo": [{
+                        "url": "/icons/dMfrwvcSq5Z_m-sM8zRZf-90SHMljmzw6tb5_Y69cSk.webp"
+                    }
+                ],
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Website": "https://getblock.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "3Route",
+                "Logline": "3Route is a next generation DEXes aggregator that facilitates cost-efficient on-chain transactions across various DEXes in Tezos ecosystem.",
+                "Logo": [{
+                        "url": "/icons/wD6enQfzBnb_JF_DTm6WbWBfVYOb44cS1FQO4uInI0A.svg"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://3route.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "SpicySwap",
+                "Logline": "Next-generation DEX built on Tezos.",
+                "Logo": [{
+                        "url": "/icons/A180hRr15ys6H6CQ8D7cbagIqDUOsdGuSle0Vg6tvFk.webp"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://spicyswap.xyz/#/"
+            }
+        }, {
+            "fields": {
+                "Project": "Electis",
+                "Logline": "ELECTIS is a non-governmental organization based on the following principles: non-profit, open-source, and politically and philosophically neutral.",
+                "Logo": [{
+                        "url": "/icons/GC3mOfM6DAfIUIHzxrAW0n4qQDNWJ94QGFrOk9idnuQ.svg"
+                    }
+                ],
+                "Tags": ["community"],
+                "Status": "active",
+                "Website": "https://www.electis.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "Kord.Fi",
+                "Logline": "Lending and Leveraged Liquidity Baking platform on Tezos.",
+                "Logo": [{
+                        "url": "/icons/ZgTv_FsqPM9AaFh_y3eTmcX6cTLAdrzwjtITfKtG9iQ.webp"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://kord.fi/"
+            }
+        }, {
+            "fields": {
+                "Project": "xU3O8 | Uranium.io",
+                "Logline": "xU3O8 enables digital ownership and transfer of uranium, supported by Curzon, Archax, with physical uranium stored in Cameco.",
+                "Logo": [{
+                        "url": "/icons/yqSzgk12cAyVXPwEsJ7qXIIOyuCwFCUGy3Vx7n1P_Vk.png"
+                    }
+                ],
+                "Tags": ["etherlink", "rwa"],
+                "Status": "active",
+                "Website": "https://uranium.io"
+            }
+        }, {
+            "fields": {
+                "Project": "Sugar Gaming",
+                "Logline": "A PVP match-3 game built by gaming industry veterans with over 60M downloads in their previous games.",
+                "Logo": [{
+                        "url": "/icons/KcR2mmU9MtNFbQ5dR4zjsJO8WCGhUtXGTsPeUoEd5Hw.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://www.sugarverse.io/"
+            }
+        }, {
+            "fields": {
+                "Project": "Bitmark",
+                "Logline": "Founded and run Feral File",
+                "Logo": [{
+                        "url": "/icons/676hvgku6zr6SmhLl9NlC1VyJH-56DFTnPO0cUpxNZE.webp"
+                    }
+                ],
+                "Tags": ["nft"],
+                "Status": "active",
+                "Website": "https://bitmark.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "PixelPotus",
+                "Logline": "PixelPotus is a digital collectable competition built on the Tezos blockchain.",
+                "Logo": [{
+                        "url": "/icons/zaQfKafoy1VYdJTpn5lYjeVQbgMs94guZZteiVciUeY.webp"
+                    }
+                ],
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Website": "https://www.pixelpotus.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "WAC Lab",
+                "Logline": "The Web3 Innovation Lab for the Arts & Culture.",
+                "Logo": [{
+                        "url": "/icons/S7BocGzh88M_tc4vXTDWmbnUGLf3XHxgvT-3NLXT3Pc.webp"
+                    }
+                ],
+                "Tags": ["education"],
+                "Status": "active",
+                "Website": "https://wac-lab.xyz/"
+            }
+        }, {
+            "fields": {
+                "Project": "Wert",
+                "Logline": "Payment tools for NFT and DeFi",
+                "Logo": [{
+                        "url": "/icons/vuii-t_zzuSk_xgBIx7KB1HVuUAnViJmQwbSPbOSmKs.webp"
+                    }
+                ],
+                "Tags": ["defi", "devtools", "nft"],
+                "Status": "active",
+                "Website": "https://wert.io"
+            }
+        }, {
+            "fields": {
+                "Project": "akaSwap",
+                "Logline": "AkaSwap is Asia's first and largest NFT open marketplace on Tezos.",
+                "Logo": [{
+                        "url": "/icons/2MLqasGh572eJTELcOzgMgI6AYnctyANlnF1R0Dow40.svg"
+                    }
+                ],
+                "Tags": ["nft"],
+                "Status": "active",
+                "Website": "https://akaswap.com/"
+            }
+        }, {
+            "fields": {
+                "Project": "Tezos Packaging",
+                "Logline": "Various forms of Tezos software distribution for Linux and macOS.",
+                "Logo": [{
+                        "url": "/icons/7mE8CPCEk3tWsmoOFy9X4QJZuJdGCn3P_7vnFA9Hp-Y.webp"
+                    }
+                ],
+                "Tags": ["baking"],
+                "Status": "active",
+                "Website": "https://github.com/serokell/tezos-packaging"
+            }
+        }, {
+            "fields": {
+                "Project": "Smartlink",
+                "Logline": "Smartlink is developing a sustainable ecosystem of decentralized escrow applications for Web3",
+                "Logo": [{
+                        "url": "/icons/eyGQmVLCS7kGwJ5DxYVkkm-qt_p_WEegLzxeb6aijKs.webp"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://www.smartlink.so/"
+            }
+        }, {
+            "fields": {
+                "Project": "Skurpy",
+                "Logline": "Skurpy is a social media & NFT marketplace built on Tezos – post, chat, buy & sell all in one place.",
+                "Logo": [{
+                        "url": "/icons/lsoZ9tJ7OS-oaEMap-djGFBLMUNV1WdfoSstbkdjLm4.jpg"
+                    }
+                ],
+                "Tags": ["nft"],
+                "Status": "active",
+                "Website": "https://skurpy.com"
+            }
+        }, {
+            "fields": {
+                "Project": "TzVote",
+                "Logline": "This application proposes different voting templates to support election diversity.",
+                "Logo": [{
+                        "url": "/icons/jY0vnFtFa7mbCVPW3qJ66xhoq1cMfDoVa01BlNTGOIM.webp"
+                    }
+                ],
+                "Tags": ["community", "devtools"],
+                "Status": "active",
+                "Website": "https://tzvote.marigold.dev"
+            }
+        }, {
+            "fields": {
+                "Project": "ArtMeta",
+                "Logline": "Bringing digital art into the world",
+                "Logo": [{
+                        "url": "/icons/pAnMSOHse0oV3WYF-RCEQEdXKdTvVI-viLiMIKrF_Hg.svg"
+                    }
+                ],
+                "Tags": ["community"],
+                "Status": "active",
+                "Website": "https://www.artmeta.org/"
+            }
+        }, {
+            "fields": {
+                "Project": "Tether-USDT",
+                "Logline": "Tether's asset-backed stablecoin available natively on Tezos",
+                "Logo": [{
+                        "url": "/icons/tZ6j9EK3Pt9zljHVKJuwLf0qlWtzr_Nv-XX0AhWRhdo.svg"
+                    }
+                ],
+                "Tags": ["stablecoins"],
+                "Status": "active",
+                "Website": "https://tether.to/"
+            }
+        }, {
+            "fields": {
+                "Project": "TezFin",
+                "Logline": "A decentralized lending protocol enabling users to easily and borrow tokens like XTZ",
+                "Logo": [{
+                        "url": "/icons/Li1LxZbdPgVEWmct-L2uQ3P0FOapuCzHNyl0jdwegMU.svg"
+                    }
+                ],
+                "Tags": ["defi"],
+                "Status": "active",
+                "Website": "https://tezos.finance/"
+            }
+        }, {
+            "fields": {
+                "Project": "XP.NETWORK",
+                "Logline": "Multi-Chain NFT Bridge",
+                "Logo": [{
+                        "url": "/icons/VtwB8zEJw4BNJq1vkiZs-HmrPdYDJtex9X3UmNNDR0Q.svg"
+                    }
+                ],
+                "Tags": ["nft", "devtools"],
+                "Status": "active",
+                "Website": "https://bridge.xp.network"
+            }
+        }, {
+            "fields": {
+                "Project": "Hanji",
+                "Logline": "An on-chain orderbook exchange",
+                "Website": "https://hanji.io/",
+                "Tags": ["defi"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://hanji.io/favicon.ico"
+                    }
+                ]
+            }
+        }, {
+            "fields": {
+                "Project": "Superlend",
+                "Logline": "Lending and borrowing infrastructure for onchain finance",
+                "Website": "https://www.superlend.xyz/",
+                "Tags": ["defi"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://cdn.prod.website-files.com/66b4b895de74b3850215d606/66b4bf621d6b1197c6f7e210_faviconsuperlend.png"
+                    }
+                ]
+            }
+        }, {
+            "fields": {
+                "Project": "IguanaDEX",
+                "Logline": "Etherlink DEX",
+                "Website": "https://www.iguanadex.com/",
+                "Tags": ["defi"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://raw.githubusercontent.com/IguanaDEX/assets/main/iguana_brand_assets/icon.webp"
+                    }
+                ]
+            }
+        }, {
+            "fields": {
+                "Project": "Stacy.fi",
+                "Logline": "Staking platform which allows users to earn staking rewards on Tezos while maintaining full liquidity of their funds, by holding stXTZ tokens",
+                "Website": "https://stacy.fi/",
+                "Tags": ["defi"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://stacy.fi/stxtz-logo.svg"
+                    }
+                ]
+            }
+        }, {
+            "fields": {
+                "Project": "Reaper Actual",
+                "Logline": "Reaper Actual is an upcoming AAA open-world persistent shooter being developed by veterans from the shooter and MMO genres, leveraging the Etherlink blockchain to enable player ownership and trading of in-game assets",
+                "Website": "https://reaperactual.com/",
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://reaperactual.com/favicon.ico"
+                    }
+                ]
+            }
+        }, {
+            "fields": {
+                "Project": "Appleville",
+                "Logline": "An onchain farm on Etherlink",
+                "Website": "https://app.appleville.xyz/",
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://app.appleville.xyz/favicon.ico"
+                    }
+                ]
+            }
+        }, {
+            "fields": {
+                "Project": "bootloader.art",
+                "Logline": "An open-source experimental on-chain long-form generative art platform built on Tezos",
+                "Website": "https://bootloader.art/",
+                "Tags": ["nft"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://bootloader.art/favicon.ico"
+                    }
+                ]
+            }
+        }, {
+            "fields": {
+                "Project": "TEZEX",
+                "Logline": "TEZEX (Tezos Exchange) is a decentralized, open-source initiative developed by StableTech, a consortium of key entities within the Tezos ecosystem committed to enhancing and expanding open decentralized finance (DeFi) on Tezos.",
+                "Website": "https://tezex.io/",
+                "Tags": ["defi"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://tezex.io/assets/favicon.ico"
+                    }
+                ]
+            }
+        }, {
+            "fields": {
+                "Project": "StableTez",
+                "Logline": "StableTez is an effort by Tezos community members, services partners, and financial-backers of the project to provide Tezos-on-chain stable assets for financial instruments and for economically-efficient Tezos-token trading.",
+                "Website": "https://stabletez.com/",
+                "Tags": ["defi"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://stabletez.com/favicon.ico"
+                    }
+                ]
+            }
+        }
+    ],
+    "tagsCount": {
+        "stablecoins": 4,
+        "gaming": 13,
+        "defi": 16,
+        "community": 13,
+        "nft": 17,
+        "devtools": 13,
+        "baking": 5,
+        "did": 4,
+        "partner": 1,
+        "blockexplorers": 3,
+        "etherlink": 1,
+        "rwa": 1,
+        "education": 1
+    }
 }
