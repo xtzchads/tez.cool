@@ -2106,7 +2106,7 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
             chart: {
                 type: 'bubble',
                 polar: true,
-                height: window.innerWidth < 768 ? 500 : 800,
+                height: window.innerWidth < 768 ? 500 : 1000,
                 backgroundColor: 'rgba(0,0,0,0)',
                 events: {
                     load() {
@@ -2247,11 +2247,11 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
     minSize: window.innerWidth < 480 ? 6 : 
              window.innerWidth < 640 ? 8 : 
              window.innerWidth < 768 ? 10 : 
-             window.innerWidth < 1024 ? 12 : 14,
+             window.innerWidth < 1024 ? 12 : 20,
     maxSize: window.innerWidth < 480 ? 12 : 
              window.innerWidth < 640 ? 16 : 
              window.innerWidth < 768 ? 20 : 
-             window.innerWidth < 1024 ? 25 : 30
+             window.innerWidth < 1024 ? 25 : 40
 },
                 pie: {
                     startAngle: 0,
