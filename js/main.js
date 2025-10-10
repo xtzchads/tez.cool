@@ -2163,7 +2163,7 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
                 }
             },
             subtitle: {
-                text: window.innerWidth < 768 ? 'Click to visit websites' : 'Active projects organized by category • Click to visit websites',
+                text: window.innerWidth < 768 ? 'Click to visit websites' : 'Projects organized by category • Click to visit websites',
                 style: { 
                     color: 'rgba(255, 255, 255, 0.7)',
                     fontFamily: '"Monda", Helvetica',
@@ -2452,6 +2452,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
