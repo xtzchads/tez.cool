@@ -10,6 +10,21 @@ let specificProtocolsTVL = 0;
 let stakingSimulator;
 let currentTVLTimeframe = '3y';
 let currentBurnedSupplyTimeframe = 'cumulative';
+const DOMCache = {};
+const MemoCache = new Map();
+
+function cacheDOM(id) {
+    if (!DOMCache[id]) DOMCache[id] = document.getElementById(id);
+    return DOMCache[id];
+}
+
+function memoize(key, fn, duration = 60000) {
+    const cached = MemoCache.get(key);
+    if (cached && Date.now() - cached.time < duration) return cached.value;
+    const value = fn();
+    MemoCache.set(key, { value, time: Date.now() });
+    return value;
+}
 
 function initializeStakingSimulator() {
     stakingSimulator = new StakingSimulator();
@@ -17,27 +32,28 @@ function initializeStakingSimulator() {
 
 class StakingSimulator {
     constructor() {
-        this.xtzInput = null;
-        this.bakerFeeInput = null;
-        this.daysSlider = null;
-        this.daysDisplay = null;
-        this.stakingApyDisplay = null;
-        this.delegationApyDisplay = null;
-        this.stakingRewardsDisplay = null;
-        this.delegationRewardsDisplay = null;
-        this.stakingTotalDisplay = null;
-        this.delegationTotalDisplay = null;
-        
+        this.inputs = {};
+        this.displays = {};
         this.stakingAPY = 0;
         this.delegationAPY = 0;
-        
         this.init();
+    }
+    
+    throttle(fn, delay) {
+        let lastCall = 0;
+        return (...args) => {
+            const now = Date.now();
+            if (now - lastCall >= delay) {
+                lastCall = now;
+                fn(...args);
+            }
+        };
     }
     
     init() {
         setTimeout(() => {
             this.bindElements();
-            if (this.xtzInput && this.daysSlider && this.bakerFeeInput) {
+            if (this.inputs.xtz && this.inputs.days && this.inputs.fee) {
                 this.setupEventListeners();
                 this.updateAPYValues();
                 this.calculateRewards();
@@ -46,199 +62,149 @@ class StakingSimulator {
     }
     
     bindElements() {
-        this.xtzInput = document.getElementById('xtz-amount');
-        this.bakerFeeInput = document.getElementById('baker-fee');
-        this.daysSlider = document.getElementById('days-slider');
-        this.daysDisplay = document.getElementById('days-display');
-        this.stakingApyDisplay = document.getElementById('staking-apy');
-        this.delegationApyDisplay = document.getElementById('delegation-apy');
-        this.stakingRewardsDisplay = document.getElementById('staking-rewards');
-        this.delegationRewardsDisplay = document.getElementById('delegation-rewards');
-        this.stakingTotalDisplay = document.getElementById('staking-total');
-        this.delegationTotalDisplay = document.getElementById('delegation-total');
+        this.inputs = {
+            xtz: cacheDOM('xtz-amount'),
+            fee: cacheDOM('baker-fee'),
+            days: cacheDOM('days-slider')
+        };
+        this.displays = {
+            daysDisplay: cacheDOM('days-display'),
+            stakingApy: cacheDOM('staking-apy'),
+            delegationApy: cacheDOM('delegation-apy'),
+            stakingRewards: cacheDOM('staking-rewards'),
+            delegationRewards: cacheDOM('delegation-rewards'),
+            stakingTotal: cacheDOM('staking-total'),
+            delegationTotal: cacheDOM('delegation-total')
+        };
     }
     
-setupEventListeners() {
-    this.xtzInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/^0+(?=\d)/, '');
-    let inputValue = e.target.value.replace(',', '.');
-    let value = parseFloat(inputValue);
-    
-    if (isNaN(value) || value < 0) {
-        e.target.value = '0';
-    } else if (value > 1000000) {
-        e.target.value = '1000000';
-    } else if (inputValue.includes('.')) {
-        const parts = inputValue.split('.');
-        if (parts[1] && parts[1].length > 6) {
-            e.target.value = parts[0] + '.' + parts[1].substring(0, 6);
-        }
+    setupEventListeners() {
+        const calcThrottled = this.throttle(() => this.calculateRewards(), 100);
+        
+        const handleNum = (e, max, decimals) => {
+            e.target.value = e.target.value.replace(/^0+(?=\d)/, '');
+            let val = parseFloat(e.target.value.replace(',', '.')) || 0;
+            if (val < 0) val = 0;
+            if (val > max) val = max;
+            e.target.value = decimals ? val.toFixed(decimals) : val.toString();
+            calcThrottled();
+        };
+        
+        this.inputs.xtz.addEventListener('input', (e) => handleNum(e, 1000000, 6));
+        this.inputs.fee.addEventListener('input', (e) => handleNum(e, 100, 2));
+        this.inputs.days.addEventListener('input', () => {
+            this.displays.daysDisplay.textContent = this.inputs.days.value;
+            calcThrottled();
+        });
     }
-    this.calculateRewards();
-});
-
-this.bakerFeeInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/^0+(?=\d)/, '');
-    let inputValue = e.target.value.replace(',', '.');
-    let value = parseFloat(inputValue);
-    
-    if (isNaN(value) || value < 0) {
-        e.target.value = '0';
-    } else if (value > 100) {
-        e.target.value = '100';
-    } else if (inputValue.includes('.')) {
-        const parts = inputValue.split('.');
-        if (parts[1] && parts[1].length > 2) {
-            e.target.value = parts[0] + '.' + parts[1].substring(0, 2);
-        }
-    }
-    this.calculateRewards();
-});
-    
-    this.daysSlider.addEventListener('input', () => {
-        this.daysDisplay.textContent = this.daysSlider.value;
-        this.calculateRewards();
-    });
-}
     
     updateAPYValues() {
         try {
-            if (aggregatedDataCache && aggregatedDataCache.homeData && aggregatedDataCache.homeData.stakingData) {
-                const stakingData = aggregatedDataCache.homeData.stakingData;
-                this.stakingAPY = stakingData.stakingApy || 0;
-                this.delegationAPY = stakingData.delegationApy || 0;
-                
-                if (this.stakingApyDisplay) {
-                    this.stakingApyDisplay.textContent = `${this.stakingAPY.toFixed(2)}%`;
-                }
-                if (this.delegationApyDisplay) {
-                    this.delegationApyDisplay.textContent = `${this.delegationAPY.toFixed(2)}%`;
-                }
+            if (aggregatedDataCache?.homeData?.stakingData) {
+                const { stakingApy, delegationApy } = aggregatedDataCache.homeData.stakingData;
+                this.stakingAPY = stakingApy || 0;
+                this.delegationAPY = delegationApy || 0;
+                this.displays.stakingApy.textContent = `${this.stakingAPY.toFixed(2)}%`;
+                this.displays.delegationApy.textContent = `${this.delegationAPY.toFixed(2)}%`;
             }
         } catch (error) {
-            console.error('Error updating APY values:', error);
+            console.error('APY error:', error);
             this.stakingAPY = 10;
             this.delegationAPY = 3.4;
-            if (this.stakingApyDisplay) this.stakingApyDisplay.textContent = '10%';
-            if (this.delegationApyDisplay) this.delegationApyDisplay.textContent = '3.4%';
         }
     }
     
     formatNumber(num) {
-        return new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(num);
+        return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
     }
     
-    calculateCompoundRewards(principal, annualRate, days, bakerFeePercent = 0) {
-    const netAnnualRate = (annualRate / 100) * (1 - bakerFeePercent / 100);
-    const dailyCompoundRate = Math.pow(1 + netAnnualRate, 1/365) - 1;
-    const finalAmount = principal * Math.pow(1 + dailyCompoundRate, days);
-    
-    return finalAmount - principal;
-}
-    
-calculateRewards() {
-    if (!this.xtzInput || !this.daysSlider || !this.bakerFeeInput) return;
-    
-    const principal = parseFloat(this.xtzInput.value) || 0;
-    const days = parseInt(this.daysSlider.value) || 0;
-    const bakerFee = parseFloat(this.bakerFeeInput.value) || 0;
-    
-    if (principal <= 0) {
-        this.updateDisplays(0, 0, 0, 0);
-        return;
+    calculateCompoundRewards(principal, annualRate, days, bakerFee = 0) {
+        const netRate = (annualRate / 100) * (1 - bakerFee / 100);
+        const dailyRate = Math.pow(1 + netRate, 1/365) - 1;
+        return principal * Math.pow(1 + dailyRate, days) - principal;
     }
-    const effectiveStakingAPY = this.stakingAPY * (1 - bakerFee / 100);
-    const effectiveDelegationAPY = this.delegationAPY * (1 - bakerFee / 100);
-    if (this.stakingApyDisplay) {
-        this.stakingApyDisplay.textContent = `${effectiveStakingAPY.toFixed(2)}%`;
-    }
-    if (this.delegationApyDisplay) {
-        this.delegationApyDisplay.textContent = `${effectiveDelegationAPY.toFixed(2)}%`;
-    }
-    const stakingRewards = this.calculateCompoundRewards(principal, this.stakingAPY, days, bakerFee);
-    const delegationRewards = this.calculateCompoundRewards(principal, this.delegationAPY, days, bakerFee);
     
-    const stakingTotal = principal + stakingRewards;
-    const delegationTotal = principal + delegationRewards;
-    
-    this.updateDisplays(stakingRewards, stakingTotal, delegationRewards, delegationTotal);
-}
-    
-    updateDisplays(stakingRewards, stakingTotal, delegationRewards, delegationTotal) {
-        if (this.stakingRewardsDisplay) {
-            this.stakingRewardsDisplay.textContent = `+${this.formatNumber(stakingRewards)} XTZ`;
+    calculateRewards() {
+        if (!this.inputs.xtz) return;
+        const principal = parseFloat(this.inputs.xtz.value) || 0;
+        const days = parseInt(this.inputs.days.value) || 0;
+        const bakerFee = parseFloat(this.inputs.fee.value) || 0;
+        
+        if (principal <= 0) {
+            this.updateDisplays(0, 0, 0, 0);
+            return;
         }
-        if (this.stakingTotalDisplay) {
-            this.stakingTotalDisplay.textContent = `${this.formatNumber(stakingTotal)} XTZ`;
-        }
-        if (this.delegationRewardsDisplay) {
-            this.delegationRewardsDisplay.textContent = `+${this.formatNumber(delegationRewards)} XTZ`;
-        }
-        if (this.delegationTotalDisplay) {
-            this.delegationTotalDisplay.textContent = `${this.formatNumber(delegationTotal)} XTZ`;
-        }
+        
+        const stakingRewards = this.calculateCompoundRewards(principal, this.stakingAPY, days, bakerFee);
+        const delegationRewards = this.calculateCompoundRewards(principal, this.delegationAPY, days, bakerFee);
+        
+        this.updateDisplays(
+            stakingRewards, 
+            principal + stakingRewards, 
+            delegationRewards, 
+            principal + delegationRewards
+        );
     }
     
-    refreshAPYValues() {
-        this.updateAPYValues();
-        this.calculateRewards();
+    updateDisplays(sRewards, sTotal, dRewards, dTotal) {
+        this.displays.stakingRewards.textContent = `+${this.formatNumber(sRewards)} XTZ`;
+        this.displays.stakingTotal.textContent = `${this.formatNumber(sTotal)} XTZ`;
+        this.displays.delegationRewards.textContent = `+${this.formatNumber(dRewards)} XTZ`;
+        this.displays.delegationTotal.textContent = `${this.formatNumber(dTotal)} XTZ`;
     }
 }
 
 class NavigationManager {
     constructor() {
         this.navItems = document.querySelectorAll('.nav-item');
-        this.homeContent = document.getElementById('home-content');
+        this.homeContent = cacheDOM('home-content');
         this.iframeContainers = document.querySelectorAll('.iframe-container');
         this.preloadedIframes = new Set();
         this.currentView = 'home';
         this.savedScrollPosition = 0;
-        
+        this.resizeTimeout = null;
         this.init();
     }
     
     init() {
-        this.navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                const target = item.dataset.target;
-                const url = item.dataset.url;
-                const isExternal = item.dataset.external === 'true';
-                
-                if (isExternal && url) {
-                    window.open(url, '_blank');
-                    return;
-                }
-                
-                if (target && target !== this.currentView) {
-                    this.navigateTo(target, url, item);
-                }
-            });
+        document.addEventListener('click', (e) => {
+            const item = e.target.closest('.nav-item');
+            if (!item) return;
+            const target = item.dataset.target;
+            const url = item.dataset.url;
+            if (item.dataset.external === 'true' && url) {
+                window.open(url, '_blank');
+                return;
+            }
+            if (target && target !== this.currentView) this.navigateTo(target, url, item);
         });
         
         window.addEventListener('resize', () => {
-            if (this.currentView !== 'home') {
-                this.adjustContainerHeight();
-            }
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
+                if (this.currentView !== 'home') this.adjustContainerHeight();
+            }, 200);
         });
         
-        setTimeout(() => {
-            this.preloadIframes();
-        }, 2000);
+        setTimeout(() => this.preloadIframes(), 2000);
     }
     
     preloadIframes() {
         this.navItems.forEach(item => {
             const target = item.dataset.target;
             const url = item.dataset.url;
-            const isExternal = item.dataset.external === 'true';
-            
-            if (url && target !== 'home' && !isExternal && !this.preloadedIframes.has(target)) {
-                this.preloadIframe(target, url);
+            if (url && target !== 'home' && item.dataset.external !== 'true' && !this.preloadedIframes.has(target)) {
+                requestIdleCallback(() => this.preloadIframe(target, url));
             }
         });
+    }
+    
+    preloadIframe(target, url) {
+        const iframe = document.getElementById(`${target}-iframe`);
+        if (!iframe) return;
+        iframe.onload = () => this.preloadedIframes.add(target);
+        iframe.onerror = () => console.warn(`Preload failed: ${target}`);
+        iframe.src = url;
     }
     
     adjustContainerHeight() {
@@ -246,54 +212,28 @@ class NavigationManager {
         if (!mainContainer) return;
         
         if (this.currentView === 'home') {
-            mainContainer.style.height = 'auto';
-            mainContainer.style.minHeight = '100vh';
-            mainContainer.style.maxHeight = 'none';
-            mainContainer.style.overflow = 'auto';
-
+            Object.assign(mainContainer.style, {
+                height: 'auto',
+                minHeight: '100vh',
+                maxHeight: 'none',
+                overflow: 'auto'
+            });
             mainContainer.scrollTop = this.savedScrollPosition;
         } else {
-            const viewportHeight = window.innerHeight;
-            const headerElement = document.querySelector('.header-content');
-            const headerHeight = headerElement.offsetHeight;
-
-            if (this.currentView === 'home') {
-                this.savedScrollPosition = mainContainer.scrollTop;
-            }
-            
-            mainContainer.scrollTop = 0;
-            
-            mainContainer.style.height = `${viewportHeight}px`;
-            mainContainer.style.minHeight = `${viewportHeight}px`;
-            mainContainer.style.maxHeight = `${viewportHeight}px`;
-            mainContainer.style.overflow = 'hidden';
-        }
-    }
-    
-    preloadIframe(target, url) {
-        const iframe = document.getElementById(`${target}-iframe`);
-        if (iframe) {
-            const navItem = document.querySelector(`[data-target="${target}"]`);
-            
-            iframe.onload = () => {
-                this.preloadedIframes.add(target);
-            };
-            
-            iframe.onerror = () => {
-                console.warn(`Failed to preload: ${target}`);
-            };
-            
-            iframe.src = url;
+            const vh = window.innerHeight;
+            Object.assign(mainContainer.style, {
+                height: `${vh}px`,
+                minHeight: `${vh}px`,
+                maxHeight: `${vh}px`,
+                overflow: 'hidden'
+            });
         }
     }
     
     navigateTo(target, url, clickedItem) {
-
         if (this.currentView === 'home' && target !== 'home') {
             const mainContainer = document.querySelector('.container.scrollable-content');
-            if (mainContainer) {
-                this.savedScrollPosition = mainContainer.scrollTop;
-            }
+            if (mainContainer) this.savedScrollPosition = mainContainer.scrollTop;
         }
         
         this.navItems.forEach(item => item.classList.remove('active'));
@@ -301,14 +241,10 @@ class NavigationManager {
         
         if (target === 'home') {
             this.homeContent.classList.remove('hidden');
-            this.iframeContainers.forEach(container => {
-                container.classList.remove('active');
-            });
+            this.iframeContainers.forEach(c => c.classList.remove('active'));
         } else {
             this.homeContent.classList.add('hidden');
-            this.iframeContainers.forEach(container => {
-                container.classList.remove('active');
-            });
+            this.iframeContainers.forEach(c => c.classList.remove('active'));
             
             const targetContainer = document.getElementById(`${target}-container`);
             const targetIframe = document.getElementById(`${target}-iframe`);
@@ -322,15 +258,12 @@ class NavigationManager {
                     };
                     targetIframe.src = url;
                 }
-                
                 targetContainer.classList.add('active');
             }
         }
         
         this.currentView = target;
-        setTimeout(() => {
-            this.adjustContainerHeight();
-        }, 100);
+        setTimeout(() => this.adjustContainerHeight(), 100);
     }
 }
 
@@ -338,152 +271,102 @@ function setupSmartTooltipPositioning() {
     const bakersGrid = document.getElementById('bakers-grid');
     if (!bakersGrid) return;
     
+    let resizeTimeout;
     const updateTooltipPositions = () => {
         const bakerItems = bakersGrid.querySelectorAll('.baker-item');
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const isMobile = viewportWidth <= 640;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const isMobile = vw <= 640;
         
         bakerItems.forEach(item => {
-            const itemRect = item.getBoundingClientRect();
+            const rect = item.getBoundingClientRect();
             const tooltip = item.querySelector('.baker-tooltip');
-            
             if (!tooltip) return;
             
             item.classList.remove('tooltip-left', 'tooltip-right', 'tooltip-top', 'tooltip-bottom');
             tooltip.style.minWidth = '';
             
             if (isMobile) {
-                const spaceAbove = itemRect.top;
-                const spaceBelow = viewportHeight - itemRect.bottom;
-                const tooltipHeight = 150;
-                
-                if (spaceBelow >= tooltipHeight) {
+                const spaceBelow = vh - rect.bottom;
+                const spaceAbove = rect.top;
+                if (spaceBelow >= 150) {
                     item.classList.add('tooltip-bottom');
-                    adjustTooltipWidthForVertical(item, tooltip, viewportWidth);
-                } else if (spaceAbove >= tooltipHeight) {
+                } else if (spaceAbove >= 150) {
                     item.classList.add('tooltip-top');
-                    adjustTooltipWidthForVertical(item, tooltip, viewportWidth);
                 } else {
-                    const spaceOnRight = viewportWidth - itemRect.right;
-                    const tooltipWidth = 240;
-                    
-                    if (spaceOnRight >= tooltipWidth) {
-                        item.classList.add('tooltip-right');
-                        adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, 'right');
-                    } else {
-                        item.classList.add('tooltip-left');
-                        adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, 'left');
-                    }
+                    const spaceRight = vw - rect.right;
+                    item.classList.add(spaceRight >= 240 ? 'tooltip-right' : 'tooltip-left');
                 }
             } else {
-                const spaceOnRight = viewportWidth - itemRect.right;
-                const tooltipWidth = 320;
-                
-                if (spaceOnRight >= tooltipWidth) {
-                    item.classList.add('tooltip-right');
-                    adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, 'right');
-                } else {
-                    item.classList.add('tooltip-left');
-                    adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, 'left');
-                }
+                const spaceRight = vw - rect.right;
+                item.classList.add(spaceRight >= 320 ? 'tooltip-right' : 'tooltip-left');
             }
         });
     };
     
-    function adjustTooltipWidthForHorizontal(item, tooltip, viewportWidth, position) {
-        const itemRect = item.getBoundingClientRect();
-        const tooltipGap = 12;
-        const viewportPadding = 20;
-        
-        let availableWidth;
-        
-        if (position === 'right') {
-            availableWidth = viewportWidth - itemRect.right - tooltipGap - viewportPadding;
-        } else {
-            availableWidth = itemRect.left - tooltipGap - viewportPadding;
-        }
-        const isMobile = viewportWidth <= 640;
-        const defaultMinWidth = isMobile ? 200 : 280;
-        if (availableWidth < defaultMinWidth) {
-            const adjustedWidth = Math.max(180, availableWidth);
-            tooltip.style.minWidth = adjustedWidth + 'px';
-        }
-    }
-    
-    function adjustTooltipWidthForVertical(item, tooltip, viewportWidth) {
-        const itemRect = item.getBoundingClientRect();
-        const viewportPadding = 20;
-        
-        const itemCenter = itemRect.left + (itemRect.width / 2);
-        const maxWidthFromCenter = Math.min(
-            itemCenter - viewportPadding,
-            viewportWidth - itemCenter - viewportPadding 
-        ) * 2;
-        
-        const defaultMinWidth = 250;
-        if (maxWidthFromCenter < defaultMinWidth) {
-            const adjustedWidth = Math.max(180, maxWidthFromCenter);
-            tooltip.style.minWidth = adjustedWidth + 'px';
-        }
-    }
     updateTooltipPositions();
-    window.addEventListener('resize', updateTooltipPositions);
-    const observer = new MutationObserver(updateTooltipPositions);
-    observer.observe(bakersGrid, { childList: true });
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(updateTooltipPositions, 150);
+    });
+    
+    new MutationObserver(updateTooltipPositions).observe(bakersGrid, { childList: true });
 }
 
 function renderBakers(bakers) {
     const bakersGrid = document.getElementById('bakers-grid');
-    
     bakersGrid.innerHTML = '';
     
-    const sortedBakers = bakers
-        .filter(baker => baker.status === 'active')
-        .filter(baker => baker.staking && baker.staking.enabled)
-        .sort((a, b) => {
-            const aEstimatedApy = a.staking.estimatedApy || 0;
-            const bEstimatedApy = b.staking.estimatedApy || 0;
-            return bEstimatedApy - aEstimatedApy;
-        })
+    const sorted = bakers
+        .filter(b => b.status === 'active' && b.staking?.enabled)
+        .sort((a, b) => (b.staking?.estimatedApy || 0) - (a.staking?.estimatedApy || 0))
         .slice(0, 100);
     
-    sortedBakers.forEach(baker => {
-        const bakerElement = createBakerElement(baker);
-        if (bakerElement) { 
-            bakersGrid.appendChild(bakerElement);
-        }
-    });
+    const batchSize = 10;
+    let idx = 0;
     
-    setTimeout(() => {
-        setupSmartTooltipPositioning();
-    }, 100);
+    function renderBatch() {
+        const end = Math.min(idx + batchSize, sorted.length);
+        const frag = document.createDocumentFragment();
+        
+        for (let i = idx; i < end; i++) {
+            const el = createBakerElement(sorted[i]);
+            if (el) frag.appendChild(el);
+        }
+        
+        bakersGrid.appendChild(frag);
+        idx = end;
+        
+        if (idx < sorted.length) {
+            requestAnimationFrame(renderBatch);
+        } else {
+            setupSmartTooltipPositioning();
+        }
+    }
+    
+    renderBatch();
 }
 
 function createBakerElement(baker) {
     const div = document.createElement('div');
     div.className = 'baker-item';
-    const stakingData = baker.staking || {};
-    
-    const apy = stakingData.estimatedApy || 0;
-    const fee = stakingData.fee || 0;
-    const capacity = stakingData.capacity || 0;
-    const freeSpace = stakingData.freeSpace || 0;
-    const usedCapacity = capacity - freeSpace;
-    const capacityPercent = capacity > 0 ? (usedCapacity / capacity) * 100 : 0;
+    const s = baker.staking || {};
+    const apy = s.estimatedApy || 0;
+    const fee = s.fee || 0;
+    const cap = s.capacity || 0;
+    const free = s.freeSpace || 0;
+    const pct = cap > 0 ? ((cap - free) / cap) * 100 : 0;
     
     div.innerHTML = `
         <div class="baker-avatar">
-            <img 
-                src="https://services.tzkt.io/v1/avatars/${escapeHTML(baker.address)}" 
-                alt="${escapeHTML(baker.name)}"
-                onerror="this.style.display='none'" onclick="window.open('https://tzkt.io/${escapeHTML(baker.address)}', '_blank')"
-            />
+            <img src="https://services.tzkt.io/v1/avatars/${escapeHTML(baker.address)}" 
+                 alt="${escapeHTML(baker.name)}" loading="lazy"
+                 onerror="this.style.display='none'" 
+                 onclick="window.open('https://tzkt.io/${escapeHTML(baker.address)}', '_blank')"/>
         </div>
         <div class="baker-tooltip">
-            <div class="baker-name">${escapeHTML(baker.name) || 'Unknown Baker'}</div>
+            <div class="baker-name">${escapeHTML(baker.name) || 'Unknown'}</div>
             <div class="baker-status ${escapeHTML(baker.status)}">${escapeHTML(baker.status)}</div>
-            
             <div class="baker-info">
                 <div class="baker-info-row">
                     <span class="baker-info-label">Staking APY:</span>
@@ -495,22 +378,21 @@ function createBakerElement(baker) {
                 </div>
                 <div class="baker-info-row">
                     <span class="baker-info-label">Capacity:</span>
-                    <span class="baker-info-value">${formatNumber(capacity)} XTZ</span>
+                    <span class="baker-info-value">${formatNumber(cap)} XTZ</span>
                 </div>
                 <div style="margin-top: 8px;">
                     <div class="capacity-bar">
-                        <div class="capacity-fill" style="width: ${Math.min(capacityPercent, 100)}%"></div>
+                        <div class="capacity-fill" style="width: ${Math.min(pct, 100)}%"></div>
                     </div>
-                    <div class="capacity-text">${capacityPercent.toFixed(1)}% filled</div>
+                    <div class="capacity-text">${pct.toFixed(1)}% filled</div>
                 </div>
                 <div class="baker-info-row" style="margin-top: 4px;">
                     <span class="baker-info-label">Available:</span>
-                    <span class="baker-info-value">${formatNumber(freeSpace)} XTZ</span>
+                    <span class="baker-info-value">${formatNumber(free)} XTZ</span>
                 </div>
             </div>
         </div>
     `;
-    
     return div;
 }
 
@@ -524,73 +406,19 @@ function escapeHTML(str) {
 }
 
 function formatNumber(num) {
-    if (num >= 1000000) {
-        return (num / 1000000).toFixed(1) + 'M';
-    } else if (num >= 1000) {
-        return (num / 1000).toFixed(1) + 'K';
-    }
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toFixed(0);
 }
 
 Highcharts.setOptions({
-    chart: {
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    title: {
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    subtitle: {
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    xAxis: {
-        labels: {
-            style: {
-                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-            }
-        },
-        title: {
-            style: {
-                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-            }
-        }
-    },
-    yAxis: {
-        labels: {
-            style: {
-                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-            }
-        },
-        title: {
-            style: {
-                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-            }
-        }
-    },
-    legend: {
-        itemStyle: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    tooltip: {
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    plotoptions: {
-        series: {
-            dataLabels: {
-                style: {
-                    fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-                }
-            }
-        }
-    }
+    chart: { style: { fontFamily: '"Monda", Helvetica, Arial, sans-serif' } },
+    title: { style: { fontFamily: '"Monda", Helvetica, Arial, sans-serif' } },
+    subtitle: { style: { fontFamily: '"Monda", Helvetica, Arial, sans-serif' } },
+    xAxis: { labels: { style: { fontFamily: '"Monda", Helvetica, Arial, sans-serif' } } },
+    yAxis: { labels: { style: { fontFamily: '"Monda", Helvetica, Arial, sans-serif' } } },
+    legend: { itemStyle: { fontFamily: '"Monda", Helvetica, Arial, sans-serif' } },
+    tooltip: { style: { fontFamily: '"Monda", Helvetica, Arial, sans-serif' } }
 });
 
 function computeExtremum(cycle, initialValue, finalValue) {
@@ -1603,6 +1431,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
 }
 
 function updateIssuanceChart(newStakingData) {
+	const data = aggregatedDataCache.historicalCycleData;
     const issuanceChart = Highcharts.charts.find(chart => 
         chart && chart.renderTo && chart.renderTo.id === 'issuanceh'
     );
@@ -2378,7 +2207,6 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
     }
 }
 
-
 function main(ratio) {
     createHistoricalCharts(ratio);
     createDALSupportChart();
@@ -2389,38 +2217,26 @@ function main(ratio) {
     createHistoricalTvlChart();
     createEcosystemChart();
     try {
-        const data = aggregatedDataCache.homeData;
-        const { totalStakedPercentage, totalDelegatedPercentage, stakingApy, delegationApy } = data.stakingData;
-        createPieChart(
-            totalStakedPercentage, 
-            totalDelegatedPercentage, 
-            stakingApy.toFixed(2), 
-            delegationApy.toFixed(2)
-        );
+        const { totalStakedPercentage, totalDelegatedPercentage, stakingApy, delegationApy } = aggregatedDataCache.homeData.stakingData;
+        createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakingApy.toFixed(2), delegationApy.toFixed(2));
     } catch (error) {
-        console.error('Error creating pie chart:', error);
+        console.error('Pie chart error:', error);
     }
-        initializeStakingSimulator();
-
-    if (aggregatedDataCache && aggregatedDataCache.bakers) {
-        renderBakers(aggregatedDataCache.bakers);
-    }
+    initializeStakingSimulator();
+    if (aggregatedDataCache?.bakers) renderBakers(aggregatedDataCache.bakers);
 }
 
-document.addEventListener('DOMContentLoaded', async function() {
-	
+document.addEventListener('DOMContentLoaded', async () => {
     try {
         new NavigationManager();
-
         const ratios = await initializeRatios();
         main(ratios);
         
-        const tvlContainer = document.querySelector('#chart-container9').closest('.chart-with-controls');
+        const tvlContainer = document.querySelector('#chart-container9')?.closest('.chart-with-controls');
         if (tvlContainer) {
-            const tvlButtons = tvlContainer.querySelectorAll('.timeframe-btn');
-            tvlButtons.forEach(btn => {
+            tvlContainer.querySelectorAll('.timeframe-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    tvlButtons.forEach(b => b.classList.remove('active'));
+                    tvlContainer.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     currentTVLTimeframe = this.dataset.timeframe;
                     createHistoricalTvlChart();
@@ -2428,32 +2244,27 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         }
         
-const burnedSupplyContainer = document.querySelector('#chart-container').closest('.chart-with-controls');
-if (burnedSupplyContainer) {
-    const burnedSupplyButtons = burnedSupplyContainer.querySelectorAll('.timeframe-btn');
-    const burnedButtonsContainer = burnedSupplyContainer.querySelector('.chart-timeframe-buttons');
-
-    
-    burnedSupplyButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            burnedSupplyButtons.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            currentBurnedSupplyTimeframe = this.dataset.timeframe;
-            createBurnedSupplyChart();
-        });
-    });
-    
-}
-        
+        const burnedContainer = document.querySelector('#chart-container')?.closest('.chart-with-controls');
+        if (burnedContainer) {
+            burnedContainer.querySelectorAll('.timeframe-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    burnedContainer.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentBurnedSupplyTimeframe = this.dataset.timeframe;
+                    createBurnedSupplyChart();
+                });
+            });
+        }
     } catch (error) {
-        console.error('Error during initialization:', error);
+        console.error('Init error:', error);
     }
-	const overlay = document.getElementById('loadingOverlay');
-	overlay.style.opacity = '0';
-	overlay.style.pointerEvents = 'none';
+    
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+    }
 });
-
-
 
 
 
