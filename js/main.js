@@ -1830,6 +1830,17 @@ async function createEcosystemChart() {
             },
 			{
                 fields: {
+                    Project: "Appleville",
+                    Logline: "An onchain farm on Etherlink",
+                    Website: "https://app.appleville.xyz/",
+                    Tags: ["gaming"],
+                    Status: "active",
+                    IsFeatured: false,
+                    Logo: [{ url: "https://app.appleville.xyz/favicon.ico" }]
+                }
+            },
+			{
+                fields: {
                     Project: "bootloader.art",
                     Logline: "An open-source experimental on-chain long-form generative art platform built on Tezos",
                     Website: "https://bootloader.art/",
@@ -2541,6 +2552,7 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
+
 
 
 
