@@ -1021,6 +1021,19 @@
                     }
                 ]
             }
+        },
+        {
+            "fields": {
+                "Project": "Homebase",
+                "Logline": "Homebase is a web application that enables users to create and manage/use DAOs on the Tezos blockchain",
+                "Website": "https://tezos-homebase.io/",
+                "Tags": ["community"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "https://tezos-homebase.io/favicon.ico"
+                    }
+                ]
+            }
         }
     ],
     "tagsCount": {
