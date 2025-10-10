@@ -975,7 +975,6 @@ function createBurnedSupplyChart() {
             }
         }
         
-        // Format function based on timeframe
         const formatter = isCumulative 
             ? value => `${(value / 1000000).toFixed(2)}M`
             : value => `${(value / 1000).toFixed(2)}K`;
@@ -1763,6 +1762,622 @@ function createTVLChart() {
     }
 }
 
+async function createEcosystemChart() {
+    try {
+        const projects = aggregatedDataCache.ecosystemProjects;
+        
+        if (!projects || projects.length === 0) {
+            console.error('No ecosystem projects data available');
+            document.getElementById('ecosystem-chart-container').innerHTML = 
+                '<div style="color: #ff6961; text-align: center; padding: 50px;">No ecosystem data available</div>';
+            return;
+        }
+		
+		const allProjects = [...projects];
+        
+        const tagMapping = {
+            'defi': 'defi',
+            'etherlink': 'defi',
+            'stablecoins': 'defi',
+			'rwa': 'defi',
+			'did': 'community',
+            'devtools': 'tooling',
+            'baking': 'tooling',
+            'blockexplorers': 'tooling',
+            'education': 'tooling'
+        };
+        
+        const tagColors = {
+            'defi': '#6CDDCA',
+            'gaming': '#C771F3',
+            'nft': '#4D90DB',
+            'community': '#FAB776',
+            'tooling': '#FF6B9D',
+            'did': '#F38181',
+            'rwa': '#FFAAA7'
+        };
+        
+        const tagDisplayNames = {
+            'defi': 'DeFi',
+            'gaming': 'Gaming',
+            'nft': 'NFT',
+            'community': 'Community',
+            'tooling': 'Tooling & Infra',
+            'did': 'DID',
+            'rwa': 'RWA'
+        };
+
+        const projectsByTag = {};
+        const processedProjects = new Set();
+        
+        allProjects.forEach(project => {
+            if (project.fields.Tags && project.fields.Tags.length > 0 && project.fields.Status === 'active') {
+                if (processedProjects.has(project.fields.Project)) {
+                    return;
+                }
+                
+                let mainTag = null;
+                
+                for (const tag of project.fields.Tags) {
+                    if (tag === 'partner') continue;
+                    
+                    mainTag = tagMapping[tag] || tag;
+                    break;
+                }
+                
+                if (mainTag) {
+                    if (!projectsByTag[mainTag]) {
+                        projectsByTag[mainTag] = [];
+                    }
+                    projectsByTag[mainTag].push(project);
+                    processedProjects.add(project.fields.Project);
+                }
+                
+        }});
+        
+        const bubbleData = [];
+        const tags = Object.keys(projectsByTag);
+        const totalAngle = 360;
+        const anglePerTag = totalAngle / tags.length;
+        
+        tags.forEach((tag, tagIndex) => {
+            const tagProjects = projectsByTag[tag];
+            const sectionStartAngle = tagIndex * anglePerTag;
+            const centerAngle = sectionStartAngle + anglePerTag / 2;
+            
+            function getItemsPerRow(rowNum) {
+                const rowRadius = 20 + (rowNum * 10);
+                const circumference = 2 * Math.PI * rowRadius;
+                const sectionCircumference = (circumference * anglePerTag) / 360;
+                const itemSpacing = 9;
+                return Math.max(2, Math.min(6, Math.floor(sectionCircumference / itemSpacing)));
+            }
+            
+            tagProjects.forEach((project, projectIndex) => {
+                let row = 0;
+                let itemsPlaced = 0;
+                let currentRow = 0;
+                
+                while (itemsPlaced + getItemsPerRow(currentRow) <= projectIndex) {
+                    itemsPlaced += getItemsPerRow(currentRow);
+                    currentRow++;
+                }
+                
+                row = currentRow;
+                const col = projectIndex - itemsPlaced;
+                const itemsInThisRow = getItemsPerRow(row);
+                
+                const radius = 20 + (row * 10);
+                
+                const angleStep = anglePerTag / (itemsInThisRow + 1);
+                const angle = sectionStartAngle + angleStep * (col + 1);
+                
+                let bubbleSize = window.innerWidth < 480 ? 20 : (window.innerWidth < 768 ? 28 : 35);
+                
+                let logoUrl = null;
+                if (project.fields.Logo && project.fields.Logo.length > 0) {
+					const url = project.fields.Logo[0].url;
+                    logoUrl = url.startsWith('http://')||url.startsWith('https://')?url:window.location.origin+url;
+                }
+                
+                bubbleData.push({
+                    name: project.fields.Project,
+                    x: angle,
+                    y: radius,
+                    z: bubbleSize,
+                    color: tagColors[tag] || '#999999',
+                    custom: {
+                        tag: tag,
+                        displayTag: tagDisplayNames[tag] || tag,
+                        logline: project.fields.Logline || '',
+                        website: project.fields.Website || '',
+                        tags: project.fields.Tags || [],
+                        featured: project.fields.IsFeatured || false,
+                        logoUrl: logoUrl
+                    }
+                });
+            });
+        });
+        
+        const pieData = tags.map((tag, index) => ({
+            y: 1,
+            color: tagColors[tag] || '#999999',
+            name: tagDisplayNames[tag] || tag,
+            custom: {
+                tag: tag,
+                displayTag: tagDisplayNames[tag] || tag,
+                count: projectsByTag[tag].length
+            }
+        }));
+		
+
+        function renderCustomLogos(chart) {
+            const bubbleSeries = chart.series[0];
+            
+            if (chart.customLogoGroups) {
+                chart.customLogoGroups.forEach(group => group.destroy());
+            }
+            chart.customLogoGroups = [];
+            
+            if (chart.customClipPaths) {
+                chart.customClipPaths.forEach(clip => clip.destroy());
+            }
+            chart.customClipPaths = [];
+            
+            bubbleSeries.points.forEach((point) => {
+                if (point.custom && point.custom.logoUrl && point.graphic) {
+                    const logoUrl = point.custom.logoUrl;
+                    const circleSize = point.marker.radius * 2;
+                    
+                    const plotX = point.plotX + chart.plotLeft;
+                    const plotY = point.plotY + chart.plotTop;
+                    
+                    const group = chart.renderer.g().attr({
+                        zIndex: 5,
+                        'class': 'clickable-logo'
+                    }).css({
+                        cursor: 'pointer'
+                    }).add();
+                    
+                    chart.customLogoGroups.push(group);
+                    
+                    group.element.addEventListener('click', function() {
+                        if (point.custom && point.custom.website) {
+                            window.open(point.custom.website, '_blank');
+                        }
+                    });
+                    
+                    group.element.addEventListener('mouseenter', function(e) {
+                        if (point.customBorderCircle) {
+                            point.customBorderCircle.attr({ opacity: 1 });
+                        }
+                        
+                        const customTooltip = document.getElementById('custom-tooltip');
+                        const logoHtml = point.custom.logoUrl ? 
+                            `<img src="${point.custom.logoUrl}" style="width: 32px; height: 32px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px;" />` : '';
+                        customTooltip.innerHTML = `
+                            ${logoHtml}
+                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">
+                                ${point.name}
+                            </div>
+                            <div style="color: rgba(255, 255, 255, 0.7); font-size: 12px; margin-bottom: 4px;">
+                                ${point.custom.logline}
+                            </div>
+                            <div style="color: ${point.color}; font-size: 11px; text-transform: uppercase;">
+                                ${point.custom.displayTag}
+                            </div>
+                        `;
+                        customTooltip.style.display = 'block';
+                    });
+                    
+                    group.element.addEventListener('mousemove', function(e) {
+                        const customTooltip = document.getElementById('custom-tooltip');
+                        const container = document.getElementById('ecosystem-chart-container');
+                        const rect = container.getBoundingClientRect();
+                        
+                        let left = e.clientX - rect.left + 10;
+                        let top = e.clientY - rect.top + 10;
+                        
+                        const tooltipWidth = customTooltip.offsetWidth;
+                        const tooltipHeight = customTooltip.offsetHeight;
+                        
+                        if (left + tooltipWidth > rect.width) {
+                            left = e.clientX - rect.left - tooltipWidth - 10;
+                        }
+                        
+                        if (top + tooltipHeight > rect.height) {
+                            top = e.clientY - rect.top - tooltipHeight - 10;
+                        }
+                        
+                        if (left < 0) {
+                            left = 10;
+                        }
+                        
+                        if (top < 0) {
+                            top = 10;
+                        }
+                        
+                        customTooltip.style.left = left + 'px';
+                        customTooltip.style.top = top + 'px';
+                    });
+                    
+                    group.element.addEventListener('mouseleave', function() {
+                        if (point.customBorderCircle) {
+                            point.customBorderCircle.attr({ opacity: 0 });
+                        }
+                        
+                        const customTooltip = document.getElementById('custom-tooltip');
+                        customTooltip.style.display = 'none';
+                    });
+                    
+                    point.customImageGroup = group;
+
+                    const clipId = 'clip-' + point.index + '-' + Date.now();
+                    const clipPath = chart.renderer.createElement('clipPath').attr({
+                        id: clipId
+                    }).add(chart.renderer.defs);
+                    
+                    chart.customClipPaths.push(clipPath);
+
+                    chart.renderer.circle(0, 0, circleSize / 2).add(clipPath);
+
+                    const bgCircle = chart.renderer.circle(
+                        plotX,
+                        plotY,
+                        circleSize / 2
+                    ).attr({
+                        fill: 'white'
+                    }).add(group);
+                    
+                    const imgGroup = chart.renderer.g().attr({
+                        'clip-path': `url(#${clipId})`,
+                        transform: `translate(${plotX}, ${plotY})`
+                    }).add(group);
+                    
+                    const imgSize = circleSize;
+                    chart.renderer.image(
+                        logoUrl,
+                        -imgSize / 2,
+                        -imgSize / 2,
+                        imgSize,
+                        imgSize
+                    ).attr({
+                        preserveAspectRatio: 'xMidYMid slice'
+                    }).add(imgGroup);
+                    
+                    const borderCircle = chart.renderer.circle(
+                        plotX,
+                        plotY,
+                        circleSize / 2
+                    ).attr({
+                        fill: 'none',
+                        stroke: 'rgba(255, 255, 255, 0.3)',
+                        'stroke-width': 2,
+                        opacity: 0
+                    }).add(group);
+                    
+                    point.customBorderCircle = borderCircle;
+                    
+                    if (point.graphic) {
+                        point.graphic.attr({ opacity: 0 });
+                    }
+                }
+            });
+        }
+
+        function fillCenter(count, label, chart, customLabel) {
+const countSize = window.innerWidth < 480 ? '20px' : (window.innerWidth < 768 ? '28px' : '48px');
+const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '10px' : '14px');
+            
+            const labelText = `
+                <div style="text-align: center; pointer-events: none;">
+                    <div style="font-size: ${countSize}; font-weight: 600; color: #ffffff; line-height: 1;">
+                        ${count}
+                    </div>
+                    <div style="font-size: ${labelSize}; color: rgba(255, 255, 255, 0.7); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">
+                        ${label}
+                    </div>
+                </div>
+            `;
+
+            if (!customLabel) {
+                customLabel = chart.renderer.label(
+                    labelText, 0, 0, undefined, undefined, undefined, true
+                ).css({
+                    color: '#ffffff',
+                    pointerEvents: 'none'
+                }).attr({
+                    zIndex: 0
+                }).add();
+            } else {
+                customLabel.attr({ text: labelText });
+            }
+
+            customLabel.attr({
+                x: (chart.pane[0].center[0] + chart.plotLeft) - customLabel.attr('width') / 2,
+                y: (chart.pane[0].center[1] + chart.plotTop) - customLabel.attr('height') / 2,
+                zIndex: 0
+            });
+
+            return customLabel;
+        }
+
+        const chartConfig = {
+            chart: {
+                type: 'bubble',
+                polar: true,
+                height: window.innerWidth < 768 ? 500 : 1000,
+                backgroundColor: 'rgba(0,0,0,0)',
+                events: {
+                    load() {
+                        const chart = this;
+                        
+                        const container = document.getElementById('ecosystem-chart-container');
+                        container.style.position = 'relative';
+                        
+                        const customTooltip = document.createElement('div');
+                        customTooltip.id = 'custom-tooltip';
+                        customTooltip.style.cssText = `
+                            position: absolute;
+                            display: none;
+                            background: rgba(15, 10, 35, 0.95);
+                            border: 1px solid rgba(255, 255, 255, 0.26);
+                            border-radius: 16px;
+                            padding: 8px;
+                            color: white;
+                            font-family: "Monda", Helvetica;
+                            z-index: 10000;
+                            pointer-events: none;
+                            max-width: 250px;
+                        `;
+                        container.appendChild(customTooltip);
+                        
+                        window.ecosystemChart = chart;
+                        
+                        renderCustomLogos(chart);
+                    },
+                    redraw() {
+                        renderCustomLogos(this);
+                    },
+                    render() {
+                        const chart = this;
+                        const pieSeries = chart.series[1];
+                        
+                        if (pieSeries) {
+                            pieSeries.customLabel = fillCenter(
+                                processedProjects.size,
+                                'TOTAL PROJECTS',
+                                chart,
+                                pieSeries.customLabel
+                            );
+                        }
+                    }
+                }
+            },
+            title: {
+                text: 'Tezos Ecosystem Map',
+                style: { 
+                    color: '#ffffff',
+                    fontSize: window.innerWidth < 768 ? '20px' : '28px',
+                    fontFamily: '"Monda", Helvetica'
+                }
+            },
+            subtitle: {
+                text: window.innerWidth < 768 ? 'Click to visit websites' : 'Projects organized by category • Click to visit websites',
+                style: { 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontFamily: '"Monda", Helvetica',
+                    fontSize: window.innerWidth < 768 ? '11px' : '12px'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            pane: {
+                startAngle: 0,
+                innerSize: window.innerWidth < 768 ? '35%' : '30%',
+                size: window.innerWidth < 480 ? '100%' : '95%',
+                background: [{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)'
+                }, {
+                    backgroundColor: 'rgba(255, 255, 255, 0.01)',
+                    borderWidth: 0,
+                    outerRadius: window.innerWidth < 768 ? '35%' : '30%'
+                }]
+            },
+            xAxis: {
+                tickPositions: Array.from({length: tags.length + 1}, (_, i) => i * anglePerTag),
+                min: 0,
+                max: totalAngle,
+                gridLineWidth: 1,
+                gridLineColor: 'rgba(255, 255, 255, 0.2)',
+                labels: {
+                    enabled: false
+                },
+                lineWidth: 0,
+				
+            },
+            yAxis: {
+                tickInterval: 10,
+                labels: {
+                    enabled: false
+                },
+                gridLineWidth: 0.5,
+                gridLineColor: 'rgba(255, 255, 255, 0.08)',
+                gridLineDashStyle: 'longdash',
+                endOnTick: false,
+                min: 15,
+                max: 70
+            },
+            tooltip: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: function() {
+                                if (this.custom && this.custom.website) {
+                                    window.open(this.custom.website, '_blank');
+                                }
+                            },
+                            mouseOver: function() {
+                                if (this.customBorderCircle) {
+                                    this.customBorderCircle.attr({ opacity: 1 });
+                                }
+                            },
+                            mouseOut: function() {
+                                if (this.customBorderCircle) {
+                                    this.customBorderCircle.attr({ opacity: 0 });
+                                }
+                            }
+                        }
+                    },
+                    states: {
+                        inactive: { enabled: false },
+                        hover: {
+                            halo: false
+                        }
+                    }
+                },
+                bubble: {
+    minSize: window.innerWidth < 480 ? 6 : 
+             window.innerWidth < 640 ? 8 : 
+             window.innerWidth < 768 ? 10 : 
+             window.innerWidth < 1024 ? 12 : 20,
+    maxSize: window.innerWidth < 480 ? 12 : 
+             window.innerWidth < 640 ? 16 : 
+             window.innerWidth < 768 ? 20 : 
+             window.innerWidth < 1024 ? 25 : 40
+},
+                pie: {
+                    startAngle: 0,
+                    states: {
+                        hover: { halo: 0 }
+                    }
+                }
+            },
+            series: [{
+                name: 'Projects',
+                data: bubbleData,
+                point: {
+                    events: {
+                        mouseOver() {
+                            const selectedTag = this.custom.tag;
+                            const chart = this.series.chart;
+                            const bubbleSeries = chart.series[0];
+                            const pieSeries = chart.series[1];
+
+                            bubbleSeries.points.forEach(point => {
+                                if (point.custom.tag !== selectedTag) {
+                                    if (point.graphic) point.graphic.attr({ opacity: 0.2 });
+                                    if (point.customImageGroup) point.customImageGroup.attr({ opacity: 0.2 });
+                                }
+                            });
+
+                            const matchingCount = bubbleSeries.points.filter(p => p.custom.tag === selectedTag).length;
+                            pieSeries.customLabel = fillCenter(
+                                matchingCount,
+                                this.custom.displayTag.toUpperCase(),
+                                chart,
+                                pieSeries.customLabel
+                            );
+                        },
+                        mouseOut() {
+                            const chart = this.series.chart;
+                            const bubbleSeries = chart.series[0];
+                            const pieSeries = chart.series[1];
+
+                            bubbleSeries.points.forEach(point => {
+                                if (point.graphic) point.graphic.attr({ opacity: 1 });
+                                if (point.customImageGroup) point.customImageGroup.attr({ opacity: 1 });
+                            });
+
+                            pieSeries.customLabel = fillCenter(
+                                processedProjects.size,
+                                'TOTAL PROJECTS',
+                                chart,
+                                pieSeries.customLabel
+                            );
+                        }
+                    }
+                }
+            }, {
+                type: 'pie',
+                dataLabels: {
+                    enabled: false
+                },
+                size: '28%',
+                innerSize: '85%',
+                zIndex: -1,
+                point: {
+                    events: {
+                        mouseOver() {
+                            const selectedTag = this.options.custom.tag;
+                            const chart = this.series.chart;
+                            const bubbleSeries = chart.series[0];
+                            const series = this.series;
+
+                            bubbleSeries.points.forEach(point => {
+                                if (point.custom.tag !== selectedTag) {
+                                    if (point.graphic) point.graphic.attr({ opacity: 0.2 });
+                                    if (point.customImageGroup) point.customImageGroup.attr({ opacity: 0.2 });
+                                }
+                            });
+
+                            series.customLabel = fillCenter(
+                                this.options.custom.count,
+                                this.options.custom.displayTag.toUpperCase(),
+                                chart,
+                                series.customLabel
+                            );
+                        },
+                        mouseOut() {
+                            const chart = this.series.chart;
+                            const bubbleSeries = chart.series[0];
+                            const series = this.series;
+
+                            bubbleSeries.points.forEach(point => {
+                                if (point.graphic) point.graphic.attr({ opacity: 1 });
+                                if (point.customImageGroup) point.customImageGroup.attr({ opacity: 1 });
+                            });
+
+                            series.customLabel = fillCenter(
+                                processedProjects.size,
+                                'TOTAL PROJECTS',
+                                chart,
+                                series.customLabel
+                            );
+                        }
+                    }
+                },
+                data: pieData
+            }],
+            credits: { enabled: false }
+        };
+        
+        const chart = Highcharts.chart('ecosystem-chart-container', chartConfig);
+        
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                if (window.ecosystemChart) {
+                    createEcosystemChart();
+                }
+            }, 250);
+        });
+
+    } catch (error) {
+        console.error('Error creating ecosystem chart:', error);
+        document.getElementById('ecosystem-chart-container').innerHTML = 
+            '<div style="color: #ff6961; text-align: center; padding: 50px;">Error loading ecosystem data</div>';
+    }
+}
+
 
 function main(ratio) {
     createHistoricalCharts(ratio);
@@ -1772,7 +2387,7 @@ function main(ratio) {
     createTotalTransactionsChart();
     createTVLChart();
     createHistoricalTvlChart();
-    
+    createEcosystemChart();
     try {
         const data = aggregatedDataCache.homeData;
         const { totalStakedPercentage, totalDelegatedPercentage, stakingApy, delegationApy } = data.stakingData;
@@ -1837,26 +2452,6 @@ if (burnedSupplyContainer) {
 	overlay.style.opacity = '0';
 	overlay.style.pointerEvents = 'none';
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
