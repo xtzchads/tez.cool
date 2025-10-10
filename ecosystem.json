@@ -995,6 +995,32 @@
                     }
                 ]
             }
+        },
+        {
+            "fields": {
+                "Project": "Pikes Arena",
+                "Logline": "Welcome to Pikes Arena, where skill meets strategy in fast-paced battle royale action! Your mission is simple but thrilling: stab opponents from behind, collect food to grow stronger, and be the last player standing. Every match brings new challenges and real rewards!",
+                "Website": "https://www.pikesarena.com/",
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "/icons/pikesarena.webp"
+                    }
+                ]
+            }
+        },
+        {
+            "fields": {
+                "Project": "Uranium Miner",
+                "Logline": "The Tap-to-Earn Game that rewards you with Physical Uranium ownership ☢️",
+                "Website": "https://www.geturanium.io/",
+                "Tags": ["gaming"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "/icons/uraniumminer.webp"
+                    }
+                ]
+            }
         }
     ],
     "tagsCount": {
