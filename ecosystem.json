@@ -899,7 +899,7 @@
                 }
             },
 			{
-                "fields: {
+                "fields": {
                     "Project": "Superlend",
                     "Logline": "Lending and borrowing infrastructure for onchain finance",
                     "Website": "https://www.superlend.xyz/",
@@ -909,7 +909,7 @@
                 }
             },
 			{
-                "fields: {
+                "fields": {
                     "Project": "IguanaDEX",
                     "Logline": "Etherlink DEX",
                     "Website": "https://www.iguanadex.com/",
@@ -919,7 +919,7 @@
                 }
             },
 			{
-                "fields: {
+                "fields": {
                     "Project": "Stacy.fi",
                     "Logline": "Staking platform which allows users to earn staking rewards on Tezos while maintaining full liquidity of their funds, by holding stXTZ tokens",
                     "Website": "https://stacy.fi/",
@@ -929,7 +929,7 @@
                 }
             },
 			{
-                "fields: {
+                "fields": {
                     "Project": "Reaper Actual",
                     "Logline": "Reaper Actual is an upcoming AAA open-world persistent shooter being developed by veterans from the shooter and MMO genres, leveraging the Etherlink blockchain to enable player ownership and trading of in-game assets",
                     "Website": "https://reaperactual.com/",
@@ -959,7 +959,7 @@
                 }
             },
 			{
-                "fields: {
+                "fields": {
                     "Project": "TEZEX",
                     "Logline": "TEZEX (Tezos Exchange) is a decentralized, open-source initiative developed by StableTech, a consortium of key entities within the Tezos ecosystem committed to enhancing and expanding open decentralized finance (DeFi) on Tezos.",
                     "Website": "https://tezex.io/",
