@@ -1073,6 +1073,19 @@
                     }
                 ]
             }
+        },
+        {
+            "fields": {
+                "Project": "Organic Growth",
+                "Logline": "Launch memecoins on Etherlink. Trustless. Permissionless. Open-sourced.",
+                "Website": "https://www.organicgrowth.wtf/",
+                "Tags": ["defi"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "/icons/organicgrowth.ico"
+                    }
+                ]
+            }
         }
     ],
     "tagsCount": {
