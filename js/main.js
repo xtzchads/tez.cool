@@ -2211,10 +2211,7 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
         window.ecosystemResizeHandler = function() {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(function() {
-        if (window.ecosystemChart) {
-            window.ecosystemChart.reflow();
-            renderCustomLogos(window.ecosystemChart);
-        }
+        createEcosystemChart();
     }, 250);
 };
 window.addEventListener('resize', window.ecosystemResizeHandler);
@@ -2284,6 +2281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
 
 
 
