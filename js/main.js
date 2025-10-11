@@ -273,14 +273,17 @@ function setupSmartTooltipPositioning() {
     
     let resizeTimeout;
     const updateTooltipPositions = () => {
-        const bakerItems = bakersGrid.querySelectorAll('.baker-item');
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const isMobile = vw <= 640;
+    const bakerItems = bakersGrid.querySelectorAll('.baker-item');
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const isMobile = vw <= 640;
+    const rects = Array.from(bakerItems).map(item => ({
+        item,
+        rect: item.getBoundingClientRect()
+    }));
         
-        bakerItems.forEach(item => {
-            const rect = item.getBoundingClientRect();
-            const tooltip = item.querySelector('.baker-tooltip');
+        rects.forEach(({ item, rect }) => {
+        const tooltip = item.querySelector('.baker-tooltip');
             if (!tooltip) return;
             
             item.classList.remove('tooltip-left', 'tooltip-right', 'tooltip-top', 'tooltip-bottom');
