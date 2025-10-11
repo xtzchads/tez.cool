@@ -363,7 +363,7 @@ function createBakerElement(baker) {
     div.innerHTML = `
         <div class="baker-avatar">
             <img src="https://services.tzkt.io/v1/avatars/${escapeHTML(baker.address)}" 
-                 alt="${escapeHTML(baker.name)}" loading="lazy"
+                 alt="${escapeHTML(baker.name)}" loading="lazy" crossorigin="anonymous"
                  onerror="this.style.display='none'" 
                  onclick="window.open('https://tzkt.io/${escapeHTML(baker.address)}', '_blank')"/>
         </div>
@@ -1800,17 +1800,17 @@ async function createEcosystemChart() {
                         
                         const customTooltip = document.getElementById('custom-tooltip');
                         const logoHtml = point.custom.logoUrl ? 
-                            `<img src="${point.custom.logoUrl}" style="width: 32px; height: 32px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px;" />` : '';
+                            `<img src="${escapeHTML(point.custom.logoUrl)}" crossorigin="anonymous" style="width: 32px; height: 32px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px;" />` : '';
                         customTooltip.innerHTML = `
                             ${logoHtml}
                             <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">
-                                ${point.name}
+                                ${escapeHTML(point.name)}
                             </div>
                             <div style="color: rgba(255, 255, 255, 0.7); font-size: 12px; margin-bottom: 4px;">
-                                ${point.custom.logline}
+                                ${escapeHTML(point.custom.logline)}
                             </div>
                             <div style="color: ${point.color}; font-size: 11px; text-transform: uppercase;">
-                                ${point.custom.displayTag}
+                                ${escapeHTML(point.custom.displayTag)}
                             </div>
                         `;
                         customTooltip.style.display = 'block';
@@ -2284,7 +2284,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.style.pointerEvents = 'none';
     }
 });
-
 
 
 
