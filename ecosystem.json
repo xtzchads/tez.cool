@@ -1024,6 +1024,32 @@
         },
         {
             "fields": {
+                "Project": "LayerZero",
+                "Logline": "An omnichain interoperability protocol that allows different blockchains to communicate with each other.",
+                "Website": "https://layerzero.network/",
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "/icons/layerzero.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "fields": {
+                "Project": "Pyth Network",
+                "Logline": "A pull-model price feed oracle that provides market data from the world’s largest professional traders and exchanges to any smart contract.",
+                "Website": "https://www.pyth.network/",
+                "Tags": ["devtools"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "/icons/pyth.jpg"
+                    }
+                ]
+            }
+        },
+        {
+            "fields": {
                 "Project": "Homebase",
                 "Logline": "Homebase is a web application that enables users to create and manage/use DAOs on the Tezos blockchain",
                 "Website": "https://tezos-homebase.io/",
