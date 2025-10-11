@@ -1523,7 +1523,7 @@ function createTVLChart() {
             const lightness = 55 + (index % 4) * 5;
             
             return {
-                name: `${project}`,
+                name: `${escapeHTML(project)}`,
                 y: tvlValues[index],
                 color: {
                     radialGradient: {
@@ -2284,6 +2284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
 
 
 
