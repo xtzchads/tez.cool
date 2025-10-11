@@ -1593,6 +1593,20 @@ function createTVLChart() {
 
 async function createEcosystemChart() {
     try {
+		if (window.ecosystemChart) {
+            window.ecosystemChart.destroy();
+            window.ecosystemChart = null;
+        }
+        
+        if (window.ecosystemResizeHandler) {
+            window.removeEventListener('resize', window.ecosystemResizeHandler);
+            window.ecosystemResizeHandler = null;
+        }
+        
+        const oldTooltip = document.getElementById('custom-tooltip');
+        if (oldTooltip) {
+            oldTooltip.remove();
+        }
         const projects = aggregatedDataCache.ecosystemProjects;
         
         if (!projects || projects.length === 0) {
@@ -2191,14 +2205,16 @@ const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '
         const chart = Highcharts.chart('ecosystem-chart-container', chartConfig);
         
         let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function() {
-                if (window.ecosystemChart) {
-                    createEcosystemChart();
-                }
-            }, 250);
-        });
+        window.ecosystemResizeHandler = function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        if (window.ecosystemChart) {
+            window.ecosystemChart.reflow();
+            renderCustomLogos(window.ecosystemChart);
+        }
+    }, 250);
+};
+window.addEventListener('resize', window.ecosystemResizeHandler);
 
     } catch (error) {
         console.error('Error creating ecosystem chart:', error);
@@ -2265,6 +2281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
 
 
 
