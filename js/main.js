@@ -617,7 +617,7 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
             name: 'Ratios',
             data: [
                 { 
-                    name: 'Staked ('+stakedAPY+'% APY)', 
+                    name: 'Staked ('+escapeHTML(stakedAPY)+'% APY)', 
                     y: totalStakedPercentage, 
                     color: {
                         radialGradient: {
@@ -633,7 +633,7 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
                     }
                 },
                 { 
-                    name: 'Delegated ('+delegatedAPY+'% APY)', 
+                    name: 'Delegated ('+escapeHTML(delegatedAPY)+'% APY)', 
                     y: totalDelegatedPercentage, 
                     color: {
                         radialGradient: {
@@ -2284,6 +2284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
 
 
 
