@@ -1060,6 +1060,19 @@
                     }
                 ]
             }
+        },
+        {
+            "fields": {
+                "Project": "KyberSwap",
+                "Logline": "A decentralized trading solution that helps users find the best swap rates by routing trades via multiple DEXs & liquidity sources across chains",
+                "Website": "https://kyberswap.com/",
+                "Tags": ["defi"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "/icons/kyberswap.ico"
+                    }
+                ]
+            }
         }
     ],
     "tagsCount": {
