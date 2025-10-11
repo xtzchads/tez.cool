@@ -1800,7 +1800,7 @@ async function createEcosystemChart() {
                         
                         const customTooltip = document.getElementById('custom-tooltip');
                         const logoHtml = point.custom.logoUrl ? 
-                            `<img src="${escapeHTML(point.custom.logoUrl)}" crossorigin="anonymous" style="width: 32px; height: 32px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px;" />` : '';
+                            `<img src="${escapeHTML(point.custom.logoUrl)}" style="width: 32px; height: 32px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px;" />` : '';
                         customTooltip.innerHTML = `
                             ${logoHtml}
                             <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">
@@ -2284,6 +2284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
 
 
 
