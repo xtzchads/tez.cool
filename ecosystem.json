@@ -1086,6 +1086,19 @@
                     }
                 ]
             }
+        },
+        {
+            "fields": {
+                "Project": "Rarible",
+                "Logline": "Rarible is an aggregated NFT marketplace that provides a platform for buying, selling, and trading non-fungible tokens (NFTs).",
+                "Website": "https://rarible.com/etherlink",
+                "Tags": ["nft"],
+                "Status": "active",
+                "Logo": [{
+                        "url": "/icons/rarible.ico"
+                    }
+                ]
+            }
         }
     ],
     "tagsCount": {
