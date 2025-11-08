@@ -686,10 +686,12 @@ function createDALSupportChart() {
     try {
         const data = aggregatedDataCache.dalHistoryData;
         const latestCycle = data[data.length - 1]?.cycle || currentCycle;
-        const chartData = data.map(item => ({
-                    x: item.cycle,
-                    y: item.dal_baking_power_percentage / 100
-                }));
+        const chartData = data
+    .map(item => ({
+        x: item.cycle,
+        y: item.dal_baking_power_percentage / 100
+    }))
+    .filter(item => item.y !== 0);
         Highcharts.chart('chart-container5', {
             chart: {
                 type: 'spline',
@@ -2319,3 +2321,4 @@ document.addEventListener('DOMContentLoaded', async() => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
