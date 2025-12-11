@@ -494,7 +494,7 @@ function applyBonus(cycle, value, targetRatio, tmp1) {
     const udist = Math.max(0, Math.abs(stakedRatioValue - targetRatio) - 0.02);
     const dist = stakedRatioValue >= targetRatio ? -udist : udist;
     const maxNewBonus = Math.min(staticRateDistToMax, 0.05);
-    const newBonus = previousBonus + dist * 0.01 * (cycle == 858) ? (245760 / 86400) : 1;
+    const newBonus = previousBonus + dist * 0.01 * (cycle <= 858) ? (245760 / 86400) : 1;
     const res = clip(newBonus, 0, maxNewBonus);
     console.assert(res >= 0 && res <= 5);
     tmp = res;
@@ -565,7 +565,7 @@ async function initializeRatios() {
             ratios.push(ratio);
             last = ratio;
         });
-        while (ratios.length < 500) {
+        while (ratios.length < 700) {
             last += slowIncrement(last, calculateAverageDifference(ratios));
             ratios.push(last);
         }
@@ -2321,4 +2321,5 @@ document.addEventListener('DOMContentLoaded', async() => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
 
