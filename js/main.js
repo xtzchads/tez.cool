@@ -218,8 +218,9 @@ class NavigationManager {
         }
     }
     navigateTo(target, url, clickedItem) {
+        const mainContainer = document.querySelector('.container.scrollable-content');
+        
         if (this.currentView === 'home' && target !== 'home') {
-            const mainContainer = document.querySelector('.container.scrollable-content');
             if (mainContainer)
                 this.savedScrollPosition = mainContainer.scrollTop;
         }
@@ -243,6 +244,9 @@ class NavigationManager {
                     targetIframe.src = url;
                 }
                 targetContainer.classList.add('active');
+            }
+            if (mainContainer) {
+                mainContainer.scrollTop = 0;
             }
         }
         this.currentView = target;
@@ -2321,5 +2325,6 @@ document.addEventListener('DOMContentLoaded', async() => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
 
 
