@@ -702,7 +702,7 @@ function createDALSupportChart() {
                 backgroundColor: 'rgba(0,0,0,0)',
             },
             title: {
-                text: 'DAL Support',
+                text: 'DAL support',
                 style: {
                     color: '#ffffff'
                 }
@@ -822,7 +822,7 @@ function createBurnedSupplyChart() {
             }
         }
         const formatter = isCumulative ? value => `${(value / 1000000).toFixed(2)}M` : value => `${(value / 1000).toFixed(2)}K`;
-        createTimeSeriesChart('chart-container', 'Burned Supply', processedData, formatter, isCumulative);
+        createTimeSeriesChart('chart-container', 'Burned supply', processedData, formatter, isCumulative);
     } catch (error) {
         console.error('Error loading burned supply data:', error);
     }
@@ -899,7 +899,7 @@ function createHistoricalTvlChart() {
                 backgroundColor: 'rgba(0,0,0,0)'
             },
             title: {
-                text: 'DeFi Growth (L1+L2-RWA)',
+                text: 'DeFi growth (L1+L2-RWA)',
                 style: {
                     color: '#ffffff'
                 }
@@ -1034,7 +1034,7 @@ function createTotalAccountsChart() {
                 backgroundColor: 'rgba(0,0,0,0)'
             },
             title: {
-                text: 'Total Accounts',
+                text: 'Total accounts',
                 style: {
                     color: '#ffffff'
                 }
@@ -1684,6 +1684,117 @@ function createTVLChart() {
         console.error('Error creating TVL chart:', error);
     }
 }
+function createConsensusKeyAdoptionChart() {
+    try {
+        const data = aggregatedDataCache.consensusKeyAdoptionData;
+        
+        if (!data || data.length === 0) {
+            console.error('No consensus key adoption data available');
+            return;
+        }
+        
+        const filteredData = data.filter(item => item.cycle >= 990);
+        
+        const chartData = filteredData.map(item => ({
+            x: item.cycle,
+            y: item.tz4_adoption_percentage
+        }));
+        
+        Highcharts.chart('chart-container6', {
+            chart: {
+                type: 'spline',
+                backgroundColor: 'rgba(0,0,0,0)',
+            },
+            title: {
+                text: 'BLS support',
+                style: {
+                    color: '#ffffff'
+                }
+            },
+            xAxis: {
+                lineColor: '#ffffff',
+                lineWidth: 1,
+                labels: {
+                    enabled: false
+                }
+            },
+            yAxis: {
+                gridLineWidth: 0,
+                title: {
+                    text: null
+                },
+                labels: {
+                    enabled: false
+                },
+                plotLines: [{
+                        color: '#ffffff',
+                        width: 2,
+                        value: 0.50,
+                        dashStyle: 'dot',
+                        zIndex: 5,
+                        label: {
+                            text: 'Target (50%)',
+                            align: 'left',
+                            style: {
+                                color: '#ffffff',
+                                fontWeight: 'bold'
+                            },
+                            x: 10,
+                            y: -10
+                        }
+                    }
+                ]
+            },
+            tooltip: {
+                formatter: function () {
+                    return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> BLS Support: <b>${(this.y * 100).toFixed(2)}%</b><br/>`;
+                }
+            },
+            series: [{
+                    shadow: {
+                        color: 'rgba(100, 150, 255, 0.7)',
+                        offsetX: 0,
+                        offsetY: 0,
+                        opacity: 1,
+                        width: 10
+                    },
+                    name: "TZ4 Adoption",
+                    showInLegend: false,
+                    data: chartData,
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function () {
+                            if (this.point.index === this.series.data.length - 1) {
+                                return `${(this.y * 100).toFixed(2)}%`;
+                            }
+                            return null;
+                        },
+                        align: 'right',
+                        verticalAlign: 'bottom',
+                    },
+                    lineWidth: 2,
+                    marker: {
+                        enabled: false
+                    },
+                    color: {
+                        linearGradient: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 1
+                        },
+                        stops: [[0, '#77dd77'], [1, '#ff6961']]
+                    }
+                }
+            ],
+            credits: {
+                enabled: false
+            }
+        });
+    } catch (error) {
+        console.error('Error loading consensus key adoption data:', error);
+    }
+}
 async function createEcosystemChart() {
     try {
         if (window.ecosystemChart) {
@@ -2268,6 +2379,7 @@ async function createEcosystemChart() {
 function main(ratio) {
     createHistoricalCharts(ratio);
     createDALSupportChart();
+	createConsensusKeyAdoptionChart();
     createBurnedSupplyChart();
     createTotalAccountsChart();
     createTotalTransactionsChart();
