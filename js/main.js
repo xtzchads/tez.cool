@@ -1747,7 +1747,7 @@ function createConsensusKeyAdoptionChart() {
             },
             tooltip: {
                 formatter: function () {
-                    return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> BLS Support: <b>${(this.y * 100).toFixed(2)}%</b><br/>`;
+                    return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> BLS Support: <b>${(this.y * 100).toFixed(2)}% of active bakers</b><br/>`;
                 }
             },
             series: [{
@@ -2437,6 +2437,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         overlay.style.pointerEvents = 'none';
     }
 });
+
 
 
 
