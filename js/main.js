@@ -569,7 +569,7 @@ async function initializeRatios() {
             ratios.push(ratio);
             last = ratio;
         });
-        while (ratios.length < relevantData.length + 1000) {
+        while (ratios.length < relevantData.length + 800) {
             last += slowIncrement(last, calculateAverageDifference(ratios));
             ratios.push(last);
         }
