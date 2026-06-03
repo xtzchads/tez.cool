@@ -1334,7 +1334,7 @@ function createHistoricalCharts(ratio) {
         currentCycle = issuanceData.currentCycle;
         const issuanceDataWithRatio = [...issuanceData.ratios, ...ratio.map((ratioValue, index) => ({
                     cycle: currentCycle + index + 1,
-                    issuance: issuanceRateQ(index + currentCycle, ratioValue) + LB_SUBSIDY / data[currentCycle].totalSupply * 100
+                    issuance: issuanceRateQ(index + currentCycle, ratioValue) + /*LB_SUBSIDY / data[currentCycle].totalSupply * 100*/
                 }))];
         createHistoricalChart('issuanceh', 'Issuance since genesis', issuanceDataWithRatio, d => ({
                 x: d.cycle,
@@ -1544,7 +1544,7 @@ function updateIssuanceChart(newStakingData) {
             if (stakingPoint) {
                 return {
                     x: point.x,
-                    y: issuanceRateQ(point.x, stakingPoint.y / 100) + LB_SUBSIDY / data[currentCycle].totalSupply * 100
+                    y: issuanceRateQ(point.x, stakingPoint.y / 100) + /*LB_SUBSIDY / data[currentCycle].totalSupply * 100*/
                 };
             }
         }
