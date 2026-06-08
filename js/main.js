@@ -1465,7 +1465,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
                 },
                 name: title,
                 data: data.map(dataMapper),
-                lineWidth: 1,
+                lineWidth: 1.5,
                 dataLabels: {
                     enabled: true,
                     formatter: function () {
