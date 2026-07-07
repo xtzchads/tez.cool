@@ -481,31 +481,38 @@ function stakedRatio(cycle, value) {
 function clip(value, minValue, maxValue) {
     return Math.max(minValue, Math.min(value, maxValue));
 }
-function staticRate(cycle, value) {
-    const staticRateValue = 1 / 1600 * (1 / (value ** 2));
-    return clip(staticRateValue, minimumRatio(cycle), maximumRatio(cycle));
+function trueMaximumRatio(adjCycle, value) {
+    const max_max = maximumRatio(adjCycle);
+    if (adjCycle >= 821) {
+        return Math.max(Math.min(max_max, adaptiveMaximum(value)), minimumRatio(adjCycle));
+    }
+    return Math.max(max_max, minimumRatio(adjCycle));
 }
-function applyBonus(cycle, value, targetRatio, tmp1) {
+function staticRate(cycle, value, trueMax) {
+    const staticRateValue = 1 / 1600 * (1 / (value ** 2));
+    return clip(staticRateValue, minimumRatio(cycle), trueMax);
+}
+function applyBonus(cycle, value, targetRatio, tmp1, trueMax) {
     if (cycle <= AI_ACTIVATION_CYCLE) {
         tmp = 0;
         return 0;
     }
     const previousBonus = tmp;
     const stakedRatioValue = tmp1;
-    const ratioMax = maximumRatio(cycle + 1);
-    const staticRateValue = staticRate(cycle, value);
-    const staticRateDistToMax = ratioMax - staticRateValue;
+    const staticRateValue = staticRate(cycle, value, trueMax);
+    const staticRateDistToMax = trueMax - staticRateValue;
     const udist = Math.max(0, Math.abs(stakedRatioValue - targetRatio) - 0.02);
     const dist = stakedRatioValue >= targetRatio ? -udist : udist;
     const maxNewBonus = Math.min(staticRateDistToMax, 0.05);
-    const newBonus = previousBonus + dist * 0.01 * (cycle <= 858) ? (245760 / 86400) : 1;
+    // Removed unnecessary ternary since cycle is always > 858 for future projections
+    const newBonus = previousBonus + dist * 0.01;
     const res = clip(newBonus, 0, maxNewBonus);
     console.assert(res >= 0 && res <= 5);
     tmp = res;
     return res;
 }
-function dyn(cycle, value, tmp1) {
-    return applyBonus(cycle, value, 0.5, tmp1);
+function dyn(cycle, value, tmp1, trueMax) {
+    return applyBonus(cycle, value, 0.5, tmp1, trueMax);
 }
 function adaptiveMaximum(r) {
     if (r >= 0.5)
@@ -518,12 +525,12 @@ function adaptiveMaximum(r) {
 function issuanceRateQ(cycle, value) {
     const adjustedCycle = cycle - 2;
     tmp1 = value;
-    const staticRateRatio = staticRate(adjustedCycle, value);
-    const bonus = dyn(adjustedCycle, value, tmp1);
+    const trueMax = trueMaximumRatio(adjustedCycle, value);
+    const staticRateRatio = staticRate(adjustedCycle, value, trueMax);
+    const bonus = dyn(adjustedCycle, value, tmp1, trueMax);
     const ratioMin = minimumRatio(adjustedCycle);
-    const ratioMax = cycle >= 823 ? Math.min(maximumRatio(adjustedCycle), adaptiveMaximum(value)) : maximumRatio(adjustedCycle);
     const totalRate = staticRateRatio + bonus;
-    return clip(totalRate, ratioMin, ratioMax) * 100;
+    return clip(totalRate, ratioMin, trueMax) * 100;
 }
 async function fetchAggregatedData() {
     try {
@@ -1332,6 +1339,7 @@ function createHistoricalCharts(ratio) {
         const issuanceData = processIssuanceData(data);
         const stakingData = processStakingData(data);
         currentCycle = issuanceData.currentCycle;
+        tmp = 0.05; // Reset bonus state to current on-chain saturation before projection
         const issuanceDataWithRatio = [...issuanceData.ratios, ...ratio.map((ratioValue, index) => ({
                     cycle: currentCycle + index + 1,
                     issuance: issuanceRateQ(index + currentCycle, ratioValue) /*LB_SUBSIDY / data[currentCycle].totalSupply * 100*/
@@ -1429,7 +1437,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
                 text: null
             },
             min: 0,
-            max: containerId === 'issuanceh' ? 11 : 50,
+            max: containerId === 'issuanceh' ? 11 : 60,
             tickInterval: 1
         },
         tooltip: {
@@ -1537,6 +1545,7 @@ function updateIssuanceChart(newStakingData) {
     const issuanceChart = Highcharts.charts.find(chart => chart && chart.renderTo && chart.renderTo.id === 'issuanceh');
     if (!issuanceChart)
         return;
+    tmp = 0.05; // Reset bonus state to current on-chain saturation before projection
     const originalData = issuanceChart.series[0].options.data;
     const updatedData = originalData.map(point => {
         if (point.x > currentCycle) {
@@ -2437,7 +2446,3 @@ document.addEventListener('DOMContentLoaded', async() => {
         overlay.style.pointerEvents = 'none';
     }
 });
-
-
-
-
