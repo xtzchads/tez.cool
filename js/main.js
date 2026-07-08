@@ -912,7 +912,6 @@ function createHistoricalTvlChart() {
                 }
             },
             tooltip: {
-                outside: true,
                 style: {
                     fontFamily: '"Monda", Helvetica, Arial, sans-serif'
                 },
@@ -1264,7 +1263,6 @@ function createTimeSeriesChart(containerId, title, data, formatter, isCumulative
             }
         },
         tooltip: {
-            outside: true,
             style: {
                 fontFamily: '"Monda", Helvetica, Arial, sans-serif'
             },
@@ -1521,6 +1519,31 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
                                 e.newPoint.y = point.y;
                                 return;
                             }
+                            // #2: Pause star animations during drag
+                            if (!window._starsPaused) {
+                                document.body.classList.add('dragging-active');
+                                window._starsPaused = true;
+                            }
+                            const newValue = parseFloat(e.newPoint.y);
+                            const series = point.series;
+                            // #1: Direct point mutation instead of setData
+                            for (let i = point.index; i < series.data.length; i++) {
+                                series.data[i].y = newValue;
+                                series.data[i].options.y = newValue;
+                            }
+                            series.isDirty = true;
+                            series.isDirtyData = true;
+                            series.chart.redraw(false);
+                            // Update issuance with new staking values
+                            updateIssuanceChartFast(series.data, false);
+                        },
+                        drop: function (e) {
+                            const point = e.target;
+                            // #2: Resume star animations
+                            document.body.classList.remove('dragging-active');
+                            window._starsPaused = false;
+                            if (point.x <= currentCycle + 1) return;
+                            
                             const newValue = e.newPoint.y;
                             const series = point.series;
                             const updatedData = series.data.map((p, i) => ({
@@ -1531,7 +1554,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
                                 duration: 800,
                                 easing: 'easeOutBounce'
                             });
-                            updateIssuanceChart(updatedData);
+                            updateIssuanceChartFast(series.data, { duration: 800, easing: 'easeOutBounce' });
                         }
                     }
                 }
@@ -1540,26 +1563,56 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
     }
     Highcharts.chart(containerId, chartConfig);
 }
-function updateIssuanceChart(newStakingData) {
-    const data = aggregatedDataCache.historicalCycleData;
-    const issuanceChart = Highcharts.charts.find(chart => chart && chart.renderTo && chart.renderTo.id === 'issuanceh');
+// #7: Cache both chart references
+let _issuanceChartCache = null;
+let _stakingChartCache = null;
+// #8: Pre-allocated array for issuance updates (avoids GC pressure)
+let _issuanceUpdateBuffer = null;
+
+function updateIssuanceChartFast(stakingData, animation) {
+    // #7: Cached chart lookup
+    if (!_issuanceChartCache || !_issuanceChartCache.renderTo) {
+        _issuanceChartCache = Highcharts.charts.find(chart => chart && chart.renderTo && chart.renderTo.id === 'issuanceh');
+    }
+    const issuanceChart = _issuanceChartCache;
     if (!issuanceChart)
         return;
     tmp = 0.05; // Reset bonus state to current on-chain saturation before projection
     const originalData = issuanceChart.series[0].options.data;
-    const updatedData = originalData.map(point => {
+
+    // #8: Pre-allocate buffer once, reuse on every drag tick
+    if (!_issuanceUpdateBuffer || _issuanceUpdateBuffer.length !== originalData.length) {
+        _issuanceUpdateBuffer = originalData.map(p => ({ x: p.x, y: p.y }));
+    }
+
+    // #3: Build staking lookup only for future cycles
+    const stakingMap = new Map();
+    for (let i = 0; i < stakingData.length; i++) {
+        const sp = stakingData[i];
+        const x = sp.x !== undefined ? sp.x : sp.options?.x;
+        const y = sp.y !== undefined ? sp.y : sp.options?.y;
+        if (x > currentCycle) stakingMap.set(x, y);
+    }
+
+    // #3: Only recalculate future points, copy historical as-is
+    for (let i = 0; i < originalData.length; i++) {
+        const point = originalData[i];
+        _issuanceUpdateBuffer[i].x = point.x;
         if (point.x > currentCycle) {
-            const stakingPoint = newStakingData.find(sp => sp.x === point.x);
-            if (stakingPoint) {
-                return {
-                    x: point.x,
-                    y: issuanceRateQ(point.x, stakingPoint.y / 100) /*LB_SUBSIDY / data[currentCycle].totalSupply * 100*/
-                };
+            const stakingY = stakingMap.get(point.x);
+            if (stakingY !== undefined) {
+                _issuanceUpdateBuffer[i].y = issuanceRateQ(point.x, stakingY / 100);
+                continue;
             }
         }
-        return point;
-    });
-    issuanceChart.series[0].setData(updatedData, true);
+        _issuanceUpdateBuffer[i].y = point.y;
+    }
+    issuanceChart.series[0].setData(_issuanceUpdateBuffer, true, animation);
+}
+// Keep legacy function for createHistoricalCharts initial call
+function updateIssuanceChart(newStakingData, animation = true) {
+    _issuanceUpdateBuffer = null; // Force buffer rebuild
+    updateIssuanceChartFast(newStakingData, animation);
 }
 function processIssuanceData(data) {
     const ratios = [];
@@ -2445,4 +2498,13 @@ document.addEventListener('DOMContentLoaded', async() => {
         overlay.style.opacity = '0';
         overlay.style.pointerEvents = 'none';
     }
+
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        document.body.classList.add('is-scrolling');
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            document.body.classList.remove('is-scrolling');
+        }, 150);
+    }, { passive: true, capture: true });
 });
