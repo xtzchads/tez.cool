@@ -967,7 +967,7 @@
                 "Tags": ["nft"],
                 "Status": "active",
                 "Logo": [{
-                        "url": "https://bootloader.art/favicon.ico"
+                        "url": "https://bootloader.art/favicon.svg"
                     }
                 ]
             }
