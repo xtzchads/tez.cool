@@ -204,7 +204,7 @@ class NavigationManager {
                 height: 'auto',
                 minHeight: '100vh',
                 maxHeight: 'none',
-                overflow: 'auto'
+                overflow: 'visible'
             });
             mainContainer.scrollTop = this.savedScrollPosition;
         } else {
