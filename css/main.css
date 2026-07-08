@@ -3,3 +3,10 @@
 
 
 
+
+body.is-scrolling .highcharts-container, body.is-scrolling iframe { pointer-events: none !important; }
+#stars,#stars2,#stars3{will-change:transform;contain:layout style;}
+.chart-placeholder{contain:content;will-change:auto;}
+.highcharts-container{overflow:hidden !important;}
+body.dragging-active #stars,body.dragging-active #stars2,body.dragging-active #stars3{animation-play-state:paused !important;}
+.row:nth-child(n+3){content-visibility:auto;contain-intrinsic-size:auto 400px;}
