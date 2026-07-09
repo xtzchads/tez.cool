@@ -943,7 +943,7 @@
                 "Tags": ["gaming"],
                 "Status": "active",
                 "Logo": [{
-                        "url": "https://reaperactual.com/favicon.ico"
+                        "url": "/icons/favicon-reaper.ico"
                     }
                 ]
             }
@@ -955,7 +955,7 @@
                 "Tags": ["gaming"],
                 "Status": "active",
                 "Logo": [{
-                        "url": "https://app.appleville.xyz/favicon.ico"
+                        "url": "/icons/favicon-appleville.ico"
                     }
                 ]
             }
@@ -967,7 +967,7 @@
                 "Tags": ["nft"],
                 "Status": "active",
                 "Logo": [{
-                        "url": "https://bootloader.art/favicon.svg"
+                        "url": "/icons/favicon-bootloader.svg"
                     }
                 ]
             }
@@ -1056,7 +1056,7 @@
                 "Tags": ["community"],
                 "Status": "active",
                 "Logo": [{
-                        "url": "https://tezos-homebase.io/favicon.ico"
+                        "url": "/icons/favicon-homebase.ico"
                     }
                 ]
             }
