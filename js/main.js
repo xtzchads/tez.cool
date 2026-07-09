@@ -320,8 +320,10 @@ function renderBakers(bakers) {
         idx = end;
         if (idx < sorted.length) {
             requestAnimationFrame(renderBatch);
+        } else if ('requestIdleCallback' in window) {
+            requestIdleCallback(setupSmartTooltipPositioning, { timeout: 500 });
         } else {
-            setupSmartTooltipPositioning();
+            setTimeout(setupSmartTooltipPositioning, 0);
         }
     }
     renderBatch();
