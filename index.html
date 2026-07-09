@@ -48,7 +48,21 @@
      ]
    }
    </script>
-<link rel="stylesheet" href="css/main.css?x=3.31">
+<style>
+html,body{margin:0;padding:0;width:100%;font-family:Monda,Helvetica;background:radial-gradient(50% 50% at 65% 50%,#241a4c 0,#09031c 100%);overflow-x:hidden;color-scheme:dark}
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10000;opacity:1;transition:opacity .5s}
+.spinner-container{position:relative;width:120px;height:120px}
+.spinner-ring{position:absolute;width:100%;height:100%;border:4px solid transparent;border-top-color:#7d7;border-right-color:#87ceeb;border-radius:50%;animation:1.5s cubic-bezier(.68,-.55,.265,1.55) infinite spin}
+.spinner-ring-inner{position:absolute;width:80%;height:80%;top:10%;left:10%;border:4px solid transparent;border-bottom-color:#ff6961;border-left-color:gold;border-radius:50%;animation:1.2s cubic-bezier(.68,-.55,.265,1.55) infinite spin-reverse}
+.spinner-dot{position:absolute;width:20px;height:20px;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#7d7,#87ceeb);border-radius:50%;animation:1s ease-in-out infinite pulse}
+.loading-text{margin-top:30px;font-family:Monda,Arial,sans-serif;font-size:18px;color:#fff;letter-spacing:2px;animation:1.5s ease-in-out infinite fade}
+@keyframes spin{0%{transform:translateY(-50%) rotate(0);transform:rotate(0)}100%{transform:translateY(-50%) rotate(360deg);transform:rotate(360deg)}}
+@keyframes spin-reverse{0%{transform:rotate(360deg)}100%{transform:rotate(0)}}
+@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:1}50%{transform:translate(-50%,-50%) scale(1.5);opacity:.5}}
+@keyframes fade{0%,100%{opacity:.5}50%{opacity:1}}
+</style>
+<link rel="preload" href="css/main.css?x=3.31" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="css/main.css?x=3.31"></noscript>
 </head>
    <body>
    <div class="loading-overlay" id="loadingOverlay">
@@ -450,6 +464,6 @@
       </main>
 	  <script src="js/highcharts.js?v=latest" defer></script>
 	  <script src="js/boost.js" defer></script>
-      <script src="js/main.min.js?v=170" defer></script>
+      <script src="js/main.min.js?v=169" defer></script>
    </body>
 </html>
