@@ -895,7 +895,7 @@
                 "Tags": ["defi"],
                 "Status": "active",
                 "Logo": [{
-                        "url": "https://hanji.io/favicon.ico"
+                        "url": "/icons/favicon-48.png"
                     }
                 ]
             }
