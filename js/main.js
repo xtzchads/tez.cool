@@ -574,7 +574,7 @@ async function initializeRatios() {
         const startCycle = AI_ACTIVATION_CYCLE;
         const relevantData = data.filter(cycleData => cycleData.cycle >= startCycle);
         relevantData.forEach(cycleData => {
-            const ratio = cycleData.totalFrozen / cycleData.totalSupply;
+            onst ratio = ((cycleData.totalOwnStaked || cycleData.totalExternalStaked) ? cycleData.totalOwnStaked + cycleData.totalExternalStaked : cycleData.totalFrozen) / cycleData.totalSupply;
             ratios.push(ratio);
             last = ratio;
         });
@@ -1641,7 +1641,9 @@ function processStakingData(data) {
     return {
         ratios: data.slice(1).map(curr => ({
                 cycle: curr.cycle,
-                staking: curr.totalFrozen / curr.totalSupply
+                staking: (curr.cycle >= 822 && (curr.totalOwnStaked || curr.totalExternalStaked)
+                    ? curr.totalOwnStaked + curr.totalExternalStaked
+                    : curr.totalFrozen) / curr.totalSupply
             })),
         currentCycle: data[data.length - 1].cycle
     };
