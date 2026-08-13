@@ -574,7 +574,7 @@ async function initializeRatios() {
         const startCycle = AI_ACTIVATION_CYCLE;
         const relevantData = data.filter(cycleData => cycleData.cycle >= startCycle);
         relevantData.forEach(cycleData => {
-            onst ratio = ((cycleData.totalOwnStaked || cycleData.totalExternalStaked) ? cycleData.totalOwnStaked + cycleData.totalExternalStaked : cycleData.totalFrozen) / cycleData.totalSupply;
+            const ratio = ((cycleData.totalOwnStaked || cycleData.totalExternalStaked) ? cycleData.totalOwnStaked + cycleData.totalExternalStaked : cycleData.totalFrozen) / cycleData.totalSupply;
             ratios.push(ratio);
             last = ratio;
         });
