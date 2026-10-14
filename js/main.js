@@ -163,7 +163,7 @@ class NavigationManager {
             const target = item.dataset.target;
             const url = item.dataset.url;
             if (item.dataset.external === 'true' && url) {
-                window.open(url, '_blank');
+                window.open(url);
                 return;
             }
             if (target && target !== this.currentView)
