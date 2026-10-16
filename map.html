@@ -10,13 +10,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-deep: #0b0e17;
-      --bg-panel: rgba(20, 25, 38, 0.78);
-      --bg-panel-solid: #141926;
-      --border-subtle: rgba(255, 255, 255, 0.09);
-      --border-bright: rgba(56, 189, 248, 0.45);
+      /* Palette synced with eye.tez.cool (css/main.css) */
+      --bg-deep: #060711;
+      --bg-panel: rgba(8, 10, 24, 0.72);
+      --bg-panel-solid: #0d0f22;
+      --bg-card: rgba(15, 19, 40, 0.72);
+      --bg-input: rgba(8, 10, 24, 0.82);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glass: rgba(148, 163, 255, 0.16);
+      --border-bright: rgba(129, 140, 248, 0.45);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      --shadow-glow: 0 0 35px rgba(99, 102, 241, 0.18);
       --accent-blue: #38bdf8;
       --accent-indigo: #6366f1;
       --accent-gold: #f59e0b;
@@ -46,8 +53,10 @@
       overflow: hidden;
       background-color: var(--bg-deep);
       background-image:
-        radial-gradient(circle at 18% 20%, rgba(99, 102, 241, 0.14) 0%, transparent 45%),
-        radial-gradient(circle at 82% 78%, rgba(56, 189, 248, 0.12) 0%, transparent 45%);
+        radial-gradient(circle at 18% 15%, rgba(99, 102, 241, 0.16) 0%, transparent 42%),
+        radial-gradient(circle at 82% 20%, rgba(16, 185, 129, 0.10) 0%, transparent 40%),
+        radial-gradient(circle at 50% 85%, rgba(244, 63, 94, 0.09) 0%, transparent 48%),
+        linear-gradient(180deg, #060711 0%, #0a0d1e 100%);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       color: var(--text-main);
       user-select: none;
@@ -177,11 +186,11 @@
       gap: 12px;
       padding: 12px 18px;
       background: var(--bg-panel);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
       border-radius: 14px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.32);
+      box-shadow: var(--shadow-lg), var(--shadow-glow);
       z-index: 20;
     }
 
@@ -195,14 +204,15 @@
       width: 40px;
       height: 40px;
       border-radius: 11px;
-      background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(16, 185, 129, 0.2));
+      border: 1px solid rgba(129, 140, 248, 0.35);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
       font-size: 20px;
       color: #fff;
-      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.22);
       flex-shrink: 0;
     }
 
@@ -210,7 +220,7 @@
       font-size: 1.15rem;
       font-weight: 800;
       letter-spacing: -0.02em;
-      background: linear-gradient(90deg, #ffffff, #cbd5e1);
+      background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 60%, #6ee7b7 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -222,7 +232,7 @@
     }
 
     .title-stack p strong {
-      color: var(--accent-blue);
+      color: #a5b4fc;
       font-weight: 600;
     }
 
@@ -246,7 +256,7 @@
       align-items: center;
       gap: 6px;
       padding: 6px 11px;
-      background: rgba(15, 23, 42, 0.65);
+      background: var(--bg-input);
       border: 1px solid var(--border-subtle);
       border-radius: 9px;
       font-size: 0.76rem;
@@ -268,7 +278,7 @@
     .search-box input {
       width: 195px;
       padding: 7px 28px 7px 30px;
-      background: rgba(15, 23, 42, 0.75);
+      background: var(--bg-input);
       border: 1px solid var(--border-subtle);
       border-radius: 9px;
       color: var(--text-main);
@@ -308,7 +318,7 @@
 
     .segmented {
       display: flex;
-      background: rgba(15, 23, 42, 0.75);
+      background: var(--bg-input);
       border: 1px solid var(--border-subtle);
       border-radius: 9px;
       padding: 2px;
@@ -327,12 +337,13 @@
     }
 
     .seg-btn.active {
-      background: rgba(56, 189, 248, 0.18);
-      color: var(--accent-blue);
+      background: var(--accent-indigo);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
     }
 
     .threshold-select {
-      background: rgba(15, 23, 42, 0.75);
+      background: var(--bg-input);
       border: 1px solid var(--border-subtle);
       color: var(--text-main);
       padding: 6px 10px;
@@ -349,8 +360,8 @@
       flex: 1;
       width: 100%;
       min-height: 0;
-      background: rgba(12, 16, 26, 0.65);
-      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
       border-radius: 14px;
       overflow: hidden;
       box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45);
@@ -445,7 +456,8 @@
 
     .hud-btn:hover {
       border-color: var(--border-bright);
-      color: var(--accent-blue);
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.18);
       transform: translateY(-1px);
     }
 
@@ -459,10 +471,10 @@
       opacity: 0;
       transform: translate3d(-9999px, -9999px, 0);
       transition: opacity 0.12s ease;
-      background: rgba(15, 21, 35, 0.94);
+      background: rgba(11, 14, 32, 0.96);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
+      border: 1px solid var(--border-bright);
       border-radius: 12px;
       padding: 11px 14px;
       min-width: 210px;
@@ -540,7 +552,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(11, 14, 23, 0.86);
+      background: rgba(6, 7, 17, 0.86);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       z-index: 30;
@@ -557,8 +569,8 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      border: 3px solid rgba(56, 189, 248, 0.18);
-      border-top-color: var(--accent-blue);
+      border: 3px solid rgba(99, 102, 241, 0.18);
+      border-top-color: var(--accent-indigo);
       animation: spin 0.85s linear infinite;
       margin-bottom: 14px;
     }
@@ -1412,16 +1424,16 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         // Background fill
-        ctx.fillStyle = '#0b0e17';
+        ctx.fillStyle = '#0a0c1d';
         ctx.fillRect(0, 0, width, height);
 
         // Subtle radial ambient glow in center
         const cx = width * 0.5 + camera.x * camera.scale;
         const cy = height * 0.5 + camera.y * camera.scale;
         const bgGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, Math.max(width, height) * 0.65);
-        bgGrad.addColorStop(0, 'rgba(56, 189, 248, 0.07)');
+        bgGrad.addColorStop(0, 'rgba(99, 102, 241, 0.08)');
         bgGrad.addColorStop(0.5, 'rgba(99, 102, 241, 0.03)');
-        bgGrad.addColorStop(1, 'rgba(11, 14, 23, 0)');
+        bgGrad.addColorStop(1, 'rgba(10, 12, 29, 0)');
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, width, height);
 
