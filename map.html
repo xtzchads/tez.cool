@@ -21,6 +21,16 @@
       --accent-indigo: #6366f1;
       --accent-gold: #f59e0b;
       --accent-emerald: #10b981;
+
+      /* Shared site header tokens (from index.html) */
+      --glass-border: rgba(255, 255, 255, 0.26);
+      --glass-bg: rgba(255, 255, 255, 0.01);
+      --spacing-xs: 8px;
+      --spacing-sm: 16px;
+      --spacing-md: 24px;
+      --text-primary: #ffffff;
+      --primary-gradient: linear-gradient(180deg, rgba(162, 124, 238, 1) 0%, rgba(127, 75, 231, 1) 100%);
+      --border-radius-sm: 16px;
     }
 
     * {
@@ -49,70 +59,113 @@
       flex-direction: column;
       width: 100%;
       height: 100%;
-      padding: 62px 14px 14px 14px;
+      padding: 92px 14px 14px 14px;
       gap: 10px;
     }
 
-    /* Top Site Navigation Bar */
+    /* Top Site Navigation Bar — identical to index.html header */
+    .header,
+    .header-content {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
     .header {
+      height: 80px;
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 50px;
-      background: rgba(15, 20, 32, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border-subtle);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
+      right: 0;
+      background: 0 0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: var(--spacing-sm) var(--spacing-md);
+      z-index: 100;
+      transition: .3s;
+      font-family: Monda, Helvetica;
+      line-height: 1.5;
+    }
+
+    .header-content {
       justify-content: center;
-      padding: 0 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
-    .nav-links {
-      display: flex;
+    .nav-menu {
       align-items: center;
-      gap: 8px;
-      overflow-x: auto;
-      max-width: 100%;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      padding: 4px 0;
-    }
-
-    .nav-links::-webkit-scrollbar {
-      display: none;
+      display: flex;
+      gap: var(--spacing-md);
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      justify-content: center;
     }
 
     .nav-item {
-      color: var(--text-muted);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 400;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius-sm);
+      transition: .3s;
+      cursor: pointer;
+      position: relative;
       text-decoration: none;
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 6px 12px;
-      border-radius: 6px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      white-space: nowrap;
-      border: 1px solid transparent;
     }
 
     .nav-item:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.08);
+      background: var(--glass-bg);
+      color: #a27cee;
+      text-decoration: none;
     }
 
     .nav-item.active {
-      color: var(--accent-blue);
-      background: rgba(56, 189, 248, 0.1);
-      border-color: rgba(56, 189, 248, 0.25);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+      background: var(--primary-gradient);
+      color: var(--text-primary);
+    }
+
+    @media (max-width:1200px) {
+      .nav-menu { gap: var(--spacing-sm) }
+      .nav-item { font-size: .9rem; padding: var(--spacing-xs) }
+    }
+
+    @media (max-width:1024px) {
+      .nav-menu { gap: var(--spacing-xs) }
+      .nav-item { font-size: .8rem; padding: 6px var(--spacing-xs) }
+    }
+
+    @media (max-width:768px) {
+      .header { padding: var(--spacing-xs) var(--spacing-sm) }
+      .nav-item { font-size: .7rem; padding: 4px 6px }
+    }
+
+    @media (max-width:640px) {
+      .nav-item { font-size: .65rem; padding: 4px }
+      .nav-menu { gap: 4px }
+      .header { height: 130px }
+    }
+
+    @media (max-width:480px) {
+      .header-content { flex-wrap: wrap; gap: var(--spacing-xs) }
+      .nav-menu { order: 2; width: 100%; justify-content: center; flex-wrap: wrap; gap: var(--spacing-xs) }
+      .nav-item { font-size: .7rem; padding: 4px 8px }
+      .header { height: 130px }
+    }
+
+    @media (max-width:640px) {
+      .header { height: 60px; padding: 6px 4px }
+      .header-content { width: 100% }
+      .nav-menu { gap: 3px; padding: 0 4px; flex-wrap: wrap; justify-content: center }
+      .nav-item { font-size: .65rem; padding: 6px 8px; white-space: nowrap; border-radius: 12px; background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .1); transition: .3s; line-height: 1 }
+      .nav-item.active { background: var(--primary-gradient); border-color: rgba(162, 124, 238, .5); box-shadow: 0 2px 8px rgba(162, 124, 238, .3); transform: scale(1.05) }
+      .nav-item:hover { background: rgba(255, 255, 255, .08) }
+    }
+
+    @media (max-width:480px) {
+      .nav-item { font-size: .6rem; padding: 5px 6px }
     }
 
     /* Glassmorphic Control Header */
@@ -530,19 +583,8 @@
 
     @media (max-width: 768px) {
       #app {
-        padding: 54px 8px 8px 8px;
+        padding: 92px 8px 8px 8px;
         gap: 8px;
-      }
-
-      .header {
-        height: 44px;
-        padding: 0 10px;
-        justify-content: flex-start;
-      }
-
-      .nav-item {
-        font-size: 10px;
-        padding: 5px 8px;
       }
 
       .topbar {
@@ -565,21 +607,30 @@
         display: none;
       }
     }
+
+    /* Shared header shrinks to 60px on small screens */
+    @media (max-width: 640px) {
+      #app {
+        padding-top: 70px;
+      }
+    }
   </style>
 </head>
 
 <body>
   <header class="header">
-    <nav class="nav-links">
-      <a href="https://tez.cool/" class="nav-item">HOME</a>
-      <a href="https://tez.cool/calm" class="nav-item">TEZCALM</a>
-      <a href="https://tez.cool/map?q=20000" class="nav-item active">CHADMAP</a>
-      <a href="https://dashboard.tez.cool" class="nav-item">THE EYE OF CHAD</a>
-      <a href="https://stake.tez.cool" class="nav-item">TEZSTAKE</a>
-      <a href="https://trollbox.tez.cool" class="nav-item">TEZTROLLBOX</a>
-      <a href="https://whales.tez.cool" class="nav-item">TEZWHALES</a>
-      <a href="https://chat.tez.cool" class="nav-item">NFTCHAT</a>
-    </nav>
+    <div class="header-content">
+      <nav class="nav-menu">
+        <div class="nav-item" data-target="home" data-url="https://tez.cool/" data-external="true">HOME</div>
+        <div class="nav-item" data-target="tezcalm" data-url="https://up.tez.cool/?v=2" data-external="true">TEZCALM</div>
+        <div class="nav-item active" data-target="chadmap" data-url="https://tez.cool/map?q=20000&v=2" data-external="true">CHADMAP</div>
+        <div class="nav-item" data-target="eyeofchad" data-url="https://eye.tez.cool/" data-external="true">THE EYE OF CHAD</div>
+        <div class="nav-item" data-target="tezstake" data-url="https://stake.tez.cool/" data-external="true">TEZSTAKE</div>
+        <div class="nav-item" data-target="trollbox" data-url="https://trollbox.tez.cool/" data-external="true">TEZTROLLBOX</div>
+        <div class="nav-item" data-target="whales" data-url="https://secret.tez.cool/" data-external="true">TEZWHALES</div>
+        <div class="nav-item" data-target="nftchat" data-url="https://chat.tez.cool/" data-external="true">NFTCHAT</div>
+      </nav>
+    </div>
   </header>
 
   <div id="app">
@@ -666,25 +717,45 @@
   </div>
 
   <script>
+    // Shared site header navigation (same behavior as index.html / main.min.js)
+    document.addEventListener('click', function (e) {
+      const item = e.target.closest('.header .nav-item');
+      if (!item || item.classList.contains('active')) return;
+      const url = item.dataset.url;
+      if (url) window.open(url, '_self');
+    });
+  </script>
+
+  <script>
     (function () {
       'use strict';
 
-      // 1. Parse URL query parameter `?q=` (preserve original behavior: default 1000 XTZ if not passed)
+      // 1. Parse URL query parameter `?q=` — only 20K / 50K / 100K tiers are allowed
+      const ALLOWED_THRESHOLDS = [20000, 50000, 100000];
+      const DEFAULT_THRESHOLD = 20000;
+      function snapThreshold(value) {
+        const v = Number(value);
+        if (!isFinite(v) || v <= 0) return DEFAULT_THRESHOLD;
+        // Largest allowed tier not above the requested value (min tier as floor)
+        let pick = ALLOWED_THRESHOLDS[0];
+        for (const t of ALLOWED_THRESHOLDS) if (v >= t) pick = t;
+        return pick;
+      }
       const urlParams = new URLSearchParams(window.location.search);
-      const qValue = Number(urlParams.get('q'));
-      let minStakeXTZ = (!isNaN(qValue) && qValue > 0) ? qValue : 1000;
+      let minStakeXTZ = snapThreshold(urlParams.get('q'));
 
       // Sync dropdown & header label
       const thresholdSelect = document.getElementById('threshold-select');
       const titleMinXtz = document.getElementById('title-min-xtz');
-      if (![...thresholdSelect.options].some(opt => Number(opt.value) === minStakeXTZ)) {
-        const customOpt = document.createElement('option');
-        customOpt.value = String(minStakeXTZ);
-        customOpt.textContent = `≥ ${minStakeXTZ.toLocaleString('en-US')} ꜩ`;
-        thresholdSelect.appendChild(customOpt);
-      }
       thresholdSelect.value = String(minStakeXTZ);
-      titleMinXtz.textContent = (qValue > 0 ? minStakeXTZ : 20000).toLocaleString('en-US');
+      titleMinXtz.textContent = minStakeXTZ.toLocaleString('en-US');
+
+      // Keep the URL consistent with the tier actually shown
+      if (urlParams.get('q') !== String(minStakeXTZ)) {
+        const fixedUrl = new URL(window.location.href);
+        fixedUrl.searchParams.set('q', String(minStakeXTZ));
+        window.history.replaceState({}, '', fixedUrl.toString());
+      }
 
       // DOM Elements
       const stageWrap = document.getElementById('stage-wrap');
@@ -1631,7 +1702,7 @@
       });
 
       thresholdSelect.addEventListener('change', function () {
-        minStakeXTZ = Number(thresholdSelect.value) || 1000;
+        minStakeXTZ = snapThreshold(thresholdSelect.value);
         titleMinXtz.textContent = minStakeXTZ.toLocaleString('en-US');
         const nextUrl = new URL(window.location.href);
         nextUrl.searchParams.set('q', String(minStakeXTZ));
