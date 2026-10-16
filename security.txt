@@ -1,0 +1,31 @@
+# =============================================================================
+# Tez.Cool — Vulnerability Disclosure Policy (VDP) & security.txt (RFC 9116)
+# =============================================================================
+#
+# Scope (In-Scope Domains):
+# - https://tez.cool
+# - https://up.tez.cool
+# - https://stake.tez.cool
+# - https://eye.tez.cool
+# - https://trollbox.tez.cool
+# - https://chat.tez.cool
+#
+# Disclosure Guidelines & Safe Harbor:
+# - Please report suspected security vulnerabilities privately via the Contact
+#   link below before disclosing them publicly.
+# - Provide a clear description and reproducible proof-of-concept (PoC).
+# - Make a good-faith effort to avoid privacy violations, data destruction,
+#   and interruption or degradation of services.
+# - Good-faith security research conducted in accordance with this policy is
+#   considered authorized.
+#
+# Out of Scope:
+# - Volumetric Denial of Service (DoS/DDoS) or automated spam on on-chain contracts
+# - Third-party APIs and infrastructure (e.g., TzKT, Tezos RPC nodes, Giphy)
+# - Non-exploitable self-XSS or benign links within target="_blank" rel="noopener noreferrer"
+# - Missing security headers that do not lead to a demonstrable vulnerability
+# =============================================================================
+
+Contact: https://x.com/IDoctorWhoI
+Preferred-Languages: en
+Canonical: https://tez.cool/security.txt
