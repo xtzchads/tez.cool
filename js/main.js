@@ -1333,6 +1333,364 @@ function createTimeSeriesChart(containerId, title, data, formatter, isCumulative
         }
     });
 }
+// Tezos protocol upgrades (activation cycle = TzKT /v1/protocols `firstCycle`).
+// Protocol names are alphabetical, so the initial letter doubles as a compact label
+// whenever there is not enough horizontal room for the full name.
+const PROTOCOL_UPGRADES = [
+    { cycle: 112, name: 'Athens' },
+    { cycle: 160, name: 'Babylon' },
+    { cycle: 208, name: 'Carthage' },
+    { cycle: 296, name: 'Delphi' },
+    { cycle: 328, name: 'Edo' },
+    { cycle: 358, name: 'Florence' },
+    { cycle: 388, name: 'Granada' },
+    { cycle: 428, name: 'Hangzhou', major: true },
+    { cycle: 468, name: 'Ithaca' },
+    { cycle: 498, name: 'Jakarta' },
+    { cycle: 528, name: 'Kathmandu' },
+    { cycle: 558, name: 'Lima' },
+    { cycle: 593, name: 'Mumbai' },
+    { cycle: 623, name: 'Nairobi' },
+    { cycle: 703, name: 'Oxford' },
+    { cycle: 743, name: 'Paris', major: true },
+    { cycle: 823, name: 'Quebec', major: true },
+    { cycle: 858, name: 'Rio' },
+    { cycle: 998, name: 'Seoul' },
+    { cycle: 1124, name: 'Tallinn' },
+    { cycle: 1278, name: 'Ushuaia' }
+];
+const SAFE_PROTOCOL_NAME = /^[A-Za-z][A-Za-z0-9 .\-]{0,23}$/;
+const UPGRADE_LABEL_ROWS = 2;
+const UPGRADE_LABEL_GAP = 6;
+const UPGRADE_LABEL_ROW_HEIGHT = 14;
+let _protocolUpgradesCache = null;
+let _labelMeasureCtx = null;
+// Hardcoded list is authoritative; newer protocols optionally supplied by the worker
+// (`aggregatedDataCache.protocols`) are appended automatically so future upgrades show up.
+function getProtocolUpgrades() {
+    if (_protocolUpgradesCache)
+        return _protocolUpgradesCache;
+    const list = PROTOCOL_UPGRADES.map(p => ({ ...p }));
+    const remote = aggregatedDataCache?.protocols;
+    if (Array.isArray(remote)) {
+        remote
+            .filter(p => p && Number.isInteger(p.cycle) && typeof p.name === 'string' && SAFE_PROTOCOL_NAME.test(p.name))
+            .sort((a, b) => a.cycle - b.cycle)
+            .forEach(p => {
+                const last = list[list.length - 1];
+                // Skip patch releases (e.g. "Paris C") that share the previous protocol's letter
+                if (p.cycle > last.cycle && p.name.charAt(0).toUpperCase() !== last.name.charAt(0).toUpperCase()) {
+                    list.push({ cycle: p.cycle, name: p.name });
+                }
+            });
+    }
+    _protocolUpgradesCache = list;
+    return list;
+}
+function protocolNameForCycle(cycle) {
+    const list = getProtocolUpgrades();
+    let name = 'Alpha';
+    for (let i = 0; i < list.length && list[i].cycle <= cycle; i++)
+        name = list[i].name;
+    return name;
+}
+function getUpgradeTickPositions() {
+    const ticks = getProtocolUpgrades().map(u => u.cycle);
+    if (!ticks.includes(currentCycle))
+        ticks.push(currentCycle);
+    return ticks.sort((a, b) => a - b);
+}
+function measureLabelText(text, bold) {
+    if (!_labelMeasureCtx)
+        _labelMeasureCtx = document.createElement('canvas').getContext('2d');
+    _labelMeasureCtx.font = `${bold ? 'bold ' : ''}11px "Monda", Helvetica, Arial, sans-serif`;
+    return Math.ceil(_labelMeasureCtx.measureText(text).width);
+}
+// Collision-free placement on up to UPGRADE_LABEL_ROWS rows, in two passes:
+//  1. Coverage: every upgrade gets a slot — "Now"/key upgrades try their full name first,
+//     the rest reserve their compact initial letter (protocols are alphabetical).
+//  2. Expansion: compact letters are upgraded to full names (on any row) wherever the
+//     wider label still doesn't collide with anything already placed.
+// Labels that can't fit even as a letter are skipped (tick, guide line and tooltip remain).
+function layoutUpgradeLabels(items, chartWidth) {
+    const placed = [];
+    const span = (item, text) => {
+        const half = measureLabelText(text, item.major) / 2;
+        const center = Math.min(Math.max(item.px, half + 2), chartWidth - half - 2);
+        return { center, left: center - half, right: center + half };
+    };
+    const fits = (box, row, ignore) => placed.every(p => p === ignore || p.row !== row ||
+        box.right + UPGRADE_LABEL_GAP <= p.left || box.left >= p.right + UPGRADE_LABEL_GAP);
+    const tryPlace = (item, text) => {
+        const box = span(item, text);
+        for (let r = 0; r < UPGRADE_LABEL_ROWS; r++) {
+            if (fits(box, r, null)) {
+                placed.push({ item, text, row: r, ...box });
+                return true;
+            }
+        }
+        return false;
+    };
+    items.forEach(item => {
+        if (item.major && tryPlace(item, item.full))
+            return;
+        tryPlace(item, item.short);
+    });
+    placed.filter(p => p.text !== p.item.full).forEach(p => {
+        const box = span(p.item, p.item.full);
+        const rowOrder = [p.row, ...Array.from({ length: UPGRADE_LABEL_ROWS }, (_, r) => r).filter(r => r !== p.row)];
+        const row = rowOrder.find(r => fits(box, r, p));
+        if (row !== undefined)
+            Object.assign(p, { text: p.item.full, row, ...box });
+    });
+    return placed;
+}
+function yAtCycle(series, cycle) {
+    const pts = series.points || [];
+    if (!pts.length)
+        return null;
+    const guess = pts[cycle - pts[0].x];
+    if (guess && guess.x === cycle)
+        return guess.y;
+    const found = pts.find(p => p.x === cycle);
+    return found ? found.y : null;
+}
+// ---- Intro animation (staking / issuance charts) ----
+// Timeline: history draws in and decelerates into "Now", holds for a beat while the
+// present-day marker lights up, then the projection extends to the end of the chart.
+const PREFERS_REDUCED_MOTION = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const INTRO_DURATION = PREFERS_REDUCED_MOTION ? 700 : 3800;
+const INTRO_HISTORY_SHARE = 0.58;
+const INTRO_HOLD_SHARE = 0.1;
+// `state.nowFrac` = horizontal position of "Now" as a fraction of the plot width. It is refined
+// to the exact pixel value in the chart's load event, before the first animation frame runs.
+function createIntroTimeline(state) {
+    const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+    const easeInOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
+    const projStart = INTRO_HISTORY_SHARE + INTRO_HOLD_SHARE;
+    const ease = PREFERS_REDUCED_MOTION ? easeOutCubic : pos => {
+        const nowFrac = state.nowFrac;
+        if (pos <= 0)
+            return 0;
+        if (pos >= 1)
+            return 1;
+        if (pos < INTRO_HISTORY_SHARE)
+            return nowFrac * easeOutCubic(pos / INTRO_HISTORY_SHARE);
+        if (pos < projStart)
+            return nowFrac;
+        return nowFrac + (1 - nowFrac) * easeInOutSine((pos - projStart) / (1 - projStart));
+    };
+    // Smallest timeline position at which the reveal reaches `frac` (ease is monotonic)
+    const inverse = frac => {
+        let lo = 0, hi = 1;
+        for (let i = 0; i < 24; i++) {
+            const mid = (lo + hi) / 2;
+            if (ease(mid) < frac)
+                lo = mid;
+            else
+                hi = mid;
+        }
+        return hi;
+    };
+    return { ease, inverse, duration: INTRO_DURATION };
+}
+const easeOutBack = t => {
+    const c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+};
+function whenElementVisible(el, callback) {
+    if (!el || typeof IntersectionObserver !== 'function') {
+        callback();
+        return;
+    }
+    const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+            observer.disconnect();
+            callback();
+        }
+    }, { threshold: 0.25 });
+    observer.observe(el);
+}
+function ensureIntroStyles() {
+    if (document.getElementById('tez-intro-styles'))
+        return;
+    const style = document.createElement('style');
+    style.id = 'tez-intro-styles';
+    style.textContent = `
+        @keyframes tezNowPulse { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(4.2); opacity: 0; } }
+        .tez-now-pulse { transform-box: fill-box; transform-origin: center; animation: tezNowPulse 2s ease-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .tez-now-pulse { animation: none; } }
+    `;
+    document.head.appendChild(style);
+}
+// Runs once on chart load: scan line, synced guide reveal, pulse marker fade-in.
+function playChartIntro(chart, timeline) {
+    const { plotLeft, plotTop, plotWidth, plotHeight } = chart;
+    const duration = timeline.duration;
+    const nowFrac = Math.min(Math.max((chart.xAxis[0].toPixels(currentCycle) - plotLeft) / plotWidth, 0), 1);
+    const nowAt = duration * timeline.inverse(nowFrac);
+    // Guide lines are revealed by a clip that grows exactly like the series reveal
+    const guideClip = chart.renderer.clipRect(plotLeft, 0, 0, chart.chartHeight);
+    chart.upgradeGuides.major.clip(guideClip);
+    chart.upgradeGuides.minor.clip(guideClip);
+    guideClip.animate({ width: plotWidth + 2 }, { duration, easing: timeline.ease });
+    setTimeout(() => {
+        if (chart.upgradeGuides && chart.upgradeGuides.major.element) {
+            chart.upgradeGuides.major.clip();
+            chart.upgradeGuides.minor.clip();
+        }
+        if (guideClip.element)
+            guideClip.destroy();
+    }, duration + 80);
+    // Present-day marker lights up when the line arrives at "Now"
+    if (chart.nowMarker) {
+        chart.nowMarker.attr({ opacity: 0 });
+        setTimeout(() => {
+            if (chart.nowMarker && chart.nowMarker.element)
+                chart.nowMarker.animate({ opacity: 1 }, { duration: 500 });
+        }, nowAt);
+    }
+    if (PREFERS_REDUCED_MOTION)
+        return;
+    // Glowing scan line riding the leading edge of the reveal
+    const scan = chart.renderer.g('intro-scan').attr({ zIndex: 6, translateX: plotLeft }).add();
+    chart.renderer.rect(-28, plotTop, 28, plotHeight).attr({
+        fill: {
+            linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
+            stops: [[0, 'rgba(255, 255, 160, 0)'], [1, 'rgba(255, 255, 160, 0.16)']]
+        }
+    }).add(scan);
+    chart.renderer.rect(-1, plotTop, 2, plotHeight).attr({
+        fill: {
+            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+            stops: [[0, 'rgba(119, 221, 119, 0)'], [0.45, 'rgba(255, 255, 200, 0.95)'], [1, 'rgba(255, 105, 97, 0)']]
+        }
+    }).add(scan);
+    scan.animate({ translateX: plotLeft + plotWidth }, { duration, easing: timeline.ease });
+    scan.element.style.transition = 'opacity 0.5s ease-out';
+    setTimeout(() => {
+        if (scan.element)
+            scan.element.style.opacity = '0';
+    }, duration);
+    setTimeout(() => {
+        if (scan.element)
+            scan.destroy();
+    }, duration + 650);
+}
+// Draws dashed upgrade guide lines + the multi-row upgrade labels under the x axis.
+// Guides are refreshed on every redraw (they follow dragged data); labels are only
+// re-laid out when geometry changes, keeping drag interactions smooth.
+function drawUpgradeOverlay(chart) {
+    const xAxis = chart.xAxis[0];
+    const yAxis = chart.yAxis[0];
+    const series = chart.series[0];
+    if (!xAxis || !yAxis || !series)
+        return;
+    const ext = xAxis.getExtremes();
+    const inRange = c => c >= ext.min && c <= ext.max;
+    const upgrades = getProtocolUpgrades().filter(u => inRange(u.cycle));
+    const bottom = chart.plotTop + chart.plotHeight;
+    const majorPath = [];
+    const minorPath = [];
+    const addGuide = (cycle, target) => {
+        const y = yAtCycle(series, cycle);
+        if (y === null || y === undefined)
+            return;
+        const xPx = xAxis.toPixels(cycle);
+        const yPx = Math.max(chart.plotTop, yAxis.toPixels(y));
+        if (yPx < bottom)
+            target.push(['M', xPx, bottom], ['L', xPx, yPx]);
+    };
+    upgrades.forEach(u => addGuide(u.cycle, u.major ? majorPath : minorPath));
+    if (inRange(currentCycle))
+        addGuide(currentCycle, majorPath);
+    if (!chart.upgradeGuides) {
+        chart.upgradeGuides = {
+            major: chart.renderer.path('M 0 0').attr({ 'stroke-width': 1, stroke: '#ffffff', 'stroke-dasharray': '5,5', zIndex: 2 }).add(),
+            minor: chart.renderer.path('M 0 0').attr({ 'stroke-width': 1, stroke: 'rgba(255, 255, 255, 0.28)', 'stroke-dasharray': '3,4', zIndex: 2 }).add()
+        };
+    }
+    chart.upgradeGuides.major.attr({ d: majorPath.length ? majorPath : 'M 0 0' });
+    chart.upgradeGuides.minor.attr({ d: minorPath.length ? minorPath : 'M 0 0' });
+
+    // Pulsing "you are here" marker on the current cycle
+    const nowY = inRange(currentCycle) ? yAtCycle(series, currentCycle) : null;
+    if (nowY !== null && nowY !== undefined) {
+        const nx = xAxis.toPixels(currentCycle);
+        const ny = Math.max(chart.plotTop, yAxis.toPixels(nowY));
+        if (!chart.nowMarker) {
+            ensureIntroStyles();
+            chart.nowMarker = chart.renderer.g('now-marker').attr({ zIndex: 8 }).add();
+            chart.nowMarkerRing = chart.renderer.circle(0, 0, 4).attr({
+                fill: 'none',
+                stroke: '#ffffaa',
+                'stroke-width': 1.5,
+                'vector-effect': 'non-scaling-stroke',
+                'class': 'tez-now-pulse'
+            }).add(chart.nowMarker);
+            chart.nowMarkerDot = chart.renderer.circle(0, 0, 3.2).attr({ fill: '#ffffff' }).add(chart.nowMarker);
+        }
+        chart.nowMarkerRing.attr({ cx: nx, cy: ny });
+        chart.nowMarkerDot.attr({ cx: nx, cy: ny });
+    }
+
+    // One-time intro (timeline is attached in the chart's load event)
+    const intro = chart.introTimeline;
+    if (intro) {
+        chart.introTimeline = null;
+        playChartIntro(chart, intro);
+    }
+
+    const layoutKey = [chart.chartWidth, chart.plotLeft, chart.plotWidth, bottom, ext.min, ext.max, upgrades.length, currentCycle].join('|');
+    if (chart.upgradeLabelKey === layoutKey)
+        return;
+    chart.upgradeLabelKey = layoutKey;
+    if (chart.upgradeLabelGroup)
+        chart.upgradeLabelGroup.destroy();
+    const group = chart.upgradeLabelGroup = chart.renderer.g('upgrade-labels').attr({ zIndex: 7 }).add();
+    const items = upgrades.map(u => ({
+        px: xAxis.toPixels(u.cycle),
+        full: u.name,
+        short: u.name.charAt(0).toUpperCase(),
+        major: !!u.major,
+        isNow: false,
+        title: `${u.name} — activated at cycle ${u.cycle}`
+    }));
+    if (inRange(currentCycle)) {
+        items.push({ px: xAxis.toPixels(currentCycle), full: 'Now', short: 'Now', major: true, isNow: true, title: `Current cycle ${currentCycle}` });
+    }
+    // Priority: "Now" first, then key economic upgrades, then everything else chronologically
+    const ordered = [
+        ...items.filter(i => i.isNow),
+        ...items.filter(i => i.major && !i.isNow),
+        ...items.filter(i => !i.major)
+    ];
+    layoutUpgradeLabels(ordered, chart.chartWidth).forEach(p => {
+        const label = chart.renderer
+            .text(escapeHTML(p.text), p.center, bottom + 15 + p.row * UPGRADE_LABEL_ROW_HEIGHT)
+            .attr({ align: 'center' })
+            .css({
+                color: p.item.major ? '#ffffff' : 'rgba(255, 255, 255, 0.72)',
+                fontSize: '11px',
+                fontWeight: p.item.major ? 'bold' : 'normal',
+                cursor: 'default'
+            })
+            .add(group);
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = p.item.title;
+        label.element.appendChild(title);
+        // During the intro each label pops in just as the reveal passes its tick
+        if (intro) {
+            const frac = Math.min(Math.max((p.item.px - chart.plotLeft) / chart.plotWidth, 0), 1);
+            const at = PREFERS_REDUCED_MOTION ? intro.duration : intro.duration * intro.inverse(frac);
+            label.attr({ opacity: 0, translateY: 9 });
+            setTimeout(() => {
+                if (label.element)
+                    label.animate({ opacity: 1, translateY: 0 }, { duration: p.item.isNow ? 650 : 480, easing: easeOutBack });
+            }, at);
+        }
+    });
+}
 function createHistoricalCharts(ratio) {
     try {
         const data = aggregatedDataCache.historicalCycleData;
@@ -1347,7 +1705,7 @@ function createHistoricalCharts(ratio) {
         createHistoricalChart('issuanceh', 'Issuance since genesis', issuanceDataWithRatio, d => ({
                 x: d.cycle,
                 y: d.issuance
-            }), [428, 743, 823, currentCycle]);
+            }), getUpgradeTickPositions());
         const stakingDataWithRatio = [...stakingData.ratios, ...ratio.map((ratioValue, index) => ({
                     cycle: currentCycle + index + 1,
                     staking: 0,
@@ -1356,45 +1714,33 @@ function createHistoricalCharts(ratio) {
         createHistoricalChart('stakingh', 'Staked since genesis', stakingDataWithRatio, d => ({
                 x: d.cycle,
                 y: (d.staking + (d.ratio || 0)) * 100
-            }), [428, 743, 823, currentCycle]);
+            }), getUpgradeTickPositions());
     } catch (error) {
         console.error('Error creating historical charts:', error);
     }
 }
 function createHistoricalChart(containerId, title, data, dataMapper, tickPositions) {
+    const seriesData = data.map(dataMapper);
+    const xFirst = seriesData.length ? seriesData[0].x : 0;
+    const xLast = seriesData.length ? seriesData[seriesData.length - 1].x : 1;
+    const introState = { nowFrac: Math.min(Math.max((currentCycle - xFirst) / Math.max(1, xLast - xFirst), 0.05), 0.95) };
+    const introTimeline = createIntroTimeline(introState);
     const chartConfig = {
         chart: {
             type: 'spline',
             backgroundColor: 'rgba(0,0,0,0)',
+            // Room for two rows of protocol upgrade labels under the x axis
+            marginBottom: 44,
             events: {
                 load: function () {
-                    this.customGroup = this.renderer.g('custom-lines').add();
-                    this.addCustomLines = function () {
-                        this.customGroup.destroy();
-                        this.customGroup = this.renderer.g('custom-lines').add();
-                        const chartData = data.map(dataMapper);
-                        [428, 743, 823, currentCycle].forEach(position => {
-                            const dataPoint = chartData.find(point => point.x === position);
-                            if (dataPoint) {
-                                const xPixel = this.xAxis[0].toPixels(position);
-                                const yPixel = this.yAxis[0].toPixels(dataPoint.y);
-                                const bottomPixel = this.plotTop + this.plotHeight;
-                                if (yPixel < bottomPixel) {
-                                    this.renderer.path(['M', xPixel, bottomPixel, 'L', xPixel, yPixel]).attr({
-                                        'stroke-width': 1,
-                                        stroke: '#ffffff',
-                                        'stroke-dasharray': '5,5'
-                                    }).add(this.customGroup);
-                                }
-                            }
-                        });
-                    };
-                    this.addCustomLines();
+                    // Exact pixel position of "Now" so the reveal pauses precisely on it
+                    const nowPx = this.xAxis[0].toPixels(currentCycle);
+                    introState.nowFrac = Math.min(Math.max((nowPx - this.plotLeft) / this.plotWidth, 0.02), 0.98);
+                    this.introTimeline = introTimeline;
+                    drawUpgradeOverlay(this);
                 },
                 redraw: function () {
-                    if (this.addCustomLines) {
-                        this.addCustomLines();
-                    }
+                    drawUpgradeOverlay(this);
                 }
             }
         },
@@ -1406,25 +1752,16 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
         },
         xAxis: {
             lineColor: '#ffffff',
+            // Labels are rendered by drawUpgradeOverlay() with collision avoidance
             labels: {
-                formatter: function () {
-                    if (this.value === 428)
-                        return 'Hangzhou';
-                    if (this.value === 743)
-                        return 'P';
-                    if (this.value === 823)
-                        return 'Q';
-                    if (this.value === currentCycle)
-                        return 'Now';
-                    return '';
-                },
-                style: {
-                    color: '#ffffff'
-                }
+                enabled: false
             },
             title: {
                 text: null
             },
+            tickWidth: 1,
+            tickLength: 5,
+            tickColor: 'rgba(255, 255, 255, 0.55)',
             tickInterval: 1,
             tickPositions: tickPositions
         },
@@ -1443,7 +1780,8 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
         tooltip: {
             formatter: function () {
                 const label = containerId === 'issuanceh' ? 'Issuance' : 'Staking (frozen tez)';
-                return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> ${label}: <b>${this.y.toFixed(2)}%</b><br/>`;
+                const era = this.x > currentCycle ? 'Projection' : escapeHTML(protocolNameForCycle(this.x));
+                return `Cycle: ${this.x} <span style="opacity:0.7">· ${era}</span><br><span style="color:${this.point.color}">●</span> ${label}: <b>${this.y.toFixed(2)}%</b><br/>`;
             }
         },
         series: [{
@@ -1472,7 +1810,12 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
                     stops: containerId === 'issuanceh' ? [[0, '#ff6961'], [1, '#77dd77']] : [[0, '#77dd77'], [1, '#ff6961']]
                 },
                 name: title,
-                data: data.map(dataMapper),
+                data: seriesData,
+                // Cinematic reveal; overlays (scan line, guides, labels) share this timeline
+                animation: {
+                    duration: introTimeline.duration,
+                    easing: introTimeline.ease
+                },
                 lineWidth: 1.5,
                 dataLabels: {
                     enabled: true,
@@ -1563,7 +1906,8 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
             }
         };
     }
-    Highcharts.chart(containerId, chartConfig);
+    // Build (and animate) only once the chart scrolls into view so the intro is actually seen
+    whenElementVisible(document.getElementById(containerId), () => Highcharts.chart(containerId, chartConfig));
 }
 // #7: Cache both chart references
 let _issuanceChartCache = null;
