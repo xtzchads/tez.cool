@@ -2,183 +2,567 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TezMoon Simulator">
-  <title>Chad Map</title>
-  <script src="https://code.highcharts.com/highcharts.js"></script>
-  <script src="https://code.highcharts.com/highcharts-more.js"></script>
-  <script src="https://code.highcharts.com/modules/boost.js"></script>
-  <script src="https://code.highcharts.com/modules/exporting.js"></script>
-  <script src="https://code.highcharts.com/modules/export-data.js"></script>
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/main.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Tezos Chad Club — Interactive Staking Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    @import url("https://fonts.googleapis.com/css?family=Monda:400,500,600");
-    html, body {
-      height: 100%;
-      margin: 0;
+    :root {
+      --bg-deep: #0b0e17;
+      --bg-panel: rgba(20, 25, 38, 0.78);
+      --bg-panel-solid: #141926;
+      --border-subtle: rgba(255, 255, 255, 0.09);
+      --border-bright: rgba(56, 189, 248, 0.45);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #6366f1;
+      --accent-gold: #f59e0b;
+      --accent-emerald: #10b981;
     }
 
-    /* Original TezCool Header */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-deep);
+      background-image:
+        radial-gradient(circle at 18% 20%, rgba(99, 102, 241, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 82% 78%, rgba(56, 189, 248, 0.12) 0%, transparent 45%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-main);
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 62px 14px 14px 14px;
+      gap: 10px;
+    }
+
+    /* Top Site Navigation Bar */
     .header {
-      height: 80px;
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      background: 0 0;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.26);
-      padding: 16px 24px;
-      z-index: 100;
-      transition: .3s;
+      width: 100%;
+      height: 50px;
+      background: rgba(15, 20, 32, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 1000;
       display: flex;
       align-items: center;
-      width: 100%;
+      justify-content: center;
+      padding: 0 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     }
 
-    .header-content {
+    .nav-links {
       display: flex;
       align-items: center;
-      width: 100%;
-      justify-content: center;
-      max-width: 1400px;
-      margin: 0 auto;
+      gap: 8px;
+      overflow-x: auto;
+      max-width: 100%;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 4px 0;
     }
 
-    .nav-menu {
-      align-items: center;
-      display: flex;
-      gap: 24px;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      justify-content: center;
+    .nav-links::-webkit-scrollbar {
+      display: none;
     }
 
     .nav-item {
-      color: #ffffff;
-      font-family: "Monda", Helvetica, sans-serif;
-      font-size: 1rem;
-      font-weight: 400;
-      padding: 8px 16px;
-      border-radius: 16px;
-      transition: .3s;
-      cursor: pointer;
-      position: relative;
+      color: var(--text-muted);
       text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      border: 1px solid transparent;
     }
 
     .nav-item:hover {
-      background: rgba(255, 255, 255, 0.01);
-      color: #a27cee;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.08);
     }
 
     .nav-item.active {
-      background: linear-gradient(180deg, rgba(162, 124, 238, 1) 0%, rgba(127, 75, 231, 1) 100%);
-      color: #ffffff;
+      color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.25);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
     }
 
-    @media (max-width: 1200px) {
-      .nav-menu {
-        gap: 16px;
-      }
-
-      .nav-item {
-        font-size: 0.9rem;
-        padding: 6px 12px;
-      }
+    /* Glassmorphic Control Header */
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.32);
+      z-index: 20;
     }
 
-    @media (max-width: 1024px) {
-      .nav-menu {
-        gap: 12px;
-      }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
 
-      .nav-item {
-        font-size: 0.85rem;
-        padding: 6px 10px;
+    .brand-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+      flex-shrink: 0;
+    }
+
+    .title-stack h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title-stack p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .title-stack p strong {
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    /* Stats & Interactive Controls */
+    .controls-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 4px;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .stat-pill .val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box input {
+      width: 195px;
+      padding: 7px 28px 7px 30px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9px;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, width 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--border-bright);
+      width: 230px;
+    }
+
+    .search-box .search-icon {
+      position: absolute;
+      left: 10px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      pointer-events: none;
+    }
+
+    .search-box .clear-btn {
+      position: absolute;
+      right: 8px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .search-box .clear-btn.visible {
+      display: block;
+    }
+
+    .segmented {
+      display: flex;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9px;
+      padding: 2px;
+    }
+
+    .seg-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .seg-btn.active {
+      background: rgba(56, 189, 248, 0.18);
+      color: var(--accent-blue);
+    }
+
+    .threshold-select {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-size: 0.76rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Main Canvas Stage */
+    #stage-wrap {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      background: rgba(12, 16, 26, 0.65);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45);
+    }
+
+    #bubble-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #bubble-canvas:active {
+      cursor: grabbing;
+    }
+
+    /* Floating Canvas Controls & Legend */
+    .canvas-hud-bottom {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .legend-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 14px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      pointer-events: auto;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.baker {
+      background: var(--accent-gold);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+
+    .legend-dot.staker {
+      background: var(--accent-blue);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+    }
+
+    .zoom-dock {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .hud-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .hud-btn:hover {
+      border-color: var(--border-bright);
+      color: var(--accent-blue);
+      transform: translateY(-1px);
+    }
+
+    /* Rich Hover Tooltip */
+    #tooltip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 1100;
+      opacity: 0;
+      transform: translate3d(-9999px, -9999px, 0);
+      transition: opacity 0.12s ease;
+      background: rgba(15, 21, 35, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 11px 14px;
+      min-width: 210px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+    }
+
+    #tooltip.visible {
+      opacity: 1;
+    }
+
+    .tt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .tt-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+      word-break: break-word;
+    }
+
+    .tt-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    .tt-badge.baker {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .tt-badge.staker {
+      background: rgba(56, 189, 248, 0.18);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .tt-stake {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-emerald);
+      margin-bottom: 4px;
+    }
+
+    .tt-addr {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .tt-hint {
+      margin-top: 6px;
+      padding-top: 5px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      font-size: 0.68rem;
+      color: #64748b;
+    }
+
+    /* Loading Overlay */
+    #loader-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(11, 14, 23, 0.86);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 30;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    #loader-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid rgba(56, 189, 248, 0.18);
+      border-top-color: var(--accent-blue);
+      animation: spin 0.85s linear infinite;
+      margin-bottom: 14px;
+    }
+
+    .loader-text {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .loader-sub {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
     }
 
     @media (max-width: 768px) {
-      .header {
-        padding: 12px 16px;
+      #app {
+        padding: 54px 8px 8px 8px;
+        gap: 8px;
       }
 
-      .nav-menu {
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: center;
+      .header {
+        height: 44px;
+        padding: 0 10px;
+        justify-content: flex-start;
       }
 
       .nav-item {
-        font-size: 0.8rem;
-        padding: 4px 8px;
+        font-size: 10px;
+        padding: 5px 8px;
       }
-    }
 
-    @media (max-width: 640px) {
-      .header {
-        height: 130px;
+      .topbar {
         padding: 10px 12px;
       }
 
-      .nav-menu {
-        gap: 6px;
+      .stat-pills {
+        display: none;
       }
 
-      .nav-item {
-        font-size: 0.75rem;
-        padding: 4px 6px;
-        border-radius: 12px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header {
-        padding: 8px 10px;
+      .search-box input {
+        width: 140px;
       }
 
-      .nav-menu {
-        gap: 4px;
+      .search-box input:focus {
+        width: 165px;
       }
 
-      .nav-item {
-        font-size: 0.7rem;
-        padding: 3px 5px;
-        border-radius: 10px;
-      }
-    }
-
-    .container {
-      height: 100%;
-      padding-top: 100px;
-    }
-
-    .row, .col-lg-12, .highcharts-figure {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    #chadmap {
-      font-family: "Monda", Helvetica;
-      width: 100%;
-      height: 100%;
-    }
-
-    @media (max-width: 640px) {
-      .container {
-        padding-top: 130px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding-top: 150px;
+      .legend-card .legend-tip {
+        display: none;
       }
     }
   </style>
@@ -186,243 +570,1098 @@
 
 <body>
   <header class="header">
-    <div class="header-content">
-      <nav class="nav-menu">
-        <a href="https://tez.cool/" class="nav-item">HOME</a>
-        <a href="https://up.tez.cool/" class="nav-item">TEZCALM</a>
-        <a href="https://tez.cool/map?q=20000" class="nav-item active">CHADMAP</a>
-        <a href="https://eye.tez.cool/" class="nav-item">THE EYE OF CHAD</a>
-        <a href="https://stake.tez.cool/" class="nav-item">TEZSTAKE</a>
-        <a href="https://trollbox.tez.cool/" class="nav-item">TEZTROLLBOX</a>
-        <a href="https://secret.tez.cool/" class="nav-item">TEZWHALES</a>
-        <a href="https://chat.tez.cool/" class="nav-item">NFTCHAT</a>
-      </nav>
-    </div>
+    <nav class="nav-links">
+      <a href="https://tez.cool/" class="nav-item">HOME</a>
+      <a href="https://tez.cool/calm" class="nav-item">TEZCALM</a>
+      <a href="https://tez.cool/map?q=20000" class="nav-item active">CHADMAP</a>
+      <a href="https://dashboard.tez.cool" class="nav-item">THE EYE OF CHAD</a>
+      <a href="https://stake.tez.cool" class="nav-item">TEZSTAKE</a>
+      <a href="https://trollbox.tez.cool" class="nav-item">TEZTROLLBOX</a>
+      <a href="https://whales.tez.cool" class="nav-item">TEZWHALES</a>
+      <a href="https://chat.tez.cool" class="nav-item">NFTCHAT</a>
+    </nav>
   </header>
 
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12">
-        <figure class="highcharts-figure">
-          <div id="chadmap"></div>
-        </figure>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand-group">
+        <div class="brand-badge">ꜩ</div>
+        <div class="title-stack">
+          <h1>The Tezos Chad Club</h1>
+          <p id="subtitle-text">Stake <strong id="title-min-xtz">20,000</strong> XTZ or more to join a Chad Club!</p>
+        </div>
       </div>
-    </div>
+
+      <div class="controls-group">
+        <div class="stat-pills">
+          <div class="stat-pill">
+            <span>Chads</span>
+            <span class="val" id="stat-count">—</span>
+          </div>
+          <div class="stat-pill">
+            <span>Club Stake</span>
+            <span class="val" id="stat-stake">—</span>
+          </div>
+        </div>
+
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="search-input" placeholder="Search alias or tz1..." autocomplete="off" />
+          <button class="clear-btn" id="search-clear" title="Clear search">✕</button>
+        </div>
+
+        <div class="segmented" id="role-filter">
+          <button class="seg-btn active" data-role="all">All</button>
+          <button class="seg-btn" data-role="staker">Stakers</button>
+          <button class="seg-btn" data-role="baker">Bakers</button>
+        </div>
+
+        <select class="threshold-select" id="threshold-select" title="Minimum Staked XTZ">
+          <option value="20000">≥ 20K ꜩ</option>
+          <option value="50000">≥ 50K ꜩ</option>
+          <option value="100000">≥ 100K ꜩ</option>
+        </select>
+      </div>
+    </header>
+
+    <main id="stage-wrap">
+      <canvas id="bubble-canvas"></canvas>
+
+      <div class="canvas-hud-bottom">
+        <div class="legend-card">
+          <div class="legend-item">
+            <span class="legend-dot baker"></span>
+            <span>Active Baker</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot staker"></span>
+            <span>Staker</span>
+          </div>
+          <span class="legend-tip">• Scroll to zoom • Drag to move • Click bubble for TzKT</span>
+        </div>
+
+        <div class="zoom-dock">
+          <button class="hud-btn" id="zoom-in" title="Zoom In">+</button>
+          <button class="hud-btn" id="zoom-out" title="Zoom Out">−</button>
+          <button class="hud-btn" id="zoom-reset" title="Reset View">⟲</button>
+        </div>
+      </div>
+
+      <div id="loader-overlay">
+        <div class="spinner"></div>
+        <div class="loader-text" id="loader-title">Summoning the Tezos Chads...</div>
+        <div class="loader-sub" id="loader-sub">Fetching live on-chain staking data from TzKT</div>
+      </div>
+    </main>
   </div>
+
+  <div id="tooltip">
+    <div class="tt-header">
+      <span class="tt-name" id="tt-alias"></span>
+      <span class="tt-badge" id="tt-role"></span>
+    </div>
+    <div class="tt-stake" id="tt-stake"></div>
+    <div class="tt-addr" id="tt-addr"></div>
+    <div class="tt-hint">Click to inspect on TzKT ↗</div>
+  </div>
+
   <script>
-  Highcharts.setOptions({
-    chart: {
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    title: {
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    subtitle: {
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    xAxis: {
-        labels: {
-            style: {
-                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-            }
-        },
-        title: {
-            style: {
-                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-            }
-        }
-    },
-    yAxis: {
-        labels: {
-            style: {
-                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-            }
-        },
-        title: {
-            style: {
-                fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-            }
-        }
-    },
-    legend: {
-        itemStyle: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    tooltip: {
-        style: {
-            fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-        }
-    },
-    plotoptions: {
-        series: {
-            dataLabels: {
-                style: {
-                    fontFamily: '"Monda", Helvetica, Arial, sans-serif'
-                }
-            }
-        }
-    }
-});
-    document.addEventListener('DOMContentLoaded', function () {
-      function fetchData(url) {
-        return fetch(url).then(response => response.json());
+    (function () {
+      'use strict';
+
+      // 1. Parse URL query parameter `?q=` (preserve original behavior: default 1000 XTZ if not passed)
+      const urlParams = new URLSearchParams(window.location.search);
+      const qValue = Number(urlParams.get('q'));
+      let minStakeXTZ = (!isNaN(qValue) && qValue > 0) ? qValue : 1000;
+
+      // Sync dropdown & header label
+      const thresholdSelect = document.getElementById('threshold-select');
+      const titleMinXtz = document.getElementById('title-min-xtz');
+      if (![...thresholdSelect.options].some(opt => Number(opt.value) === minStakeXTZ)) {
+        const customOpt = document.createElement('option');
+        customOpt.value = String(minStakeXTZ);
+        customOpt.textContent = `≥ ${minStakeXTZ.toLocaleString('en-US')} ꜩ`;
+        thresholdSelect.appendChild(customOpt);
+      }
+      thresholdSelect.value = String(minStakeXTZ);
+      titleMinXtz.textContent = (qValue > 0 ? minStakeXTZ : 20000).toLocaleString('en-US');
+
+      // DOM Elements
+      const stageWrap = document.getElementById('stage-wrap');
+      const canvas = document.getElementById('bubble-canvas');
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const loaderOverlay = document.getElementById('loader-overlay');
+      const loaderTitle = document.getElementById('loader-title');
+      const loaderSub = document.getElementById('loader-sub');
+      const statCountEl = document.getElementById('stat-count');
+      const statStakeEl = document.getElementById('stat-stake');
+      const searchInput = document.getElementById('search-input');
+      const searchClear = document.getElementById('search-clear');
+      const roleFilter = document.getElementById('role-filter');
+      const tooltip = document.getElementById('tooltip');
+      const ttAlias = document.getElementById('tt-alias');
+      const ttRole = document.getElementById('tt-role');
+      const ttStake = document.getElementById('tt-stake');
+      const ttAddr = document.getElementById('tt-addr');
+
+      // State
+      let rawAccounts = []; // Deduplicated list of all fetched accounts
+      let nodes = [];       // Active physics bubble nodes
+      let currentRole = 'all';
+      let searchQuery = '';
+
+      // Viewport & Camera State
+      let width = 800;
+      let height = 600;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const camera = {
+        x: 0,
+        y: 0,
+        scale: 1,
+        targetX: 0,
+        targetY: 0,
+        targetScale: 1
+      };
+
+      // Physics & Interaction State
+      let alpha = 1;
+      let rafId = null;
+      let hoveredNode = null;
+      let draggedNode = null;
+      let isPanning = false;
+      let pointerDownPos = { x: 0, y: 0 };
+      let lastPointerPos = { x: 0, y: 0 };
+      let pointerMoved = false;
+
+      // Layout tuning
+      const BUBBLE_GAP_BASE = 6;      // fixed px gap between neighbouring bubbles
+      const BUBBLE_GAP_RATIO = 0.08;  // extra gap proportional to combined radii
+      const ALPHA_MIN = 0.005;        // physics goes to sleep below this energy
+
+      // Intro animation state
+      let introActive = false;
+      let introStart = 0;
+      let introSpread = 0;   // ms over which the ripple travels from core to edge
+      let introNodeDur = 0;  // ms each bubble takes to fly into place
+      let introTotal = 0;
+      let introMaxDist = 1;
+      let hasBuiltOnce = false;
+      const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+      // Offscreen Pre-clipped Avatar Cache (keyed by address)
+      const avatarSpriteCache = new Map();
+      const SPRITE_SIZE = 128;
+      let activeImageLoads = 0;
+      const MAX_CONCURRENT_LOADS = 18;
+      const imageLoadQueue = [];
+
+      function formatXTZ(xtz) {
+        if (xtz >= 1e6) return (xtz / 1e6).toFixed(2) + 'M ꜩ';
+        if (xtz >= 1e3) return (xtz / 1e3).toFixed(1) + 'K ꜩ';
+        return Math.round(xtz).toLocaleString('en-US') + ' ꜩ';
       }
 
-      function escapeHTML(str) {
-        return String(str || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
+      function shortAddr(addr) {
+        if (!addr || addr.length < 12) return addr || '';
+        return addr.slice(0, 6) + '…' + addr.slice(-4);
       }
 
-      function processAccountData(data) {
-        let q = Math.abs(parseInt(new URLSearchParams(window.location.search).get('q'), 10));
-        return data.filter(account => (account.stakedBalance || 0) >= (isNaN(q) ? 1000000000 : q*1000000)).map(account => {
-          const name = escapeHTML(account.alias ? account.alias : account.address);
-          const stakedBalance = account.stakedBalance || 0;
-          const address = account.address;
-          return {
-            name: name,
-            value: stakedBalance / 1e6,
-            stakedBalance: stakedBalance,
-            display: name + ': ' + (stakedBalance / 1e6).toLocaleString() + ' XTZ',
-            address: address,
-            marker: {
-              symbol: `url(https://services.tzkt.io/v1/avatars/${encodeURIComponent(address)})`
-            }
+      // Deterministic vibrant color from Tezos address
+      function hashColor(addr) {
+        let h = 2166136261;
+        for (let i = 0; i < addr.length; i++) {
+          h ^= addr.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        const hue = Math.abs(h) % 360;
+        return `hsl(${hue}, 70%, 48%)`;
+      }
+
+      // Create circular monogram fallback sprite immediately, then upgrade with TzKT avatar
+      function getOrRequestAvatarSprite(node) {
+        const addr = node.address;
+        if (avatarSpriteCache.has(addr)) {
+          return avatarSpriteCache.get(addr);
+        }
+
+        const off = document.createElement('canvas');
+        off.width = SPRITE_SIZE;
+        off.height = SPRITE_SIZE;
+        const octx = off.getContext('2d');
+        const half = SPRITE_SIZE / 2;
+
+        // Draw fallback gradient + monogram
+        octx.save();
+        octx.beginPath();
+        octx.arc(half, half, half - 2, 0, Math.PI * 2);
+        octx.closePath();
+        octx.clip();
+
+        const grad = octx.createLinearGradient(0, 0, SPRITE_SIZE, SPRITE_SIZE);
+        grad.addColorStop(0, hashColor(addr));
+        grad.addColorStop(1, '#0f172a');
+        octx.fillStyle = grad;
+        octx.fillRect(0, 0, SPRITE_SIZE, SPRITE_SIZE);
+
+        octx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        octx.font = '700 44px Inter, sans-serif';
+        octx.textAlign = 'center';
+        octx.textBaseline = 'middle';
+        const label = (node.alias ? node.alias.trim().slice(0, 2) : addr.slice(3, 5)).toUpperCase();
+        octx.fillText(label, half, half + 2);
+        octx.restore();
+
+        const spriteRecord = { canvas: off, loaded: false };
+        avatarSpriteCache.set(addr, spriteRecord);
+
+        // Queue async TzKT avatar load
+        imageLoadQueue.push({ addr, octx, spriteRecord });
+        pumpImageLoadQueue();
+
+        return spriteRecord;
+      }
+
+      function pumpImageLoadQueue() {
+        while (activeImageLoads < MAX_CONCURRENT_LOADS && imageLoadQueue.length > 0) {
+          const item = imageLoadQueue.shift();
+          activeImageLoads++;
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.decoding = 'async';
+          img.onload = function () {
+            const half = SPRITE_SIZE / 2;
+            const octx = item.octx;
+            octx.clearRect(0, 0, SPRITE_SIZE, SPRITE_SIZE);
+            octx.save();
+            octx.beginPath();
+            octx.arc(half, half, half - 2, 0, Math.PI * 2);
+            octx.closePath();
+            octx.clip();
+            octx.fillStyle = '#0f172a';
+            octx.fillRect(0, 0, SPRITE_SIZE, SPRITE_SIZE);
+            octx.drawImage(img, 0, 0, SPRITE_SIZE, SPRITE_SIZE);
+            octx.restore();
+            item.spriteRecord.loaded = true;
+            activeImageLoads--;
+            requestRender();
+            pumpImageLoadQueue();
           };
-        });
+          img.onerror = function () {
+            activeImageLoads--;
+            pumpImageLoadQueue();
+          };
+          img.src = `https://services.tzkt.io/v1/avatars/${encodeURIComponent(item.addr)}`;
+        }
       }
 
-      function initChart(processedData) {
-        Highcharts.chart('chadmap', {
-          navigation: {
-            buttonOptions: {
-              enabled: false
-            }
-          },
-          chart: {
-            type: 'packedbubble',
-            backgroundColor: 'rgba(0,0,0,0)',
-            boost: {
-              useGPUTranslations: true,
-              usePreAllocated: true
-            },
-            events: {
-              load: function() {
-                const chart = this;
-                setTimeout(() => {
-                  chart.series[0].points.forEach(point => {
-                    const image = point.graphic.element;
-                    image.style.clipPath = 'circle(50%)';
-                    image.style.webkitClipPath = 'circle(50%)';
-                  });
-                }, 500);
-              }
-            }
-          },
-          title: {
-            text: 'Stake 20 000 XTZ or more to join a Chad Club!',
-            style: {
-              color: '#ffffff'
-            }
-          },
-          tooltip: {
-            useHTML: true,
-            pointFormat: '<b>{point.display}</b>'
-          },
-          plotOptions: {
-            packedbubble: {
-              boostThreshold: 1,
-              minSize: '100%',
-              maxSize: '100%',
-              zMin: 0,
-              zMax: Math.max(...processedData.map(d => d.value)),
-              colorByPoint: true,
-              layoutAlgorithm: {
-                maxIterations: 500,
-                gravitationalConstant: 0.005,
-                splitSeries: false,
-                seriesInteraction: true,
-                dragBetweenSeries: true,
-                parentNodeLimit: true
-              },
-              dataLabels: {
-                enabled: false
-              },
-              states: {
-                hover: {
-                  enabled: false,
-                  halo: {
-                    size: 0
-                  }
-                }
-              },
-              events: {
-                click: function (event) {
-                  const address = event.point.options.address;
-                  window.open(`https://tzkt.io/${address}`, '_blank');
-                }
-              }
-            }
-          },
-          colorAxis: {
-            min: 0,
-            max: Math.max(...processedData.map(d => d.value)),
-            stops: [
-              [0, '#00f2f2'],
-              [0.5, '#00d0d0'],
-              [1, '#007777']
-            ],
-            minColor: '#00f2f2',
-            maxColor: '#007777'
-          },
-          series: [{
-            name: 'Chad Energy',
-            data: processedData
-          }],
-          legend: {
-            enabled: false
-          },
-          responsive: {
-            rules: [{
-              condition: {},
-              chartOptions: {
-                plotOptions: {
-                  packedbubble: {
-                    minSize: '100%',
-                    maxSize: '200%'
-                  }
-                }
-              }
-            }]
-          },
-          credits: {
-            enabled: false
+      // Fetch and deduplicate TzKT Stakers + Active Delegates
+      async function loadTzKTData() {
+        try {
+          loaderTitle.textContent = 'Summoning the Tezos Chads...';
+          loaderSub.textContent = 'Fetching live stakers & active bakers from TzKT API';
+
+          const [stakersRes, delegatesRes] = await Promise.all([
+            fetch('https://api.tzkt.io/v1/accounts?stakedPseudotokens.gt=0&limit=10000'),
+            fetch('https://api.tzkt.io/v1/delegates?active=true&limit=10000')
+          ]);
+
+          if (!stakersRes.ok || !delegatesRes.ok) {
+            throw new Error('TzKT API returned non-200 status');
           }
-        });
+
+          const [stakers, delegates] = await Promise.all([
+            stakersRes.json(),
+            delegatesRes.json()
+          ]);
+
+          // Deduplicate by address, marking active bakers
+          const mapByAddr = new Map();
+
+          for (const d of delegates) {
+            if (!d || !d.address || !d.stakedBalance) continue;
+            mapByAddr.set(d.address, {
+              address: String(d.address),
+              alias: d.alias ? String(d.alias) : '',
+              stakedMutez: Number(d.stakedBalance) || 0,
+              isBaker: true
+            });
+          }
+
+          for (const s of stakers) {
+            if (!s || !s.address || !s.stakedBalance) continue;
+            const existing = mapByAddr.get(s.address);
+            if (existing) {
+              existing.stakedMutez = Math.max(existing.stakedMutez, Number(s.stakedBalance) || 0);
+              if (!existing.alias && s.alias) existing.alias = String(s.alias);
+            } else {
+              mapByAddr.set(s.address, {
+                address: String(s.address),
+                alias: s.alias ? String(s.alias) : '',
+                stakedMutez: Number(s.stakedBalance) || 0,
+                isBaker: s.type === 'delegate'
+              });
+            }
+          }
+
+          rawAccounts = Array.from(mapByAddr.values()).sort((a, b) => b.stakedMutez - a.stakedMutez);
+          rebuildGraph(true);
+          loaderOverlay.classList.add('hidden');
+        } catch (err) {
+          console.error('Error fetching TzKT data:', err);
+          loaderTitle.textContent = 'Failed to load TzKT data';
+          loaderSub.textContent = 'Please check your connection and refresh the page.';
+        }
       }
 
-      Promise.all([
-        fetchData('https://api.tzkt.io/v1/accounts?stakedPseudotokens.gt=0&limit=10000'),
-        fetchData('https://api.tzkt.io/v1/delegates?active=true&limit=10000')
-      ]).then(results => {
-        const accountData = processAccountData(results[0]);
-        const delegateData = processAccountData(results[1]);
-        const combinedData = [...accountData, ...delegateData];
+      // Build packed-bubble nodes for current threshold & role filter
+      function rebuildGraph(resetCamera) {
+        const minMutez = minStakeXTZ * 1e6;
+        const filtered = rawAccounts.filter(acc => {
+          if (acc.stakedMutez < minMutez) return false;
+          if (currentRole === 'baker' && !acc.isBaker) return false;
+          if (currentRole === 'staker' && acc.isBaker) return false;
+          return true;
+        });
 
-        initChart(combinedData);
-      }).catch(error => console.error('Error fetching data:', error));
-    });
+        const isFirstBuild = !hasBuiltOnce;
+        hasBuiltOnce = true;
+        finishIntro();
+
+        // Update KPI stats (count-up synced with the intro)
+        let totalXTZ = 0;
+        for (const a of filtered) totalXTZ += a.stakedMutez / 1e6;
+        const statDur = isFirstBuild ? 2600 : 1100;
+        animateStat(statCountEl, filtered.length, v => Math.round(v).toLocaleString('en-US'), statDur);
+        animateStat(statStakeEl, totalXTZ, formatXTZ, statDur);
+
+        const count = filtered.length;
+        if (count === 0) {
+          nodes = [];
+          requestRender();
+          return;
+        }
+
+        // Dynamic radius scaling so total area fits comfortably in viewport
+        const maxXTZ = filtered[0].stakedMutez / 1e6;
+        const minXTZ = filtered[count - 1].stakedMutez / 1e6;
+        const minR = count > 350 ? 11 : count > 150 ? 14 : 18;
+        const maxR = count > 350 ? 64 : count > 150 ? 78 : 96;
+
+        // Golden-angle phyllotaxis spiral initial placement (largest in center)
+        const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+        const spread = Math.max(minR * 1.9, 26);
+
+        nodes = filtered.map((acc, idx) => {
+          const xtz = acc.stakedMutez / 1e6;
+          // Power-curve area scaling (sqrt of stake with gentle compression for huge whales)
+          const norm = maxXTZ > minXTZ
+            ? (Math.pow(xtz, 0.46) - Math.pow(minXTZ, 0.46)) / (Math.pow(maxXTZ, 0.46) - Math.pow(minXTZ, 0.46))
+            : 0.5;
+          const r = minR + norm * (maxR - minR);
+
+          const angle = idx * goldenAngle;
+          const dist = idx === 0 ? 0 : spread * Math.sqrt(idx) * 1.35;
+
+          const node = {
+            address: acc.address,
+            alias: acc.alias,
+            xtz: xtz,
+            isBaker: acc.isBaker,
+            r: r,
+            x: Math.cos(angle) * dist,
+            y: Math.sin(angle) * dist,
+            vx: 0,
+            vy: 0,
+            matched: true,
+            introT: 1,
+            introScale: 1,
+            introAlpha: 1
+          };
+          return node;
+        });
+
+        // Pre-warm avatars for largest nodes first
+        for (let i = 0; i < nodes.length; i++) {
+          getOrRequestAvatarSprite(nodes[i]);
+        }
+
+        applySearchHighlight();
+
+        // Pre-settle physics synchronously so the layout is already at rest when shown.
+        // Iteration budget adapts to node count (collision pass is O(n²)).
+        const settleSteps = Math.max(70, Math.min(260, Math.round(1.5e8 / (count * count))));
+        for (let i = 0; i < settleSteps; i++) {
+          stepPhysics(0.7 * Math.pow(0.985, i) + 0.05);
+        }
+        freezeNodes();
+
+        if (resetCamera) {
+          fitCameraToNodes();
+        }
+
+        // Cinematic entrance: full show on first load, quicker replay on filter changes
+        startIntro(isFirstBuild);
+        requestRender();
+      }
+
+      function fitCameraToNodes() {
+        if (nodes.length === 0) {
+          camera.targetX = 0;
+          camera.targetY = 0;
+          camera.targetScale = 1;
+          return;
+        }
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          if (n.x - n.r < minX) minX = n.x - n.r;
+          if (n.x + n.r > maxX) maxX = n.x + n.r;
+          if (n.y - n.r < minY) minY = n.y - n.r;
+          if (n.y + n.r > maxY) maxY = n.y + n.r;
+        }
+        const packW = Math.max(100, maxX - minX);
+        const packH = Math.max(100, maxY - minY);
+        const pad = 1.14;
+        const scaleX = width / (packW * pad);
+        const scaleY = height / (packH * pad);
+        camera.targetScale = Math.max(0.25, Math.min(2.2, Math.min(scaleX, scaleY)));
+        camera.targetX = -(minX + maxX) / 2;
+        camera.targetY = -(minY + maxY) / 2;
+        camera.scale = camera.targetScale;
+        camera.x = camera.targetX;
+        camera.y = camera.targetY;
+      }
+
+      function applySearchHighlight() {
+        const q = searchQuery.trim().toLowerCase();
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          if (!q) {
+            n.matched = true;
+          } else {
+            n.matched =
+              (n.alias && n.alias.toLowerCase().includes(q)) ||
+              n.address.toLowerCase().includes(q);
+          }
+        }
+      }
+
+      // Fast Packed-Bubble Force Simulation Step
+      function stepPhysics(currentAlpha) {
+        const nCount = nodes.length;
+        if (nCount === 0) return;
+
+        const gravity = 0.018 * currentAlpha;
+        const damping = 0.72;
+
+        // 1. Center gravity pull
+        for (let i = 0; i < nCount; i++) {
+          const n = nodes[i];
+          if (n === draggedNode) continue;
+          n.vx -= n.x * gravity;
+          n.vy -= n.y * gravity;
+        }
+
+        // 2. Iterative pairwise collision resolution
+        const iterations = 3;
+        for (let iter = 0; iter < iterations; iter++) {
+          for (let i = 0; i < nCount; i++) {
+            const a = nodes[i];
+            for (let j = i + 1; j < nCount; j++) {
+              const b = nodes[j];
+              const dx = b.x - a.x;
+              const dy = b.y - a.y;
+              // Gap grows with bubble size so the cloud breathes instead of looking crammed
+              const minDist = a.r + b.r + BUBBLE_GAP_BASE + (a.r + b.r) * BUBBLE_GAP_RATIO;
+
+              if (Math.abs(dx) >= minDist || Math.abs(dy) >= minDist) continue;
+
+              const distSq = dx * dx + dy * dy;
+              if (distSq < minDist * minDist) {
+                const dist = Math.sqrt(distSq) || 0.01;
+                const overlap = (minDist - dist) / dist * 0.5;
+                const ox = dx * overlap;
+                const oy = dy * overlap;
+
+                // Weight displacement by inverse radius so whales stay steadier
+                const totalR = a.r + b.r;
+                const weightA = b.r / totalR;
+                const weightB = a.r / totalR;
+
+                if (a !== draggedNode) {
+                  a.x -= ox * weightA;
+                  a.y -= oy * weightA;
+                }
+                if (b !== draggedNode) {
+                  b.x += ox * weightB;
+                  b.y += oy * weightB;
+                }
+              }
+            }
+          }
+        }
+
+        // 3. Integrate velocities
+        for (let i = 0; i < nCount; i++) {
+          const n = nodes[i];
+          if (n === draggedNode) {
+            n.vx = 0;
+            n.vy = 0;
+            continue;
+          }
+          n.vx *= damping;
+          n.vy *= damping;
+          n.x += n.vx;
+          n.y += n.vy;
+        }
+      }
+
+      // Render Loop
+      function renderLoop() {
+        rafId = null;
+        let needsNextFrame = false;
+
+        if (introActive) {
+          // Intro drives camera + bubble positions itself
+          updateIntro(performance.now());
+          needsNextFrame = true;
+        } else {
+          // Smooth camera interpolation
+          const camDx = camera.targetX - camera.x;
+          const camDy = camera.targetY - camera.y;
+          const camDs = camera.targetScale - camera.scale;
+          if (Math.abs(camDx) > 0.05 || Math.abs(camDy) > 0.05 || Math.abs(camDs) > 0.0005) {
+            camera.x += camDx * 0.22;
+            camera.y += camDy * 0.22;
+            camera.scale += camDs * 0.22;
+            needsNextFrame = true;
+          } else {
+            camera.x = camera.targetX;
+            camera.y = camera.targetY;
+            camera.scale = camera.targetScale;
+          }
+        }
+
+        const isDragging = !!draggedNode && pointerMoved;
+        if (!introActive && (alpha > ALPHA_MIN || isDragging)) {
+          stepPhysics(Math.max(alpha, isDragging ? 0.2 : 0));
+          alpha *= 0.94;
+          if (alpha <= ALPHA_MIN && !isDragging) {
+            freezeNodes();
+          } else {
+            needsNextFrame = true;
+          }
+        }
+
+        drawFrame();
+
+        if (needsNextFrame) {
+          rafId = requestAnimationFrame(renderLoop);
+        }
+      }
+
+      // ---------- Intro "Big Bang" animation ----------
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function easeOutBack(t) {
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+      }
+
+      // Start the intro using the already-settled layout as each bubble's home position
+      function startIntro(full) {
+        if (prefersReducedMotion || nodes.length === 0) {
+          introActive = false;
+          return;
+        }
+        const k = full ? 1 : 0.55;
+        introSpread = 1700 * k;
+        introNodeDur = 1150 * k;
+        introTotal = introSpread + introNodeDur + 140 * k;
+        introStart = performance.now() + (full ? 280 : 0);
+
+        introMaxDist = 1;
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          n.hx = n.x;
+          n.hy = n.y;
+          n.homeDist = Math.hypot(n.x, n.y);
+          n.homeAng = Math.atan2(n.y, n.x);
+          if (n.homeDist > introMaxDist) introMaxDist = n.homeDist;
+        }
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          // Deterministic jitter so the ripple feels organic, not mechanical
+          const jitter = (Math.imul(i + 1, 2654435761) >>> 0) / 4294967296;
+          n.introDelay = Math.pow(n.homeDist / introMaxDist, 0.8) * introSpread + jitter * 110 * k;
+          n.introT = 0;
+          n.introScale = 0;
+          n.introAlpha = 0;
+          n.x = 0;
+          n.y = 0;
+        }
+        introActive = true;
+        requestRender();
+      }
+
+      function updateIntro(now) {
+        const elapsed = now - introStart;
+        if (elapsed >= introTotal) {
+          finishIntro();
+          return;
+        }
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          const t = Math.max(0, Math.min(1, (elapsed - n.introDelay) / introNodeDur));
+          n.introT = t;
+          if (t <= 0) {
+            n.introScale = 0;
+            n.introAlpha = 0;
+            continue;
+          }
+          // Spiral outward from the core and settle into the home slot
+          const e = easeOutCubic(t);
+          const swirl = Math.pow(1 - e, 2) * 1.9;
+          const dist = n.homeDist * e;
+          const ang = n.homeAng - swirl;
+          n.x = Math.cos(ang) * dist;
+          n.y = Math.sin(ang) * dist;
+          n.introScale = Math.max(0, easeOutBack(t));
+          n.introAlpha = Math.min(1, t * 2.5);
+        }
+        // Slow cinematic camera pull-in
+        const gt = Math.max(0, Math.min(1, elapsed / introTotal));
+        camera.scale = camera.targetScale * (0.68 + 0.32 * easeOutCubic(gt));
+        camera.x = camera.targetX;
+        camera.y = camera.targetY;
+      }
+
+      // Snap everything to its final state (also used to skip on user interaction)
+      function finishIntro() {
+        if (!introActive) return;
+        introActive = false;
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          n.x = n.hx;
+          n.y = n.hy;
+          n.introT = 1;
+          n.introScale = 1;
+          n.introAlpha = 1;
+        }
+        camera.scale = camera.targetScale;
+        camera.x = camera.targetX;
+        camera.y = camera.targetY;
+        requestRender();
+      }
+
+      function drawIntroEffects(now) {
+        const elapsed = now - introStart;
+        if (elapsed < 0) return;
+        const R = introMaxDist + 80;
+        const TAU = Math.PI * 2;
+
+        // Core energy flash
+        const flashT = Math.min(1, elapsed / 1000);
+        if (flashT < 1) {
+          const fr = 30 + R * 0.55 * easeOutCubic(flashT);
+          const a = (1 - flashT) * 0.6;
+          const g = ctx.createRadialGradient(0, 0, 0, 0, 0, fr);
+          g.addColorStop(0, `rgba(224, 242, 254, ${a})`);
+          g.addColorStop(0.3, `rgba(56, 189, 248, ${a * 0.55})`);
+          g.addColorStop(0.7, `rgba(99, 102, 241, ${a * 0.2})`);
+          g.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(0, 0, fr, 0, TAU);
+          ctx.fill();
+        }
+
+        // Expanding shockwave rings that "seed" the bubbles as they pass
+        const ringDur = introSpread + 600;
+        for (let k = 0; k < 3; k++) {
+          const rt = (elapsed - k * 280) / ringDur;
+          if (rt <= 0 || rt >= 1) continue;
+          const e = easeOutCubic(rt);
+          ctx.beginPath();
+          ctx.arc(0, 0, R * 1.15 * e, 0, TAU);
+          ctx.lineWidth = (3.2 * (1 - rt) + 0.6) / camera.scale;
+          ctx.strokeStyle = k === 1
+            ? `rgba(245, 158, 11, ${(1 - rt) * 0.4})`
+            : `rgba(56, 189, 248, ${(1 - rt) * 0.55})`;
+          ctx.stroke();
+        }
+      }
+
+      // Count-up animation for header KPIs
+      function animateStat(el, target, fmt, duration) {
+        const token = {};
+        el._animToken = token;
+        if (prefersReducedMotion || duration <= 0) {
+          el.textContent = fmt(target);
+          return;
+        }
+        const start = performance.now();
+        function tick(now) {
+          if (el._animToken !== token) return;
+          const t = Math.min(1, (now - start) / duration);
+          el.textContent = fmt(target * easeOutCubic(t));
+          if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      // Fully stop motion so the cloud stays perfectly still once settled
+      function freezeNodes() {
+        alpha = 0;
+        for (let i = 0; i < nodes.length; i++) {
+          nodes[i].vx = 0;
+          nodes[i].vy = 0;
+        }
+      }
+
+      // Redraw only (camera / hover / search changes) — never moves bubbles
+      function requestRender() {
+        if (!rafId) {
+          rafId = requestAnimationFrame(renderLoop);
+        }
+      }
+
+      // Re-heat the physics simulation (layout rebuilds and drags only)
+      function wakeSimulation(minAlpha) {
+        if (minAlpha > alpha) alpha = minAlpha;
+        requestRender();
+      }
+
+      function drawFrame() {
+        ctx.save();
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Background fill
+        ctx.fillStyle = '#0b0e17';
+        ctx.fillRect(0, 0, width, height);
+
+        // Subtle radial ambient glow in center
+        const cx = width * 0.5 + camera.x * camera.scale;
+        const cy = height * 0.5 + camera.y * camera.scale;
+        const bgGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, Math.max(width, height) * 0.65);
+        bgGrad.addColorStop(0, 'rgba(56, 189, 248, 0.07)');
+        bgGrad.addColorStop(0.5, 'rgba(99, 102, 241, 0.03)');
+        bgGrad.addColorStop(1, 'rgba(11, 14, 23, 0)');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Apply camera transform
+        ctx.translate(width * 0.5, height * 0.5);
+        ctx.scale(camera.scale, camera.scale);
+        ctx.translate(camera.x, camera.y);
+
+        const hasSearch = searchQuery.trim().length > 0;
+
+        // Frustum bounds in world coordinates for fast culling
+        const halfW = (width * 0.5) / camera.scale;
+        const halfH = (height * 0.5) / camera.scale;
+        const viewLeft = -camera.x - halfW;
+        const viewRight = -camera.x + halfW;
+        const viewTop = -camera.y - halfH;
+        const viewBottom = -camera.y + halfH;
+
+        // Intro shockwave / core flash (drawn beneath bubbles)
+        if (introActive) {
+          drawIntroEffects(performance.now());
+        }
+
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          const r = n.r;
+
+          // Not yet spawned by the intro animation
+          if (n.introScale < 0.02) continue;
+
+          // Viewport frustum culling
+          if (
+            n.x + r < viewLeft ||
+            n.x - r > viewRight ||
+            n.y + r < viewTop ||
+            n.y - r > viewBottom
+          ) {
+            continue;
+          }
+
+          const isHovered = n === hoveredNode;
+          const drawR = (isHovered ? r * 1.05 : r) * n.introScale;
+
+          const baseAlpha = ((hasSearch && !n.matched) ? 0.16 : 1.0) * n.introAlpha;
+          ctx.globalAlpha = baseAlpha;
+
+          // Draw pre-clipped circular avatar sprite
+          const sprite = avatarSpriteCache.get(n.address) || getOrRequestAvatarSprite(n);
+          ctx.drawImage(sprite.canvas, n.x - drawR, n.y - drawR, drawR * 2, drawR * 2);
+
+          // Draw role ring (Gold for Active Bakers, Cyan for Stakers)
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, Math.max(0.5, drawR - 1), 0, Math.PI * 2);
+          if (isHovered) {
+            ctx.lineWidth = 3.2 / Math.sqrt(camera.scale);
+            ctx.strokeStyle = '#ffffff';
+          } else if (hasSearch && n.matched) {
+            ctx.lineWidth = 2.8 / Math.sqrt(camera.scale);
+            ctx.strokeStyle = '#10b981';
+          } else {
+            ctx.lineWidth = (n.isBaker ? 2.2 : 1.5) / Math.sqrt(camera.scale);
+            ctx.strokeStyle = n.isBaker
+              ? 'rgba(245, 158, 11, 0.85)'
+              : 'rgba(56, 189, 248, 0.55)';
+          }
+          ctx.stroke();
+
+          // Bright rim flash while a bubble is popping in
+          if (introActive && n.introT < 1) {
+            ctx.globalAlpha = baseAlpha * (1 - n.introT) * 0.9;
+            ctx.lineWidth = 3 / Math.sqrt(camera.scale);
+            ctx.strokeStyle = '#e0f2fe';
+            ctx.stroke();
+          }
+        }
+
+        ctx.globalAlpha = 1.0;
+        ctx.restore();
+      }
+
+      // Coordinate conversion: Screen -> World
+      function screenToWorld(sx, sy) {
+        return {
+          x: (sx - width * 0.5) / camera.scale - camera.x,
+          y: (sy - height * 0.5) / camera.scale - camera.y
+        };
+      }
+
+      function findNodeAt(sx, sy) {
+        const w = screenToWorld(sx, sy);
+        for (let i = nodes.length - 1; i >= 0; i--) {
+          const n = nodes[i];
+          const dx = w.x - n.x;
+          const dy = w.y - n.y;
+          if (n.introScale > 0.3 && dx * dx + dy * dy <= n.r * n.r) {
+            return n;
+          }
+        }
+        return null;
+      }
+
+      function updateTooltip(node, clientX, clientY) {
+        if (!node) {
+          tooltip.classList.remove('visible');
+          return;
+        }
+        ttAlias.textContent = node.alias || shortAddr(node.address);
+        ttRole.textContent = node.isBaker ? 'Baker' : 'Staker';
+        ttRole.className = 'tt-badge ' + (node.isBaker ? 'baker' : 'staker');
+        ttStake.textContent = `${Math.round(node.xtz).toLocaleString('en-US')} XTZ`;
+        ttAddr.textContent = node.address;
+
+        tooltip.classList.add('visible');
+
+        const pad = 16;
+        const rect = tooltip.getBoundingClientRect();
+        let tx = clientX + pad;
+        let ty = clientY + pad;
+        if (tx + rect.width > window.innerWidth - 12) {
+          tx = clientX - rect.width - pad;
+        }
+        if (ty + rect.height > window.innerHeight - 12) {
+          ty = clientY - rect.height - pad;
+        }
+        tooltip.style.transform = `translate3d(${Math.round(tx)}px, ${Math.round(ty)}px, 0)`;
+      }
+
+      // Pointer Events (Pan, Drag Bubble, Hover, Click to open TzKT)
+      canvas.addEventListener('pointerdown', function (e) {
+        finishIntro(); // any interaction skips the intro
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+
+        pointerDownPos = { x: sx, y: sy };
+        lastPointerPos = { x: sx, y: sy };
+        pointerMoved = false;
+
+        const hit = findNodeAt(sx, sy);
+        if (hit) {
+          draggedNode = hit;
+          hoveredNode = hit;
+          updateTooltip(null);
+          requestRender();
+        } else {
+          isPanning = true;
+        }
+        canvas.setPointerCapture(e.pointerId);
+      });
+
+      canvas.addEventListener('pointermove', function (e) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+
+        const moveDist = Math.hypot(sx - pointerDownPos.x, sy - pointerDownPos.y);
+        if (moveDist > 5) {
+          pointerMoved = true;
+        }
+
+        if (draggedNode) {
+          // Ignore tiny jitters while pressing so clicks never nudge the layout
+          if (!pointerMoved) return;
+          const w = screenToWorld(sx, sy);
+          draggedNode.x = w.x;
+          draggedNode.y = w.y;
+          lastPointerPos = { x: sx, y: sy };
+          wakeSimulation(0.3);
+          return;
+        }
+
+        if (isPanning) {
+          const dx = (sx - lastPointerPos.x) / camera.scale;
+          const dy = (sy - lastPointerPos.y) / camera.scale;
+          camera.x += dx;
+          camera.y += dy;
+          camera.targetX = camera.x;
+          camera.targetY = camera.y;
+          lastPointerPos = { x: sx, y: sy };
+          requestRender();
+          return;
+        }
+
+        const hit = findNodeAt(sx, sy);
+        if (hit !== hoveredNode) {
+          hoveredNode = hit;
+          canvas.style.cursor = hit ? 'pointer' : 'grab';
+          requestRender();
+        }
+        updateTooltip(hit, e.clientX, e.clientY);
+      });
+
+      function endPointer() {
+        const wasDragging = draggedNode && pointerMoved;
+        if (draggedNode && !pointerMoved) {
+          // Click without drag -> open TzKT profile in new tab (original behavior)
+          window.open(`https://tzkt.io/${encodeURIComponent(draggedNode.address)}`, '_blank', 'noopener,noreferrer');
+        }
+        draggedNode = null;
+        isPanning = false;
+        if (wasDragging) {
+          // Let neighbours gently relax after a real drag only
+          wakeSimulation(0.18);
+        } else {
+          requestRender();
+        }
+      }
+
+      canvas.addEventListener('pointerup', endPointer);
+      canvas.addEventListener('pointercancel', endPointer);
+      canvas.addEventListener('pointerleave', function () {
+        if (!draggedNode && !isPanning) {
+          hoveredNode = null;
+          updateTooltip(null);
+          requestRender();
+        }
+      });
+
+      // Smooth Wheel Zoom around cursor
+      canvas.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        finishIntro();
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+
+        const worldBefore = screenToWorld(sx, sy);
+        const zoomFactor = e.deltaY < 0 ? 1.16 : 0.86;
+        const nextScale = Math.max(0.25, Math.min(4.5, camera.targetScale * zoomFactor));
+
+        camera.targetScale = nextScale;
+        camera.targetX = (sx - width * 0.5) / nextScale - worldBefore.x;
+        camera.targetY = (sy - height * 0.5) / nextScale - worldBefore.y;
+        requestRender();
+      }, { passive: false });
+
+      // Toolbar Controls
+      document.getElementById('zoom-in').addEventListener('click', function () {
+        finishIntro();
+        camera.targetScale = Math.min(4.5, camera.targetScale * 1.25);
+        requestRender();
+      });
+
+      document.getElementById('zoom-out').addEventListener('click', function () {
+        finishIntro();
+        camera.targetScale = Math.max(0.25, camera.targetScale * 0.8);
+        requestRender();
+      });
+
+      document.getElementById('zoom-reset').addEventListener('click', function () {
+        finishIntro();
+        fitCameraToNodes();
+        requestRender();
+      });
+
+      searchInput.addEventListener('input', function () {
+        searchQuery = searchInput.value;
+        searchClear.classList.toggle('visible', searchQuery.length > 0);
+        applySearchHighlight();
+        requestRender();
+      });
+
+      searchClear.addEventListener('click', function () {
+        searchInput.value = '';
+        searchQuery = '';
+        searchClear.classList.remove('visible');
+        applySearchHighlight();
+        requestRender();
+      });
+
+      roleFilter.addEventListener('click', function (e) {
+        const btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        roleFilter.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentRole = btn.dataset.role;
+        rebuildGraph(true);
+      });
+
+      thresholdSelect.addEventListener('change', function () {
+        minStakeXTZ = Number(thresholdSelect.value) || 1000;
+        titleMinXtz.textContent = minStakeXTZ.toLocaleString('en-US');
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set('q', String(minStakeXTZ));
+        window.history.replaceState({}, '', nextUrl.toString());
+        rebuildGraph(true);
+      });
+
+      // Responsive Canvas Resize
+      function resizeCanvas() {
+        const rect = stageWrap.getBoundingClientRect();
+        width = Math.max(300, Math.floor(rect.width));
+        height = Math.max(240, Math.floor(rect.height));
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+
+        if (nodes.length > 0) {
+          finishIntro();
+          fitCameraToNodes();
+          requestRender();
+        } else {
+          drawFrame();
+        }
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+      loadTzKTData();
+    })();
   </script>
 </body>
 
