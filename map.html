@@ -275,10 +275,19 @@
         return fetch(url).then(response => response.json());
       }
 
+      function escapeHTML(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
       function processAccountData(data) {
         let q = Math.abs(parseInt(new URLSearchParams(window.location.search).get('q'), 10));
         return data.filter(account => (account.stakedBalance || 0) >= (isNaN(q) ? 1000000000 : q*1000000)).map(account => {
-          const name = account.alias ? account.alias : account.address;
+          const name = escapeHTML(account.alias ? account.alias : account.address);
           const stakedBalance = account.stakedBalance || 0;
           const address = account.address;
           return {
@@ -288,7 +297,7 @@
             display: name + ': ' + (stakedBalance / 1e6).toLocaleString() + ' XTZ',
             address: address,
             marker: {
-              symbol: `url(https://services.tzkt.io/v1/avatars/${address})`
+              symbol: `url(https://services.tzkt.io/v1/avatars/${encodeURIComponent(address)})`
             }
           };
         });

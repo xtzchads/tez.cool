@@ -1,7 +1,22 @@
 export default {
   async fetch(request, env, ctx) {
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    };
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+    if (request.method !== 'GET') {
+      return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+    }
+
     const cache = caches.default;
-    const cacheKey = new Request(request.url, request);
+    const cacheUrl = new URL(request.url);
+    cacheUrl.search = '';
+    const cacheKey = new Request(cacheUrl.toString(), { method: 'GET' });
     
     // Configurable TTL from environment variable
     const CACHE_TTL_MINUTES = parseInt(env.CACHE_TTL_MINUTES, 10) || 60; // Default 60 minutes
