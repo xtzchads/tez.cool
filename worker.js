@@ -14,10 +14,7 @@ export default {
     }
 
     const cache = caches.default;
-    const cacheUrl = new URL(request.url);
-    cacheUrl.pathname = '/';
-    cacheUrl.search = '';
-    const cacheKey = new Request(cacheUrl.toString(), { method: 'GET' });
+    const cacheKey = new Request('https://tez.cool/__cache_v2', { method: 'GET' });
     
     // Configurable TTL from environment variable
     const CACHE_TTL_MINUTES = 60;
@@ -26,20 +23,25 @@ export default {
     
     // Try to get response from cache first
     let cachedResponse = await cache.match(cacheKey);
+    let staleCachedData = null;
     
     if (cachedResponse) {
       try {
         const cachedData = await cachedResponse.json();
+        staleCachedData = cachedData;
         const cacheAge = Date.now() - cachedData.timestamp;
+        const hasValidTvl = Array.isArray(cachedData.combinedTvlChart) && cachedData.combinedTvlChart.length > 0 &&
+          cachedData.tvlData?.series?.[0]?.values?.[0]?.length > 0;
         
-        if (cacheAge < CACHE_TTL) {
+        if (cacheAge < CACHE_TTL && hasValidTvl) {
+          const remainingSeconds = Math.max(1, CACHE_TTL_SECONDS - Math.floor(cacheAge / 1000));
           console.log(`Cache hit! Age: ${Math.floor(cacheAge / 1000)}s, TTL: ${CACHE_TTL_MINUTES}min`);
           return new Response(JSON.stringify(cachedData), {
             status: 200,
             headers: {
               'Content-Type': 'application/json',
-              'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`,
-              'Expires': new Date(Date.now() + CACHE_TTL).toUTCString(),
+              'Cache-Control': `public, max-age=${remainingSeconds}`,
+              'Expires': new Date(cachedData.timestamp + CACHE_TTL).toUTCString(),
               ...corsHeaders,
               'X-Cache': 'HIT',
               'X-Cache-Age': Math.floor(cacheAge / 1000),
@@ -47,8 +49,8 @@ export default {
             }
           });
         } else {
-          console.log(`Cache expired - Age: ${Math.floor(cacheAge / 1000)}s, TTL: ${CACHE_TTL_MINUTES}min`);
-          // Clean up expired cache entry
+          console.log(`Cache expired or incomplete TVL - Age: ${Math.floor(cacheAge / 1000)}s, hasValidTvl: ${hasValidTvl}`);
+          // Clean up expired or incomplete cache entry
           ctx.waitUntil(cache.delete(cacheKey));
         }
       } catch (error) {
@@ -145,7 +147,6 @@ export default {
           }),
         fetch('https://defillama.com/chain/etherlink',{
           headers: {
-            'Cache-Control': 'max-age=0',
             'Sec-Ch-Ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
             'Sec-Ch-Ua-Mobile': '?0',
             'Sec-Ch-Ua-Platform': '"Windows"',
@@ -162,7 +163,19 @@ export default {
         })
         .then(r => r.text())
         .then(html => {
-          const match = html.match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/);
+          const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
+          if (startIdx !== -1) {
+            const jsonStart = html.indexOf('>', startIdx) + 1;
+            const jsonEnd = html.indexOf('</script>', jsonStart);
+            if (jsonStart > 0 && jsonEnd !== -1) {
+              const data = JSON.parse(html.slice(jsonStart, jsonEnd));
+              return {
+                tvlChart: data.props.pageProps.tvlChart || [],
+                protocols: data.props.pageProps.protocols || []
+              };
+            }
+          }
+          const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
           if (match) {
             const data = JSON.parse(match[1]);
             return {
@@ -178,7 +191,6 @@ export default {
         }),
         fetch('https://defillama.com/chain/tezos',{
           headers: {
-            'Cache-Control': 'max-age=0',
             'Sec-Ch-Ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
             'Sec-Ch-Ua-Mobile': '?0',
             'Sec-Ch-Ua-Platform': '"Windows"',
@@ -195,7 +207,19 @@ export default {
         })
         .then(r => r.text())
         .then(html => {
-          const match = html.match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/);
+          const startIdx = html.indexOf('<script id="__NEXT_DATA__"');
+          if (startIdx !== -1) {
+            const jsonStart = html.indexOf('>', startIdx) + 1;
+            const jsonEnd = html.indexOf('</script>', jsonStart);
+            if (jsonStart > 0 && jsonEnd !== -1) {
+              const data = JSON.parse(html.slice(jsonStart, jsonEnd));
+              return {
+                tvlChart: data.props.pageProps.tvlChart || [],
+                protocols: data.props.pageProps.protocols || []
+              };
+            }
+          }
+          const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
           if (match) {
             const data = JSON.parse(match[1]);
             return {
@@ -242,10 +266,10 @@ export default {
           mergedTvlChart[timestamp] = (mergedTvlChart[timestamp] || 0) + value;
         });
       });
-      const combinedTvlChart = Object.entries(mergedTvlChart).map(([ts, val]) => [parseInt(ts)*1000, val]);
+      let combinedTvlChart = Object.entries(mergedTvlChart).map(([ts, val]) => [parseInt(ts)*1000, val]);
 
       // Process TVL data from DeFiLlama protocols
-      const processedTvlData = {
+      let processedTvlData = {
         series: [{
           values: [[], []] // [names, tvl_values]
         }]
@@ -264,6 +288,14 @@ export default {
           processedTvlData.series[0].values[1].push(Math.floor(protocol.tvl.default.tvl));
         }
       });
+
+      // Fallback to stale cached TVL data if DeFiLlama returned empty
+      if (combinedTvlChart.length === 0 && staleCachedData?.combinedTvlChart?.length > 0) {
+        combinedTvlChart = staleCachedData.combinedTvlChart;
+      }
+      if (processedTvlData.series[0].values[0].length === 0 && staleCachedData?.tvlData?.series?.[0]?.values?.[0]?.length > 0) {
+        processedTvlData = staleCachedData.tvlData;
+      }
 
       // Process other data as before
       let processedEtherlinkData = [];
@@ -406,21 +438,25 @@ export default {
         timestamp: Date.now()
       };
 
+      const isTvlValid = combinedTvlChart.length > 0 && processedTvlData.series[0].values[0].length > 0;
+
       // Create response with configurable cache headers
       const responseData = new Response(JSON.stringify(aggregatedData), {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`,
-          'Expires': new Date(Date.now() + CACHE_TTL).toUTCString(),
+          'Cache-Control': isTvlValid ? `public, max-age=${CACHE_TTL_SECONDS}` : 'no-store',
+          ...(isTvlValid ? { 'Expires': new Date(Date.now() + CACHE_TTL).toUTCString() } : {}),
           ...corsHeaders,
           'X-Cache': 'MISS',
-          'X-Cache-TTL': CACHE_TTL_MINUTES
+          'X-Cache-TTL': isTvlValid ? CACHE_TTL_MINUTES : 0
         }
       });
 
-      // Store in cache with configurable TTL
-      ctx.waitUntil(cache.put(cacheKey, responseData.clone()));
+      // Only store in cache when DeFiLlama TVL data succeeded
+      if (isTvlValid) {
+        ctx.waitUntil(cache.put(cacheKey, responseData.clone()));
+      }
 
       return responseData;
 
