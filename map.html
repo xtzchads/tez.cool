@@ -811,6 +811,7 @@
       let rafId = null;
       let hoveredNode = null;
       let draggedNode = null;
+      let dragTarget = { x: 0, y: 0 };
       let isPanning = false;
       let pointerDownPos = { x: 0, y: 0 };
       let lastPointerPos = { x: 0, y: 0 };
@@ -1030,9 +1031,10 @@
         const minR = count > 350 ? 11 : count > 150 ? 14 : 18;
         const maxR = count > 350 ? 64 : count > 150 ? 78 : 96;
 
-        // Golden-angle phyllotaxis spiral initial placement (largest in center)
+        // Golden-angle phyllotaxis spiral initial placement using cumulative disk area
+        // so large central whales start at their true packed radius without core overlap
         const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-        const spread = Math.max(minR * 1.9, 26);
+        let cumArea = 0;
 
         nodes = filtered.map((acc, idx) => {
           const xtz = acc.stakedMutez / 1e6;
@@ -1041,9 +1043,11 @@
             ? (Math.pow(xtz, 0.46) - Math.pow(minXTZ, 0.46)) / (Math.pow(maxXTZ, 0.46) - Math.pow(minXTZ, 0.46))
             : 0.5;
           const r = minR + norm * (maxR - minR);
+          const effR = r + BUBBLE_GAP_BASE * 0.5 + r * BUBBLE_GAP_RATIO;
 
           const angle = idx * goldenAngle;
-          const dist = idx === 0 ? 0 : spread * Math.sqrt(idx) * 1.35;
+          const dist = idx === 0 ? 0 : Math.sqrt(cumArea / (Math.PI * 0.72));
+          cumArea += Math.PI * effR * effR;
 
           const node = {
             address: acc.address,
@@ -1071,10 +1075,13 @@
         applySearchHighlight();
 
         // Pre-settle physics synchronously so the layout is already at rest when shown.
-        // Iteration budget adapts to node count (collision pass is O(n²)).
-        const settleSteps = Math.max(70, Math.min(260, Math.round(1.5e8 / (count * count))));
+        const settleSteps = Math.max(120, Math.min(260, Math.round(2.0e8 / (count * count))));
         for (let i = 0; i < settleSteps; i++) {
-          stepPhysics(0.7 * Math.pow(0.985, i) + 0.05);
+          stepPhysics(0.7 * Math.pow(0.982, i) + 0.04, true);
+        }
+        // Final zero-gravity relaxation pass to eliminate any residual core compression
+        for (let i = 0; i < 45; i++) {
+          if (!stepPhysics(0, false)) break;
         }
         freezeNodes();
 
@@ -1130,23 +1137,45 @@
       }
 
       // Fast Packed-Bubble Force Simulation Step
-      function stepPhysics(currentAlpha) {
+      function stepPhysics(currentAlpha, isInitialSettle) {
         const nCount = nodes.length;
-        if (nCount === 0) return;
+        if (nCount === 0) return false;
 
-        const gravity = 0.018 * currentAlpha;
-        const damping = 0.72;
+        // Smoothly advance dragged node toward pointer target so fast drags sweep
+        // through neighbours instead of teleporting onto their centers
+        if (!isInitialSettle && draggedNode) {
+          const ddx = dragTarget.x - draggedNode.x;
+          const ddy = dragTarget.y - draggedNode.y;
+          const dDist = Math.hypot(ddx, ddy);
+          if (dDist > 0.01) {
+            const maxDragStep = Math.max(18, draggedNode.r * 0.65);
+            const step = Math.min(dDist, Math.max(dDist * 0.55, Math.min(dDist, maxDragStep)));
+            draggedNode.x += (ddx / dDist) * step;
+            draggedNode.y += (ddy / dDist) * step;
+          }
+          draggedNode.vx = 0;
+          draggedNode.vy = 0;
+        }
 
-        // 1. Center gravity pull
-        for (let i = 0; i < nCount; i++) {
-          const n = nodes[i];
-          if (n === draggedNode) continue;
-          n.vx -= n.x * gravity;
-          n.vy -= n.y * gravity;
+        // 1. Center gravity pull — active ONLY during initial layout packing.
+        // Keeping global gravity off during interactive drags prevents the outer
+        // rings from acting like a hydraulic press that crushes the central core.
+        if (isInitialSettle && currentAlpha > 0) {
+          const gravity = 0.018 * currentAlpha;
+          for (let i = 0; i < nCount; i++) {
+            const n = nodes[i];
+            if (n === draggedNode) continue;
+            n.vx -= n.x * gravity;
+            n.vy -= n.y * gravity;
+          }
         }
 
         // 2. Iterative pairwise collision resolution
-        const iterations = 3;
+        const iterations = isInitialSettle ? 3 : 2;
+        const relax = isInitialSettle ? 0.5 : 0.28;
+        const maxPairPush = isInitialSettle ? 22 : 3.6;
+        let maxPenetration = 0;
+
         for (let iter = 0; iter < iterations; iter++) {
           for (let i = 0; i < nCount; i++) {
             const a = nodes[i];
@@ -1161,30 +1190,56 @@
 
               const distSq = dx * dx + dy * dy;
               if (distSq < minDist * minDist) {
-                const dist = Math.sqrt(distSq) || 0.01;
-                const overlap = (minDist - dist) / dist * 0.5;
-                const ox = dx * overlap;
-                const oy = dy * overlap;
+                const dist = Math.sqrt(distSq) || 0.1;
+                const pen = minDist - dist;
+                if (pen > maxPenetration) maxPenetration = pen;
 
-                // Weight displacement by inverse radius so whales stay steadier
-                const totalR = a.r + b.r;
-                const weightA = b.r / totalR;
-                const weightB = a.r / totalR;
+                const pushMag = Math.min(maxPairPush, pen * relax);
+                const nx = dx / dist;
+                const ny = dy / dist;
 
-                if (a !== draggedNode) {
-                  a.x -= ox * weightA;
-                  a.y -= oy * weightA;
+                // If one node is pinned by dragging, transfer 100% of separation to the free node;
+                // otherwise weight by inverse radius so larger whales feel heavier and steadier.
+                let weightA, weightB;
+                if (a === draggedNode) {
+                  weightA = 0;
+                  weightB = 1;
+                } else if (b === draggedNode) {
+                  weightA = 1;
+                  weightB = 0;
+                } else {
+                  const totalR = a.r + b.r;
+                  weightA = b.r / totalR;
+                  weightB = a.r / totalR;
                 }
-                if (b !== draggedNode) {
-                  b.x += ox * weightB;
-                  b.y += oy * weightB;
+
+                const pushA = pushMag * weightA;
+                const pushB = pushMag * weightB;
+
+                if (weightA > 0) {
+                  a.x -= nx * pushA;
+                  a.y -= ny * pushA;
+                  if (!isInitialSettle) {
+                    a.vx -= nx * pushA * 0.25;
+                    a.vy -= ny * pushA * 0.25;
+                  }
+                }
+                if (weightB > 0) {
+                  b.x += nx * pushB;
+                  b.y += ny * pushB;
+                  if (!isInitialSettle) {
+                    b.vx += nx * pushB * 0.25;
+                    b.vy += ny * pushB * 0.25;
+                  }
                 }
               }
             }
           }
         }
 
-        // 3. Integrate velocities
+        // 3. Integrate velocities with viscous damping & speed cap
+        const damping = isInitialSettle ? 0.72 : 0.56;
+        const maxSpeed = isInitialSettle ? 40 : 6.0;
         for (let i = 0; i < nCount; i++) {
           const n = nodes[i];
           if (n === draggedNode) {
@@ -1194,9 +1249,17 @@
           }
           n.vx *= damping;
           n.vy *= damping;
+          const spd = Math.hypot(n.vx, n.vy);
+          if (spd > maxSpeed) {
+            const scale = maxSpeed / spd;
+            n.vx *= scale;
+            n.vy *= scale;
+          }
           n.x += n.vx;
           n.y += n.vy;
         }
+
+        return maxPenetration > 0.25;
       }
 
       // Render Loop
@@ -1227,8 +1290,8 @@
 
         const isDragging = !!draggedNode && pointerMoved;
         if (!introActive && (alpha > ALPHA_MIN || isDragging)) {
-          stepPhysics(Math.max(alpha, isDragging ? 0.2 : 0));
-          alpha *= 0.94;
+          stepPhysics(Math.max(alpha, isDragging ? 0.2 : 0), false);
+          alpha *= 0.92;
           if (alpha <= ALPHA_MIN && !isDragging) {
             freezeNodes();
           } else {
@@ -1562,6 +1625,7 @@
       }
 
       // Pointer Events (Pan, Drag Bubble, Hover, Click to open TzKT)
+      let dragOffset = { x: 0, y: 0 };
       canvas.addEventListener('pointerdown', function (e) {
         finishIntro(); // any interaction skips the intro
         const rect = canvas.getBoundingClientRect();
@@ -1574,7 +1638,10 @@
 
         const hit = findNodeAt(sx, sy);
         if (hit) {
+          const w = screenToWorld(sx, sy);
           draggedNode = hit;
+          dragOffset = { x: hit.x - w.x, y: hit.y - w.y };
+          dragTarget = { x: hit.x, y: hit.y };
           hoveredNode = hit;
           updateTooltip(null);
           requestRender();
@@ -1598,8 +1665,8 @@
           // Ignore tiny jitters while pressing so clicks never nudge the layout
           if (!pointerMoved) return;
           const w = screenToWorld(sx, sy);
-          draggedNode.x = w.x;
-          draggedNode.y = w.y;
+          dragTarget.x = w.x + dragOffset.x;
+          dragTarget.y = w.y + dragOffset.y;
           lastPointerPos = { x: sx, y: sy };
           wakeSimulation(0.3);
           return;
