@@ -2537,8 +2537,15 @@ async function createEcosystemChart() {
                 const targetOpacity = (!activeCat && !q) ? 1 : (visible ? 1 : 0.14);
                 if (pt.customImageGroup) {
                     pt.customImageGroup.attr({ opacity: targetOpacity });
+                    pt.customImageGroup.css({ opacity: String(targetOpacity) });
+                    if (pt.graphic) {
+                        pt.graphic.attr({ opacity: 0, visibility: 'hidden' });
+                    }
                 } else if (pt.graphic) {
                     pt.graphic.attr({ opacity: targetOpacity });
+                }
+                if (!visible && pt.customBorderCircle) {
+                    pt.customBorderCircle.attr({ opacity: 0.55, 'stroke-width': 1.5 });
                 }
             });
 
@@ -2689,7 +2696,10 @@ async function createEcosystemChart() {
                     })
                     .add(grp);
                 pt.customBorderCircle = borderCircle;
-                if (pt.graphic) pt.graphic.attr({ opacity: 0 });
+                if (pt.graphic) {
+                    pt.graphic.attr({ opacity: 0, visibility: 'hidden' });
+                    pt.graphic.css({ display: 'none', pointerEvents: 'none' });
+                }
             });
 
             applyFilterState(chart, true);
@@ -2877,18 +2887,9 @@ async function createEcosystemChart() {
             plotOptions: {
                 series: {
                     cursor: 'pointer',
-                    point: {
-                        events: {
-                            click: function () {
-                                if (this.custom && this.custom.website) {
-                                    window.open(this.custom.website, '_blank');
-                                }
-                            }
-                        }
-                    },
                     states: {
                         inactive: { enabled: false },
-                        hover: { halo: false }
+                        hover: { enabled: false, halo: false }
                     }
                 },
                 bubble: {
@@ -2903,6 +2904,8 @@ async function createEcosystemChart() {
             series: [
                 {
                     name: 'Projects',
+                    enableMouseTracking: false,
+                    stickyTracking: false,
                     data: bubbleData
                 },
                 {
