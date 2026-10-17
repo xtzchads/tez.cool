@@ -1,0 +1,20 @@
+<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_2803_3574)">
+<mask id="mask0_2803_3574" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="500" height="500">
+<path d="M0 0H500V500H0V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_2803_3574)">
+<path d="M0 0H500V500H0V0Z" fill="black"/>
+<path d="M359.875 177.75V136.25H151.5V366.75H360V325H193.25V177.75H359.875Z" fill="url(#paint0_radial_2803_3574)"/>
+</g>
+</g>
+<defs>
+<radialGradient id="paint0_radial_2803_3574" cx="0" cy="0" r="1" gradientTransform="matrix(208.375 -230.5 208.375 188.25 151.5 366.625)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#1BE6AB"/>
+<stop offset="1" stop-color="#027DFD"/>
+</radialGradient>
+<clipPath id="clip0_2803_3574">
+<rect width="500" height="500" fill="white"/>
+</clipPath>
+</defs>
+</svg>
