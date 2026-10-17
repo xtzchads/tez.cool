@@ -1,0 +1,77 @@
+
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <noscript>
+      <style>
+        #container {
+          display: none;
+        }
+      </style>
+    </noscript>
+
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TD7X6SMQ');</script>
+<!-- End Google Tag Manager -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="preload" href="/_runtimes/sites-runtime.c42e02b3d7d77dc71ec56f05a68a2486b19754333c24b83c13c427b10a51b96d.js" as="script" crossorigin />
+    <link rel="preload" href="/_components/v1/3b2ba6f7aaae6827b5c94a0ebd7898704d076651.js" as="script" crossorigin />
+    <link rel="preload" href="/_json/1ee41f3c-621b-4085-9636-6b84b47cb66f/_index.json" as="fetch" />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-TD7X6SMQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GTM-TD7X6SMQ');
+    </script>
+    <link rel="stylesheet" href="/_components/v1/3b2ba6f7aaae6827b5c94a0ebd7898704d076651.css">
+    <style id="reset-css"> @layer figreset,figoverridable,reset,theme,base,figutils,components,utilities;@layer figreset{:root{--100dvw:100vw;--100dvh:100vh}@supports (width:100dvw){:root{--100dvw:100dvw;--100dvh:100dvh}}}</style><style id="font-faces-xzww3t"> @font-face{font-family:"Inter:Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-english.woff2");font-display:block;unicode-range:U+0000-00A0,U+00A2-00A9,U+00AC-00AE,U+00B0-00B7,U+00B9-00BA,U+00BC-00BE,U+00D7,U+00F7,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-21BB,U+2212,U+2215,U+F8FF,U+FEFF,U+FFFD}@font-face{font-family:"Inter:Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-rest-latin.woff2");font-display:block;unicode-range:U+00A1,U+00AA-00AB,U+00AF,U+00B8,U+00BB,U+00BF-00D6,U+00D8-00F6,U+00F8-00FF,U+0131,U+0152-0153,U+02B0-02FF}@font-face{font-family:"Inter:Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-a.woff2");font-display:block;unicode-range:U+0100-0130,U+0132-0151,U+0154-017F}@font-face{font-family:"Inter:Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-b.woff2");font-display:block;unicode-range:U+0180-024F}@font-face{font-family:"Inter:Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-additional.woff2");font-display:block;unicode-range:U+1E00-1EFF}@font-face{font-family:"Inter:Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-rest.woff2");font-display:block;unicode-range:U+0250-02AF,U+0300-1DFF,U+1F00-1FFF,U+2070-2073,U+2075-20AB,U+20AD-2121,U+2123-218F,U+21BC-2211,U+2213-2214,U+2216-F8FE,U+F900-FEFE,U+FF00-FFFC,U+FFFE-FFFF}@font-face{font-family:"Inter";font-style:Semi Bold;src:url("/_woff/v2/Inter_1/Inter_1-english.woff2");font-display:block;unicode-range:U+0000-00A0,U+00A2-00A9,U+00AC-00AE,U+00B0-00B7,U+00B9-00BA,U+00BC-00BE,U+00D7,U+00F7,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-21BB,U+2212,U+2215,U+F8FF,U+FEFF,U+FFFD}@font-face{font-family:"Inter";font-style:Semi Bold;src:url("/_woff/v2/Inter_1/Inter_1-rest-latin.woff2");font-display:block;unicode-range:U+00A1,U+00AA-00AB,U+00AF,U+00B8,U+00BB,U+00BF-00D6,U+00D8-00F6,U+00F8-00FF,U+0131,U+0152-0153,U+02B0-02FF}@font-face{font-family:"Inter";font-style:Semi Bold;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-a.woff2");font-display:block;unicode-range:U+0100-0130,U+0132-0151,U+0154-017F}@font-face{font-family:"Inter";font-style:Semi Bold;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-b.woff2");font-display:block;unicode-range:U+0180-024F}@font-face{font-family:"Inter";font-style:Semi Bold;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-additional.woff2");font-display:block;unicode-range:U+1E00-1EFF}@font-face{font-family:"Inter";font-style:Semi Bold;src:url("/_woff/v2/Inter_1/Inter_1-rest.woff2");font-display:block;unicode-range:U+0250-02AF,U+0300-1DFF,U+1F00-1FFF,U+2070-2073,U+2075-20AB,U+20AD-2121,U+2123-218F,U+21BC-2211,U+2213-2214,U+2216-F8FE,U+F900-FEFE,U+FF00-FFFC,U+FFFE-FFFF}@font-face{font-family:"Inter:Regular";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-english.woff2");font-display:block;unicode-range:U+0000-00A0,U+00A2-00A9,U+00AC-00AE,U+00B0-00B7,U+00B9-00BA,U+00BC-00BE,U+00D7,U+00F7,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-21BB,U+2212,U+2215,U+F8FF,U+FEFF,U+FFFD}@font-face{font-family:"Inter:Regular";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-rest-latin.woff2");font-display:block;unicode-range:U+00A1,U+00AA-00AB,U+00AF,U+00B8,U+00BB,U+00BF-00D6,U+00D8-00F6,U+00F8-00FF,U+0131,U+0152-0153,U+02B0-02FF}@font-face{font-family:"Inter:Regular";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-a.woff2");font-display:block;unicode-range:U+0100-0130,U+0132-0151,U+0154-017F}@font-face{font-family:"Inter:Regular";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-b.woff2");font-display:block;unicode-range:U+0180-024F}@font-face{font-family:"Inter:Regular";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-additional.woff2");font-display:block;unicode-range:U+1E00-1EFF}@font-face{font-family:"Inter:Regular";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-rest.woff2");font-display:block;unicode-range:U+0250-02AF,U+0300-1DFF,U+1F00-1FFF,U+2070-2073,U+2075-20AB,U+20AD-2121,U+2123-218F,U+21BC-2211,U+2213-2214,U+2216-F8FE,U+F900-FEFE,U+FF00-FFFC,U+FFFE-FFFF}@font-face{font-family:"Inter:Medium";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-english.woff2");font-display:block;unicode-range:U+0000-00A0,U+00A2-00A9,U+00AC-00AE,U+00B0-00B7,U+00B9-00BA,U+00BC-00BE,U+00D7,U+00F7,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-21BB,U+2212,U+2215,U+F8FF,U+FEFF,U+FFFD}@font-face{font-family:"Inter:Medium";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-rest-latin.woff2");font-display:block;unicode-range:U+00A1,U+00AA-00AB,U+00AF,U+00B8,U+00BB,U+00BF-00D6,U+00D8-00F6,U+00F8-00FF,U+0131,U+0152-0153,U+02B0-02FF}@font-face{font-family:"Inter:Medium";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-a.woff2");font-display:block;unicode-range:U+0100-0130,U+0132-0151,U+0154-017F}@font-face{font-family:"Inter:Medium";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-b.woff2");font-display:block;unicode-range:U+0180-024F}@font-face{font-family:"Inter:Medium";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-additional.woff2");font-display:block;unicode-range:U+1E00-1EFF}@font-face{font-family:"Inter:Medium";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-rest.woff2");font-display:block;unicode-range:U+0250-02AF,U+0300-1DFF,U+1F00-1FFF,U+2070-2073,U+2075-20AB,U+20AD-2121,U+2123-218F,U+21BC-2211,U+2213-2214,U+2216-F8FE,U+F900-FEFE,U+FF00-FFFC,U+FFFE-FFFF}@font-face{font-family:"Inter:Semi Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-english.woff2");font-display:block;unicode-range:U+0000-00A0,U+00A2-00A9,U+00AC-00AE,U+00B0-00B7,U+00B9-00BA,U+00BC-00BE,U+00D7,U+00F7,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-21BB,U+2212,U+2215,U+F8FF,U+FEFF,U+FFFD}@font-face{font-family:"Inter:Semi Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-rest-latin.woff2");font-display:block;unicode-range:U+00A1,U+00AA-00AB,U+00AF,U+00B8,U+00BB,U+00BF-00D6,U+00D8-00F6,U+00F8-00FF,U+0131,U+0152-0153,U+02B0-02FF}@font-face{font-family:"Inter:Semi Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-a.woff2");font-display:block;unicode-range:U+0100-0130,U+0132-0151,U+0154-017F}@font-face{font-family:"Inter:Semi Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-b.woff2");font-display:block;unicode-range:U+0180-024F}@font-face{font-family:"Inter:Semi Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-latin-extended-additional.woff2");font-display:block;unicode-range:U+1E00-1EFF}@font-face{font-family:"Inter:Semi Bold";font-style:normal;src:url("/_woff/v2/Inter_1/Inter_1-rest.woff2");font-display:block;unicode-range:U+0250-02AF,U+0300-1DFF,U+1F00-1FFF,U+2070-2073,U+2075-20AB,U+20AD-2121,U+2123-218F,U+21BC-2211,U+2213-2214,U+2216-F8FE,U+F900-FEFE,U+FF00-FFFC,U+FFFE-FFFF}</style><style id="body-background-color">body:has([data-breakpoint-id="node-0_4"]) { background-color: #FFF }</style><style id="ssr-css">#container .css-vh2lqg {width: var(--viewport-width-scaled); min-height: var(--viewport-height-scaled); height: 100%; top: 0px;}#container .css-tzn6qh {display: block; position: absolute;}#container .css-6gkcj1 {transform-origin: top left; --max-layout-width: 2048px; --min-layout-width: 320px; --max-font-size: 288px; --min-font-size: 6px; --viewport-width-scaled: calc(var(--100dvw) / var(--viewport-scale)); --viewport-height-scaled: calc(var(--100dvh) / var(--viewport-scale)); --content-width-scaled: calc(var(--content-width-unscaled) / var(--viewport-scale)); --content-margin-x-scaled: max(calc((var(--viewport-width) - var(--max-layout-width)) / var(--viewport-scale) / 2), 0px);}#container .css-k1lnlu {position: relative; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; padding: 0px;}#container .css-50jkpj {min-width: var(--content-min-width); width: 100%;}#container .css-mat38n {--content-width: calc(var(--content-width-scaled, 100%) - (var(--content-margin-x-scaled, 0px) * 2)); --content-margin: 0 var(--content-margin-x-scaled, 0); --content-min-width: calc(var(--viewport-width-scaled, 100%) - (var(--content-margin-x-scaled, 0px) * 2)); --content-min-height: var(--viewport-height-scaled, var(--100dvh)); align-content: stretch;}#container .css-myl2ny {position: relative; flex-shrink: 0; flex: 1 0 0; display: block;}#container .css-w1qwf1 {min-width: 1px; min-height: 1px; width: 100%;}#container .css-gs60ek {overflow: visible;}</style><script>window.__serverRenderedCSSClassNames = {"css-vh2lqg":"{\"width\":\"var(--viewport-width-scaled)\",\"minHeight\":\"var(--viewport-height-scaled)\",\"height\":\"100%\",\"top\":\"0px\"}","css-tzn6qh":"{\"display\":\"block\",\"position\":\"absolute\"}","css-6gkcj1":"{\"transformOrigin\":\"top left\",\"--max-layout-width\":\"2048px\",\"--min-layout-width\":\"320px\",\"--max-font-size\":\"288px\",\"--min-font-size\":\"6px\",\"--viewport-width-scaled\":\"calc(var(--100dvw) / var(--viewport-scale))\",\"--viewport-height-scaled\":\"calc(var(--100dvh) / var(--viewport-scale))\",\"--content-width-scaled\":\"calc(var(--content-width-unscaled) / var(--viewport-scale))\",\"--content-margin-x-scaled\":\"max(calc((var(--viewport-width) - var(--max-layout-width)) / var(--viewport-scale) / 2), 0px)\"}","css-k1lnlu":"{\"position\":\"relative\",\"paddingTop\":0,\"paddingBottom\":0,\"paddingLeft\":0,\"paddingRight\":0,\"boxSizing\":\"border-box\",\"display\":\"flex\",\"flexDirection\":\"column\",\"justifyContent\":\"flex-start\",\"alignItems\":\"flex-start\"}","css-50jkpj":"{\"minWidth\":\"var(--content-min-width)\",\"width\":\"100%\"}","css-mat38n":"{\"--content-width\":\"calc(var(--content-width-scaled, 100%) - (var(--content-margin-x-scaled, 0px) * 2))\",\"--content-margin\":\"0 var(--content-margin-x-scaled, 0)\",\"--content-min-width\":\"calc(var(--viewport-width-scaled, 100%) - (var(--content-margin-x-scaled, 0px) * 2))\",\"--content-min-height\":\"var(--viewport-height-scaled, var(--100dvh))\",\"alignContent\":\"stretch\"}","css-myl2ny":"{\"position\":\"relative\",\"flexShrink\":0,\"flex\":\"1 0 0\",\"display\":\"block\"}","css-w1qwf1":"{\"minWidth\":1,\"minHeight\":1,\"width\":\"100%\"}","css-gs60ek":"{\"overflow\":\"visible\"}"}</script><meta id="meta-aelia8" name="description" content="The secure browser wallet for leading and exclusive assets.
+Buy, sell, send, and receive across major EVM networks."><meta id="meta-etg9ab" property="og:image" content="/_assets/v9/feef5f979f4b30d6c38bac02e461c7bb7091e441.png"><meta id="meta-udza7s" property="twitter:image" content="/_assets/v9/feef5f979f4b30d6c38bac02e461c7bb7091e441.png"><link id="link-peutts" rel="icon" href="/_assets/v9/77672ee9428a55cee0dee74025316dc0b93c3988.png"><title id="title-p92tme">Umami Wallet</title>
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TD7X6SMQ"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+    <script type="module">
+      import {SitesRuntime} from '/_runtimes/sites-runtime.c42e02b3d7d77dc71ec56f05a68a2486b19754333c24b83c13c427b10a51b96d.js';
+      const sitesRuntime = new SitesRuntime({
+        container: document.getElementById('container'),
+        env: 'published',
+        bundleId: '1ee41f3c-621b-4085-9636-6b84b47cb66f',
+        
+        loadComponentsOverNetwork: true,
+        assetsVersion: 'v9',
+        codeComponentsVersion: 'v1',
+        wasServerRendered: true,
+        withBaseStyles: false,
+        reportingDomain: "https://www.figma.com",
+        bundleCreationDate: '2025-06-26 16:34:34 UTC',
+      });
+    </script>
+    
+    <div id="container"><div class="css-k1lnlu css-50jkpj css-mat38n" data-breakpoint-id="node-0_4" data-breakpoint="true" data-width="1280" data-height="1080"><div class="tailwind css-myl2ny css-w1qwf1 css-gs60ek"></div></div></div>
+    
+
+     <noscript data-nosnippet>
+      <main style="height: 100vh; width: 100vw; background-color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+        <h1 style="font-size: 24px; padding: 8px; color: black">
+        This site requires JavaScript
+        </h1>
+        <p style="font-size: 16px; padding: 8px; color: #00000080">To view this website, enable JavaScript in your browser settings and reload the page.</p>
+        <form style="margin-top: 12px;" action="">
+          <button type="submit" style="font-size: 14px; color: black; border: 1px solid #0000001a; border-radius: 5px; width: 256px; height: 32px;">
+          Reload page
+          </button>
+        </form>
+      </main>
+    </noscript>
+  </body>
+</html>
