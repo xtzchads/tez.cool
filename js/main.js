@@ -2216,414 +2216,664 @@ async function createEcosystemChart() {
             window.ecosystemResizeHandler = null;
         }
         const oldTooltip = document.getElementById('custom-tooltip');
-        if (oldTooltip) {
-            oldTooltip.remove();
+        if (oldTooltip) oldTooltip.remove();
+        const oldControls = document.getElementById('eco-controls-bar');
+        if (oldControls) oldControls.remove();
+
+        let projects = null;
+        try {
+            const ecoResp = await fetch('ecosystem.json');
+            if (ecoResp && ecoResp.ok) {
+                const ecoJson = await ecoResp.json();
+                if (ecoJson && Array.isArray(ecoJson.ecosystem) && ecoJson.ecosystem.length > 0) {
+                    projects = ecoJson.ecosystem;
+                }
+            }
+        } catch (e) {
+            try {
+                const ecoJson = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', 'ecosystem.json', true);
+                    xhr.onload = () => {
+                        if (xhr.status === 200 || (xhr.status === 0 && xhr.responseText)) {
+                            try { resolve(JSON.parse(xhr.responseText)); } catch (err) { reject(err); }
+                        } else {
+                            reject(new Error('XHR status ' + xhr.status));
+                        }
+                    };
+                    xhr.onerror = () => reject(new Error('XHR error'));
+                    xhr.send();
+                });
+                if (ecoJson && Array.isArray(ecoJson.ecosystem) && ecoJson.ecosystem.length > 0) {
+                    projects = ecoJson.ecosystem;
+                }
+            } catch (e2) {}
         }
-        const projects = aggregatedDataCache.ecosystemProjects;
+
+        if (!projects || projects.length === 0) {
+            projects = (typeof aggregatedDataCache !== 'undefined' && aggregatedDataCache && Array.isArray(aggregatedDataCache.ecosystemProjects))
+                ? aggregatedDataCache.ecosystemProjects
+                : [];
+        } else if (typeof aggregatedDataCache !== 'undefined' && aggregatedDataCache) {
+            aggregatedDataCache.ecosystemProjects = projects;
+        }
+
+        const container = document.getElementById('ecosystem-chart-container');
+        if (!container) return;
         if (!projects || projects.length === 0) {
             console.error('No ecosystem projects data available');
-            document.getElementById('ecosystem-chart-container').innerHTML = '<div style="color: #ff6961; text-align: center; padding: 50px;">No ecosystem data available</div>';
+            container.innerHTML = '<div style="color: #ff6961; text-align: center; padding: 50px;">No ecosystem data available</div>';
             return;
         }
-        const allProjects = [...projects];
-        const tagMapping = {
-            'defi': 'defi',
-            'etherlink': 'defi',
-            'stablecoins': 'defi',
-            'rwa': 'defi',
-            'did': 'community',
-            'devtools': 'tooling',
-            'baking': 'tooling',
-            'blockexplorers': 'tooling',
-            'education': 'tooling'
+
+        const tagMap = {
+            defi: 'defi',
+            etherlink: 'defi',
+            stablecoins: 'defi',
+            rwa: 'defi',
+            gaming: 'gaming',
+            nft: 'nft',
+            nfts: 'nft',
+            community: 'community',
+            did: 'community',
+            social: 'community',
+            tooling: 'tooling',
+            devtools: 'tooling',
+            'dev-tools': 'tooling',
+            baking: 'tooling',
+            blockexplorers: 'tooling',
+            education: 'tooling',
+            wallet: 'tooling',
+            'tezos-wallet': 'tooling',
+            infra: 'tooling'
         };
-        const tagColors = {
-            'defi': '#6CDDCA',
-            'gaming': '#C771F3',
-            'nft': '#4D90DB',
-            'community': '#FAB776',
-            'tooling': '#FF6B9D',
-            'did': '#F38181',
-            'rwa': '#FFAAA7'
+
+        const categoryColors = {
+            defi: '#6CDDCA',
+            gaming: '#C771F3',
+            nft: '#4D90DB',
+            community: '#FAB776',
+            tooling: '#FF6B9D'
         };
-        const tagDisplayNames = {
-            'defi': 'DeFi',
-            'gaming': 'Gaming',
-            'nft': 'NFT',
-            'community': 'Community',
-            'tooling': 'Tooling & Infra',
-            'did': 'DID',
-            'rwa': 'RWA'
+
+        const categoryNames = {
+            defi: 'DeFi',
+            gaming: 'Gaming',
+            nft: 'NFT',
+            community: 'Community',
+            tooling: 'Tooling & Infra'
         };
-        const projectsByTag = {};
-        const processedProjects = new Set();
-        allProjects.forEach(project => {
-            if (project.fields.Tags && project.fields.Tags.length > 0 && project.fields.Status === 'active') {
-                if (processedProjects.has(project.fields.Project)) {
-                    return;
-                }
-                let mainTag = null;
-                for (const tag of project.fields.Tags) {
-                    if (tag === 'partner')
-                        continue;
-                    mainTag = tagMapping[tag] || tag;
-                    break;
-                }
-                if (mainTag) {
-                    if (!projectsByTag[mainTag]) {
-                        projectsByTag[mainTag] = [];
+
+        const categoryOrder = ['defi', 'gaming', 'nft', 'community', 'tooling'];
+        const grouped = { defi: [], gaming: [], nft: [], community: [], tooling: [] };
+        const uniqueSet = new Set();
+
+        projects.forEach(item => {
+            const f = item && item.fields ? item.fields : {};
+            if (f.Tags && f.Tags.length > 0 && f.Status === 'active' && f.Project && !uniqueSet.has(f.Project)) {
+                let cat = null;
+                if (/wallet/i.test(f.Project)) {
+                    cat = 'tooling';
+                } else {
+                    for (const rawTag of f.Tags) {
+                        if (rawTag !== 'partner') {
+                            cat = tagMap[rawTag] || (grouped[rawTag] ? rawTag : 'tooling');
+                            break;
+                        }
                     }
-                    projectsByTag[mainTag].push(project);
-                    processedProjects.add(project.fields.Project);
+                }
+                if (cat && grouped[cat]) {
+                    grouped[cat].push(item);
+                    uniqueSet.add(f.Project);
                 }
             }
         });
+
+        const activeCategories = categoryOrder.filter(cat => grouped[cat] && grouped[cat].length > 0);
+        const totalProjects = uniqueSet.size;
+
+        const weights = activeCategories.map(cat => Math.pow(Math.max(10, grouped[cat].length), 0.75));
+        const weightSum = weights.reduce((a, b) => a + b, 0);
+        const sectorAngles = weights.map(w => (w / weightSum) * 360);
+
+        const tickPositions = [0];
+        const sectorBounds = {};
+        let runningAngle = 0;
+        activeCategories.forEach((cat, idx) => {
+            const span = sectorAngles[idx];
+            sectorBounds[cat] = { start: runningAngle, span: span, end: runningAngle + span };
+            runningAngle += span;
+            tickPositions.push(idx === activeCategories.length - 1 ? 360 : Number(runningAngle.toFixed(3)));
+        });
+
+        const vw = window.innerWidth;
+        const bubbleSize = vw < 480 ? 15 : vw < 640 ? 18 : vw < 768 ? 22 : vw < 1024 ? 26 : 31;
+        const baseOrigin = (window.location.origin && window.location.origin.startsWith('http'))
+            ? window.location.origin
+            : 'https://tez.cool';
+
         const bubbleData = [];
-        const tags = Object.keys(projectsByTag);
-        const totalAngle = 360;
-        const anglePerTag = totalAngle / tags.length;
-        tags.forEach((tag, tagIndex) => {
-            const tagProjects = projectsByTag[tag];
-            const sectionStartAngle = tagIndex * anglePerTag;
-            const centerAngle = sectionStartAngle + anglePerTag / 2;
-            function getItemsPerRow(rowNum) {
-                const rowRadius = 20 + (rowNum * 10);
-                const circumference = 2 * Math.PI * rowRadius;
-                const sectionCircumference = (circumference * anglePerTag) / 360;
-                const itemSpacing = 9;
-                return Math.max(2, Math.min(6, Math.floor(sectionCircumference / itemSpacing)));
-            }
-            tagProjects.forEach((project, projectIndex) => {
-                let row = 0;
-                let itemsPlaced = 0;
-                let currentRow = 0;
-                while (itemsPlaced + getItemsPerRow(currentRow) <= projectIndex) {
-                    itemsPlaced += getItemsPerRow(currentRow);
-                    currentRow++;
-                }
-                row = currentRow;
-                const col = projectIndex - itemsPlaced;
-                const itemsInThisRow = getItemsPerRow(row);
-                const radius = 20 + (row * 10);
-                const angleStep = anglePerTag / (itemsInThisRow + 1);
-                const angle = sectionStartAngle + angleStep * (col + 1);
-                let bubbleSize = window.innerWidth < 480 ? 20 : (window.innerWidth < 768 ? 28 : 35);
-                let logoUrl = null;
-                if (project.fields.Logo && project.fields.Logo.length > 0) {
-                    const url = project.fields.Logo[0].url;
-                    logoUrl = url.startsWith('http://') || url.startsWith('https://') ? url : window.location.origin + url;
-                }
-                bubbleData.push({
-                    name: project.fields.Project,
-                    x: angle,
-                    y: radius,
-                    z: bubbleSize,
-                    color: tagColors[tag] || '#999999',
-                    custom: {
-                        tag: tag,
-                        displayTag: tagDisplayNames[tag] || tag,
-                        logline: project.fields.Logline || '',
-                        website: project.fields.Website || '',
-                        tags: project.fields.Tags || [],
-                        featured: project.fields.IsFeatured || false,
-                        logoUrl: logoUrl
-                    }
-                });
+
+        activeCategories.forEach(cat => {
+            const items = grouped[cat].slice().sort((a, b) => {
+                const fa = a.fields.IsFeatured ? 1 : 0;
+                const fb = b.fields.IsFeatured ? 1 : 0;
+                if (fa !== fb) return fb - fa;
+                return String(a.fields.Project).localeCompare(String(b.fields.Project));
             });
+            const N = items.length;
+            const { start, span } = sectorBounds[cat];
+
+            const numRings = N >= 42 ? 6 : N >= 26 ? 5 : N >= 11 ? 4 : N >= 5 ? 3 : 2;
+            const yMin = numRings >= 6 ? 20.5 : numRings === 5 ? 22.0 : 24.0;
+            const yMax = numRings >= 6 ? 65.5 : numRings === 5 ? 64.5 : 63.0;
+
+            const ringRadii = [];
+            for (let r = 0; r < numRings; r++) {
+                ringRadii.push(numRings === 1 ? 42 : yMin + (r / (numRings - 1)) * (yMax - yMin));
+            }
+
+            const ringWeights = ringRadii.map(y => Math.pow(y + 8, 0.86));
+            const rwSum = ringWeights.reduce((a, b) => a + b, 0);
+            const exactCounts = ringWeights.map(w => (w / rwSum) * N);
+            const ringCounts = exactCounts.map(c => Math.max(1, Math.floor(c)));
+            let diff = N - ringCounts.reduce((a, b) => a + b, 0);
+
+            const fracOrder = exactCounts
+                .map((c, idx) => ({ idx, frac: c - Math.floor(c) }))
+                .sort((a, b) => b.frac - a.frac);
+
+            let guard = 0;
+            while (diff > 0 && guard++ < 100) {
+                for (const f of fracOrder) {
+                    if (diff <= 0) break;
+                    ringCounts[f.idx]++;
+                    diff--;
+                }
+            }
+            while (diff < 0 && guard++ < 200) {
+                for (let i = fracOrder.length - 1; i >= 0; i--) {
+                    if (diff >= 0) break;
+                    const idx = fracOrder[i].idx;
+                    if (ringCounts[idx] > 1) {
+                        ringCounts[idx]--;
+                        diff++;
+                    }
+                }
+            }
+
+            const padDeg = Math.min(span * 0.065, 3.6);
+            const usableSpan = Math.max(4, span - 2 * padDeg);
+
+            let cursor = 0;
+            for (let r = 0; r < numRings; r++) {
+                const countInRing = ringCounts[r];
+                const yVal = ringRadii[r];
+                const stagger = countInRing > 2 ? (r % 2 === 1 ? 0.16 : -0.16) : 0;
+
+                for (let s = 0; s < countInRing && cursor < N; s++, cursor++) {
+                    const item = items[cursor];
+                    const frac = (s + 0.5 + stagger) / countInRing;
+                    const clampedFrac = Math.max(0.04, Math.min(0.96, frac));
+                    const xVal = start + padDeg + clampedFrac * usableSpan;
+
+                    let logoUrl = null;
+                    if (item.fields.Logo && item.fields.Logo.length > 0 && item.fields.Logo[0].url) {
+                        const rawUrl = item.fields.Logo[0].url;
+                        logoUrl = (rawUrl.startsWith('http://') || rawUrl.startsWith('https://'))
+                            ? rawUrl
+                            : rawUrl.replace(/^\//, '');
+                    }
+
+                    bubbleData.push({
+                        name: item.fields.Project,
+                        x: Number(xVal.toFixed(3)),
+                        y: Number(yVal.toFixed(3)),
+                        z: bubbleSize,
+                        color: categoryColors[cat] || '#999999',
+                        custom: {
+                            tag: cat,
+                            displayTag: categoryNames[cat] || cat,
+                            logline: item.fields.Logline || '',
+                            website: item.fields.Website || '',
+                            tags: item.fields.Tags || [],
+                            featured: !!item.fields.IsFeatured,
+                            logoUrl: logoUrl
+                        }
+                    });
+                }
+            }
         });
-        const pieData = tags.map((tag, index) => ({
-                    y: 1,
-                    color: tagColors[tag] || '#999999',
-                    name: tagDisplayNames[tag] || tag,
-                    custom: {
-                        tag: tag,
-                        displayTag: tagDisplayNames[tag] || tag,
-                        count: projectsByTag[tag].length
-                    }
-                }));
-        function renderCustomLogos(chart) {
-            const bubbleSeries = chart.series[0];
-            if (chart.customLogoGroups) {
-                chart.customLogoGroups.forEach(group => group.destroy());
+
+        const pieData = activeCategories.map((cat, idx) => ({
+            y: Number(sectorAngles[idx].toFixed(3)),
+            color: categoryColors[cat] || '#999999',
+            name: categoryNames[cat] || cat,
+            custom: {
+                tag: cat,
+                displayTag: categoryNames[cat] || cat,
+                count: grouped[cat].length
             }
-            chart.customLogoGroups = [];
-            if (chart.customClipPaths) {
-                chart.customClipPaths.forEach(clip => clip.destroy());
+        }));
+
+        let lockedCategory = null;
+        let hoveredSector = null;
+        let pillPreviewCategory = null;
+        let searchQuery = '';
+        let lastAppliedSignature = null;
+
+        function getSectorFromPointerEvent(ev, chart) {
+            if (!chart || !chart.pane || !chart.pane[0] || !chart.container) return null;
+            const svgRect = chart.container.getBoundingClientRect();
+            const mx = ev.clientX - svgRect.left;
+            const my = ev.clientY - svgRect.top;
+            const cx = chart.pane[0].center[0] + chart.plotLeft;
+            const cy = chart.pane[0].center[1] + chart.plotTop;
+            const dx = mx - cx;
+            const dy = my - cy;
+            const dist = Math.hypot(dx, dy);
+            const paneDiam = chart.pane[0].center[2] || Math.min(chart.plotWidth, chart.plotHeight);
+            const outerR = paneDiam / 2;
+            const innerHoleR = outerR * 0.20;
+            if (dist < innerHoleR || dist > outerR * 1.02) {
+                return null;
             }
-            chart.customClipPaths = [];
-            bubbleSeries.points.forEach((point) => {
-                if (point.custom && point.custom.logoUrl && point.graphic) {
-                    const logoUrl = point.custom.logoUrl;
-                    const circleSize = point.marker.radius * 2;
-                    const plotX = point.plotX + chart.plotLeft;
-                    const plotY = point.plotY + chart.plotTop;
-                    const group = chart.renderer.g().attr({
-                        zIndex: 5,
-                        'class': 'clickable-logo'
-                    }).css({
-                        cursor: 'pointer'
-                    }).add();
-                    chart.customLogoGroups.push(group);
-                    group.element.addEventListener('click', function () {
-                        if (point.custom && point.custom.website) {
-                            window.open(point.custom.website, '_blank');
-                        }
-                    });
-                    group.element.addEventListener('mouseenter', function (e) {
-                        if (point.customBorderCircle) {
-                            point.customBorderCircle.attr({
-                                opacity: 1
-                            });
-                        }
-                        const customTooltip = document.getElementById('custom-tooltip');
-                        const logoHtml = point.custom.logoUrl ? `<img src="${escapeHTML(point.custom.logoUrl)}" style="width: 32px; height: 32px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px;" />` : '';
-                        customTooltip.innerHTML = `
-
-                            ${logoHtml}
-
-                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">
-
-                                ${escapeHTML(point.name)}
-
-                            </div>
-
-                            <div style="color: rgba(255, 255, 255, 0.7); font-size: 12px; margin-bottom: 4px;">
-
-                                ${escapeHTML(point.custom.logline)}
-
-                            </div>
-
-                            <div style="color: ${point.color}; font-size: 11px; text-transform: uppercase;">
-
-                                ${escapeHTML(point.custom.displayTag)}
-
-                            </div>
-
-                        `;
-                        customTooltip.style.display = 'block';
-                    });
-                    group.element.addEventListener('mousemove', function (e) {
-                        const customTooltip = document.getElementById('custom-tooltip');
-                        const container = document.getElementById('ecosystem-chart-container');
-                        const rect = container.getBoundingClientRect();
-                        let left = e.clientX - rect.left + 10;
-                        let top = e.clientY - rect.top + 10;
-                        const tooltipWidth = customTooltip.offsetWidth;
-                        const tooltipHeight = customTooltip.offsetHeight;
-                        if (left + tooltipWidth > rect.width) {
-                            left = e.clientX - rect.left - tooltipWidth - 10;
-                        }
-                        if (top + tooltipHeight > rect.height) {
-                            top = e.clientY - rect.top - tooltipHeight - 10;
-                        }
-                        if (left < 0) {
-                            left = 10;
-                        }
-                        if (top < 0) {
-                            top = 10;
-                        }
-                        customTooltip.style.left = left + 'px';
-                        customTooltip.style.top = top + 'px';
-                    });
-                    group.element.addEventListener('mouseleave', function () {
-                        if (point.customBorderCircle) {
-                            point.customBorderCircle.attr({
-                                opacity: 0
-                            });
-                        }
-                        const customTooltip = document.getElementById('custom-tooltip');
-                        customTooltip.style.display = 'none';
-                    });
-                    point.customImageGroup = group;
-                    const clipId = 'clip-' + point.index + '-' + Date.now();
-                    const clipPath = chart.renderer.createElement('clipPath').attr({
-                        id: clipId
-                    }).add(chart.renderer.defs);
-                    chart.customClipPaths.push(clipPath);
-                    chart.renderer.circle(0, 0, circleSize / 2).add(clipPath);
-                    const bgCircle = chart.renderer.circle(plotX, plotY, circleSize / 2).attr({
-                        fill: 'white'
-                    }).add(group);
-                    const imgGroup = chart.renderer.g().attr({
-                        'clip-path': `url(#${clipId})`,
-                        transform: `translate(${plotX}, ${plotY})`
-                    }).add(group);
-                    const imgSize = circleSize;
-                    chart.renderer.image(logoUrl, -imgSize / 2, -imgSize / 2, imgSize, imgSize).attr({
-                        preserveAspectRatio: 'xMidYMid slice'
-                    }).add(imgGroup);
-                    const borderCircle = chart.renderer.circle(plotX, plotY, circleSize / 2).attr({
-                        fill: 'none',
-                        stroke: 'rgba(255, 255, 255, 0.3)',
-                        'stroke-width': 2,
-                        opacity: 0
-                    }).add(group);
-                    point.customBorderCircle = borderCircle;
-                    if (point.graphic) {
-                        point.graphic.attr({
-                            opacity: 0
-                        });
-                    }
+            const angleDeg = (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
+            for (const cat of activeCategories) {
+                const b = sectorBounds[cat];
+                if (b && angleDeg >= b.start && angleDeg <= b.end) {
+                    return cat;
                 }
-            });
-        }
-        function fillCenter(count, label, chart, customLabel) {
-            const countSize = window.innerWidth < 480 ? '20px' : (window.innerWidth < 768 ? '28px' : '48px');
-            const labelSize = window.innerWidth < 480 ? '5px' : (window.innerWidth < 768 ? '10px' : '14px');
-            const labelText = `
-
-                <div style="text-align: center; pointer-events: none;">
-
-                    <div style="font-size: ${countSize}; font-weight: 600; color: #ffffff; line-height: 1;">
-
-                        ${count}
-
-                    </div>
-
-                    <div style="font-size: ${labelSize}; color: rgba(255, 255, 255, 0.7); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">
-
-                        ${label}
-
-                    </div>
-
-                </div>
-
-            `;
-            if (!customLabel) {
-                customLabel = chart.renderer.label(labelText, 0, 0, undefined, undefined, undefined, true).css({
-                    color: '#ffffff',
-                    pointerEvents: 'none'
-                }).attr({
-                    zIndex: 0
-                }).add();
-            } else {
-                customLabel.attr({
-                    text: labelText
-                });
             }
-            customLabel.attr({
-                x: (chart.pane[0].center[0] + chart.plotLeft) - customLabel.attr('width') / 2,
-                y: (chart.pane[0].center[1] + chart.plotTop) - customLabel.attr('height') / 2,
+            return null;
+        }
+
+        function updateCenterLabel(countVal, titleText, chart, existingLabel) {
+            const html = `
+                <div style="text-align: center; pointer-events: none;">
+                    <div style="font-size: ${window.innerWidth < 480 ? '20px' : window.innerWidth < 768 ? '28px' : '46px'}; font-weight: 600; color: #ffffff; line-height: 1;">
+                        ${countVal}
+                    </div>
+                    <div style="font-size: ${window.innerWidth < 480 ? '6px' : window.innerWidth < 768 ? '10px' : '13px'}; color: rgba(255, 255, 255, 0.72); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">
+                        ${titleText}
+                    </div>
+                </div>
+            `;
+            const lbl = existingLabel
+                ? existingLabel.attr({ text: html })
+                : chart.renderer.label(html, 0, 0, void 0, void 0, void 0, true)
+                    .css({ color: '#ffffff', pointerEvents: 'none' })
+                    .attr({ zIndex: 0 })
+                    .add();
+            lbl.attr({
+                x: chart.pane[0].center[0] + chart.plotLeft - lbl.attr('width') / 2,
+                y: chart.pane[0].center[1] + chart.plotTop - lbl.attr('height') / 2,
                 zIndex: 0
             });
-            return customLabel;
+            return lbl;
         }
+
+        function applyFilterState(chart, forceUpdate) {
+            if (!chart || !chart.series || !chart.series[0]) return;
+            const activeCat = pillPreviewCategory || hoveredSector || lockedCategory;
+            const q = searchQuery.trim().toLowerCase();
+            const signature = `${activeCat || ''}|${q}`;
+            if (!forceUpdate && signature === lastAppliedSignature) return;
+            lastAppliedSignature = signature;
+
+            const pts = chart.series[0].points;
+            const pieSeries = chart.series[1];
+
+            let matchCount = 0;
+            pts.forEach(pt => {
+                const matchesCat = !activeCat || pt.custom.tag === activeCat;
+                const matchesQuery = !q ||
+                    pt.name.toLowerCase().includes(q) ||
+                    (pt.custom.logline && pt.custom.logline.toLowerCase().includes(q)) ||
+                    (pt.custom.displayTag && pt.custom.displayTag.toLowerCase().includes(q));
+                const visible = matchesCat && matchesQuery;
+                if (visible) matchCount++;
+
+                const targetOpacity = (!activeCat && !q) ? 1 : (visible ? 1 : 0.14);
+                if (pt.customImageGroup) {
+                    pt.customImageGroup.attr({ opacity: targetOpacity });
+                } else if (pt.graphic) {
+                    pt.graphic.attr({ opacity: targetOpacity });
+                }
+            });
+
+            if (pieSeries) {
+                pieSeries.points.forEach(slice => {
+                    const sliceActive = !activeCat || slice.options.custom.tag === activeCat;
+                    if (slice.graphic) {
+                        slice.graphic.attr({ opacity: sliceActive ? 1 : 0.25 });
+                    }
+                });
+                if (q) {
+                    pieSeries.customLabel = updateCenterLabel(matchCount, 'MATCHING', chart, pieSeries.customLabel);
+                } else if (activeCat) {
+                    const catCount = grouped[activeCat] ? grouped[activeCat].length : matchCount;
+                    pieSeries.customLabel = updateCenterLabel(catCount, (categoryNames[activeCat] || activeCat).toUpperCase(), chart, pieSeries.customLabel);
+                } else {
+                    pieSeries.customLabel = updateCenterLabel(totalProjects, 'TOTAL PROJECTS', chart, pieSeries.customLabel);
+                }
+            }
+        }
+
+        function bindSectorBoundaryTracking(chart) {
+            if (!chart || !chart.container || chart._sectorBoundaryBound) return;
+            chart._sectorBoundaryBound = true;
+            chart.container.addEventListener('mousemove', function (ev) {
+                const sec = getSectorFromPointerEvent(ev, chart);
+                if (sec !== hoveredSector) {
+                    hoveredSector = sec;
+                    applyFilterState(chart, false);
+                }
+            });
+            chart.container.addEventListener('mouseleave', function () {
+                if (hoveredSector !== null) {
+                    hoveredSector = null;
+                    applyFilterState(chart, false);
+                }
+                const tip = document.getElementById('custom-tooltip');
+                if (tip) tip.style.display = 'none';
+            });
+        }
+
+        function renderCustomLogos(chart) {
+            const series = chart.series[0];
+            if (chart.customLogoGroups) chart.customLogoGroups.forEach(g => g.destroy());
+            chart.customLogoGroups = [];
+            if (chart.customClipPaths) chart.customClipPaths.forEach(cp => cp.destroy());
+            chart.customClipPaths = [];
+
+            series.points.forEach(pt => {
+                if (!pt.custom || !pt.custom.logoUrl || !pt.graphic) return;
+                const logoUrl = pt.custom.logoUrl;
+                const diam = Math.max(12, 2 * (pt.marker && pt.marker.radius ? pt.marker.radius : bubbleSize / 2));
+                const cx = pt.plotX + chart.plotLeft;
+                const cy = pt.plotY + chart.plotTop;
+
+                const grp = chart.renderer.g()
+                    .attr({ zIndex: 5, 'class': 'clickable-logo' })
+                    .css({ cursor: 'pointer', transition: 'opacity 0.16s ease' })
+                    .add();
+                chart.customLogoGroups.push(grp);
+
+                grp.element.addEventListener('click', function () {
+                    if (pt.custom && pt.custom.website) {
+                        window.open(pt.custom.website, '_blank');
+                    }
+                });
+
+                grp.element.addEventListener('mouseenter', function () {
+                    if (pt.customBorderCircle) {
+                        pt.customBorderCircle.attr({ opacity: 1, 'stroke-width': 2.5 });
+                    }
+                    if (hoveredSector !== pt.custom.tag) {
+                        hoveredSector = pt.custom.tag;
+                        applyFilterState(chart, false);
+                    }
+                    const tip = document.getElementById('custom-tooltip');
+                    if (!tip) return;
+                    const imgHtml = pt.custom.logoUrl
+                        ? `<img src="${escapeHTML(pt.custom.logoUrl)}" style="width: 34px; height: 34px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px; object-fit: cover;" onerror="this.style.display='none'" />`
+                        : '';
+                    tip.innerHTML = `
+                        ${imgHtml}
+                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #ffffff;">
+                            ${escapeHTML(pt.name)}
+                        </div>
+                        <div style="color: rgba(255, 255, 255, 0.76); font-size: 12px; line-height: 1.35; margin-bottom: 6px;">
+                            ${escapeHTML(pt.custom.logline)}
+                        </div>
+                        <div style="color: ${pt.color}; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                            ${escapeHTML(pt.custom.displayTag)}
+                        </div>
+                    `;
+                    tip.style.display = 'block';
+                });
+
+                grp.element.addEventListener('mousemove', function (ev) {
+                    const tip = document.getElementById('custom-tooltip');
+                    if (!tip) return;
+                    const rect = container.getBoundingClientRect();
+                    let left = ev.clientX - rect.left + 12;
+                    let top = ev.clientY - rect.top + 12;
+                    const tw = tip.offsetWidth;
+                    const th = tip.offsetHeight;
+                    if (left + tw > rect.width) left = ev.clientX - rect.left - tw - 12;
+                    if (top + th > rect.height) top = ev.clientY - rect.top - th - 12;
+                    if (left < 0) left = 10;
+                    if (top < 0) top = 10;
+                    tip.style.left = left + 'px';
+                    tip.style.top = top + 'px';
+                });
+
+                grp.element.addEventListener('mouseleave', function () {
+                    if (pt.customBorderCircle) {
+                        pt.customBorderCircle.attr({ opacity: 0.55, 'stroke-width': 1.5 });
+                    }
+                    const tip = document.getElementById('custom-tooltip');
+                    if (tip) tip.style.display = 'none';
+                });
+
+                pt.customImageGroup = grp;
+                const clipId = 'clip-' + pt.index + '-' + Math.random().toString(36).slice(2, 8);
+                const clipPath = chart.renderer.createElement('clipPath').attr({ id: clipId }).add(chart.renderer.defs);
+                chart.customClipPaths.push(clipPath);
+                chart.renderer.circle(0, 0, diam / 2).add(clipPath);
+
+                chart.renderer.circle(cx, cy, diam / 2).attr({ fill: '#ffffff' }).add(grp);
+
+                const imgClipGroup = chart.renderer.g()
+                    .attr({ 'clip-path': `url(#${clipId})`, transform: `translate(${cx}, ${cy})` })
+                    .add(grp);
+
+                const svgImg = chart.renderer.image(logoUrl, -diam / 2, -diam / 2, diam, diam)
+                    .attr({ preserveAspectRatio: 'xMidYMid slice' })
+                    .add(imgClipGroup);
+
+                if (svgImg && svgImg.element) {
+                    svgImg.element.addEventListener('error', function () {
+                        svgImg.attr({ visibility: 'hidden' });
+                    });
+                }
+
+                const borderCircle = chart.renderer.circle(cx, cy, diam / 2)
+                    .attr({
+                        fill: 'none',
+                        stroke: pt.color || 'rgba(255, 255, 255, 0.45)',
+                        'stroke-width': 1.5,
+                        opacity: 0.55
+                    })
+                    .add(grp);
+                pt.customBorderCircle = borderCircle;
+                if (pt.graphic) pt.graphic.attr({ opacity: 0 });
+            });
+
+            applyFilterState(chart, true);
+        }
+
+        function buildControlsBar(chart) {
+            let bar = document.getElementById('eco-controls-bar');
+            if (bar) bar.remove();
+            bar = document.createElement('div');
+            bar.id = 'eco-controls-bar';
+
+            const headerWrap = document.createElement('div');
+            headerWrap.style.cssText = 'text-align: center; padding: 8px 10px 4px;';
+            const titleEl = document.createElement('div');
+            titleEl.style.cssText = `color: #ffffff; font-size: ${vw < 768 ? '20px' : '28px'}; font-family: "Monda", Helvetica, sans-serif; font-weight: 500; line-height: 1.2; margin-bottom: 6px;`;
+            titleEl.textContent = 'Tezos Ecosystem Map';
+            const subEl = document.createElement('div');
+            subEl.style.cssText = `color: rgba(255, 255, 255, 0.7); font-family: "Monda", Helvetica, sans-serif; font-size: ${vw < 768 ? '11px' : '12px'}; margin-bottom: 10px;`;
+            subEl.textContent = vw < 768
+                ? 'Tap category pills to filter \u00b7 Tap logos to visit websites'
+                : 'Projects organized by category \u00b7 Filter by category or click logos to visit websites';
+            headerWrap.appendChild(titleEl);
+            headerWrap.appendChild(subEl);
+            bar.appendChild(headerWrap);
+
+            const pillRow = document.createElement('div');
+            pillRow.className = 'eco-controls-bar';
+
+            const pills = [];
+            function syncPillsUI() {
+                pills.forEach(p => {
+                    const isAll = p.dataset.cat === '';
+                    const isActive = isAll ? !lockedCategory : lockedCategory === p.dataset.cat;
+                    p.classList.toggle('active', isActive);
+                });
+            }
+
+            const allPill = document.createElement('button');
+            allPill.type = 'button';
+            allPill.className = 'eco-cat-pill active';
+            allPill.dataset.cat = '';
+            allPill.innerHTML = `<span>All</span><span class="eco-cat-count">${totalProjects}</span>`;
+            allPill.addEventListener('click', () => {
+                lockedCategory = null;
+                pillPreviewCategory = null;
+                syncPillsUI();
+                applyFilterState(chart, false);
+            });
+            pillRow.appendChild(allPill);
+            pills.push(allPill);
+
+            activeCategories.forEach(cat => {
+                const pill = document.createElement('button');
+                pill.type = 'button';
+                pill.className = 'eco-cat-pill';
+                pill.dataset.cat = cat;
+                const col = categoryColors[cat] || '#a27cee';
+                pill.style.setProperty('--pill-color', col);
+                pill.style.setProperty('--pill-glow', col + '55');
+                pill.innerHTML = `
+                    <span class="eco-cat-dot" style="background:${col}; color:${col};"></span>
+                    <span>${escapeHTML(categoryNames[cat] || cat)}</span>
+                    <span class="eco-cat-count">${grouped[cat].length}</span>
+                `;
+                pill.addEventListener('mouseenter', () => {
+                    if (!lockedCategory) {
+                        pillPreviewCategory = cat;
+                        applyFilterState(chart, false);
+                    }
+                });
+                pill.addEventListener('mouseleave', () => {
+                    if (pillPreviewCategory === cat) {
+                        pillPreviewCategory = null;
+                        applyFilterState(chart, false);
+                    }
+                });
+                pill.addEventListener('click', () => {
+                    lockedCategory = lockedCategory === cat ? null : cat;
+                    pillPreviewCategory = null;
+                    syncPillsUI();
+                    applyFilterState(chart, false);
+                });
+                pillRow.appendChild(pill);
+                pills.push(pill);
+            });
+
+            const searchInput = document.createElement('input');
+            searchInput.type = 'search';
+            searchInput.className = 'eco-search-input';
+            searchInput.placeholder = 'Search projects...';
+            searchInput.setAttribute('aria-label', 'Search ecosystem projects');
+            searchInput.addEventListener('input', () => {
+                searchQuery = searchInput.value || '';
+                applyFilterState(chart, false);
+            });
+            pillRow.appendChild(searchInput);
+            bar.appendChild(pillRow);
+
+            container.insertBefore(bar, container.firstChild);
+        }
+
         const chartConfig = {
             chart: {
                 type: 'bubble',
                 polar: true,
-                height: window.innerWidth < 768 ? 500 : 1000,
+                height: vw < 768 ? 500 : 940,
                 backgroundColor: 'rgba(0,0,0,0)',
                 events: {
                     load() {
                         const chart = this;
-                        const container = document.getElementById('ecosystem-chart-container');
                         container.style.position = 'relative';
                         const customTooltip = document.createElement('div');
                         customTooltip.id = 'custom-tooltip';
                         customTooltip.style.cssText = `
-
                             position: absolute;
-
                             display: none;
-
-                            background: rgba(15, 10, 35, 0.95);
-
+                            background: rgba(15, 10, 35, 0.96);
                             border: 1px solid rgba(255, 255, 255, 0.26);
-
                             border-radius: 16px;
-
-                            padding: 8px;
-
+                            padding: 10px 12px;
                             color: white;
-
                             font-family: "Monda", Helvetica;
-
                             z-index: 10000;
-
                             pointer-events: none;
-
-                            max-width: 250px;
-
+                            max-width: 260px;
+                            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
                         `;
                         container.appendChild(customTooltip);
                         window.ecosystemChart = chart;
+                        buildControlsBar(chart);
+                        bindSectorBoundaryTracking(chart);
                         renderCustomLogos(chart);
                     },
                     redraw() {
                         renderCustomLogos(this);
                     },
                     render() {
-                        const chart = this;
-                        const pieSeries = chart.series[1];
-                        if (pieSeries) {
-                            pieSeries.customLabel = fillCenter(processedProjects.size, 'TOTAL PROJECTS', chart, pieSeries.customLabel);
+                        const pieSeries = this.series[1];
+                        if (pieSeries && !lastAppliedSignature) {
+                            pieSeries.customLabel = updateCenterLabel(totalProjects, 'TOTAL PROJECTS', this, pieSeries.customLabel);
                         }
                     }
                 }
             },
-            title: {
-                text: 'Tezos Ecosystem Map',
-                style: {
-                    color: '#ffffff',
-                    fontSize: window.innerWidth < 768 ? '20px' : '28px',
-                    fontFamily: '"Monda", Helvetica'
-                }
-            },
-            subtitle: {
-                text: window.innerWidth < 768 ? 'Click to visit websites' : 'Projects organized by category • Click to visit websites',
-                style: {
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontFamily: '"Monda", Helvetica',
-                    fontSize: window.innerWidth < 768 ? '11px' : '12px'
-                }
-            },
-            legend: {
-                enabled: false
-            },
+            title: { text: null },
+            subtitle: { text: null },
+            legend: { enabled: false },
             pane: {
                 startAngle: 0,
-                innerSize: window.innerWidth < 768 ? '35%' : '30%',
-                size: window.innerWidth < 480 ? '100%' : '95%',
-                background: [{
+                innerSize: vw < 768 ? '32%' : '27%',
+                size: vw < 480 ? '98%' : '95%',
+                background: [
+                    {
                         backgroundColor: 'rgba(255, 255, 255, 0.03)',
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.1)'
-                    }, {
+                    },
+                    {
                         backgroundColor: 'rgba(255, 255, 255, 0.01)',
                         borderWidth: 0,
-                        outerRadius: window.innerWidth < 768 ? '35%' : '30%'
+                        outerRadius: vw < 768 ? '32%' : '27%'
                     }
                 ]
             },
             xAxis: {
-                tickPositions: Array.from({
-                    length: tags.length + 1
-                }, (_, i) => i * anglePerTag),
+                tickPositions: tickPositions,
                 min: 0,
-                max: totalAngle,
+                max: 360,
                 gridLineWidth: 1,
-                gridLineColor: 'rgba(255, 255, 255, 0.2)',
-                labels: {
-                    enabled: false
-                },
-                lineWidth: 0,
+                gridLineColor: 'rgba(255, 255, 255, 0.18)',
+                labels: { enabled: false },
+                lineWidth: 0
             },
             yAxis: {
                 tickInterval: 10,
-                labels: {
-                    enabled: false
-                },
+                labels: { enabled: false },
                 gridLineWidth: 0.5,
-                gridLineColor: 'rgba(255, 255, 255, 0.08)',
+                gridLineColor: 'rgba(255, 255, 255, 0.07)',
                 gridLineDashStyle: 'longdash',
                 endOnTick: false,
                 min: 15,
-                max: 70
+                max: 71
             },
-            tooltip: {
-                enabled: false
-            },
+            tooltip: { enabled: false },
             plotOptions: {
                 series: {
                     cursor: 'pointer',
@@ -2633,143 +2883,58 @@ async function createEcosystemChart() {
                                 if (this.custom && this.custom.website) {
                                     window.open(this.custom.website, '_blank');
                                 }
-                            },
-                            mouseOver: function () {
-                                if (this.customBorderCircle) {
-                                    this.customBorderCircle.attr({
-                                        opacity: 1
-                                    });
-                                }
-                            },
-                            mouseOut: function () {
-                                if (this.customBorderCircle) {
-                                    this.customBorderCircle.attr({
-                                        opacity: 0
-                                    });
-                                }
                             }
                         }
                     },
                     states: {
-                        inactive: {
-                            enabled: false
-                        },
-                        hover: {
-                            halo: false
-                        }
+                        inactive: { enabled: false },
+                        hover: { halo: false }
                     }
                 },
                 bubble: {
-                    minSize: window.innerWidth < 480 ? 6 : window.innerWidth < 640 ? 8 : window.innerWidth < 768 ? 10 : window.innerWidth < 1024 ? 12 : 20,
-                    maxSize: window.innerWidth < 480 ? 12 : window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : window.innerWidth < 1024 ? 25 : 40
+                    minSize: vw < 480 ? 11 : vw < 640 ? 14 : vw < 768 ? 18 : vw < 1024 ? 22 : 28,
+                    maxSize: vw < 480 ? 14 : vw < 640 ? 17 : vw < 768 ? 21 : vw < 1024 ? 25 : 31
                 },
                 pie: {
                     startAngle: 0,
-                    states: {
-                        hover: {
-                            halo: 0
-                        }
-                    }
+                    states: { hover: { halo: 0 } }
                 }
             },
-            series: [{
+            series: [
+                {
                     name: 'Projects',
-                    data: bubbleData,
-                    point: {
-                        events: {
-                            mouseOver() {
-                                const selectedTag = this.custom.tag;
-                                const chart = this.series.chart;
-                                const bubbleSeries = chart.series[0];
-                                const pieSeries = chart.series[1];
-                                bubbleSeries.points.forEach(point => {
-                                    if (point.custom.tag !== selectedTag) {
-                                        if (point.graphic)
-                                            point.graphic.attr({
-                                                opacity: 0.2
-                                            });
-                                        if (point.customImageGroup)
-                                            point.customImageGroup.attr({
-                                                opacity: 0.2
-                                            });
-                                    }
-                                });
-                                const matchingCount = bubbleSeries.points.filter(p => p.custom.tag === selectedTag).length;
-                                pieSeries.customLabel = fillCenter(matchingCount, this.custom.displayTag.toUpperCase(), chart, pieSeries.customLabel);
-                            },
-                            mouseOut() {
-                                const chart = this.series.chart;
-                                const bubbleSeries = chart.series[0];
-                                const pieSeries = chart.series[1];
-                                bubbleSeries.points.forEach(point => {
-                                    if (point.graphic)
-                                        point.graphic.attr({
-                                            opacity: 1
-                                        });
-                                    if (point.customImageGroup)
-                                        point.customImageGroup.attr({
-                                            opacity: 1
-                                        });
-                                });
-                                pieSeries.customLabel = fillCenter(processedProjects.size, 'TOTAL PROJECTS', chart, pieSeries.customLabel);
-                            }
-                        }
-                    }
-                }, {
+                    data: bubbleData
+                },
+                {
                     type: 'pie',
-                    dataLabels: {
-                        enabled: false
-                    },
-                    size: '28%',
-                    innerSize: '85%',
+                    dataLabels: { enabled: false },
+                    size: vw < 768 ? '29%' : '25%',
+                    innerSize: '84%',
                     zIndex: -1,
                     point: {
                         events: {
-                            mouseOver() {
-                                const selectedTag = this.options.custom.tag;
-                                const chart = this.series.chart;
-                                const bubbleSeries = chart.series[0];
-                                const series = this.series;
-                                bubbleSeries.points.forEach(point => {
-                                    if (point.custom.tag !== selectedTag) {
-                                        if (point.graphic)
-                                            point.graphic.attr({
-                                                opacity: 0.2
-                                            });
-                                        if (point.customImageGroup)
-                                            point.customImageGroup.attr({
-                                                opacity: 0.2
-                                            });
-                                    }
-                                });
-                                series.customLabel = fillCenter(this.options.custom.count, this.options.custom.displayTag.toUpperCase(), chart, series.customLabel);
-                            },
-                            mouseOut() {
-                                const chart = this.series.chart;
-                                const bubbleSeries = chart.series[0];
-                                const series = this.series;
-                                bubbleSeries.points.forEach(point => {
-                                    if (point.graphic)
-                                        point.graphic.attr({
-                                            opacity: 1
-                                        });
-                                    if (point.customImageGroup)
-                                        point.customImageGroup.attr({
-                                            opacity: 1
-                                        });
-                                });
-                                series.customLabel = fillCenter(processedProjects.size, 'TOTAL PROJECTS', chart, series.customLabel);
+                            click() {
+                                const cat = this.options.custom.tag;
+                                lockedCategory = lockedCategory === cat ? null : cat;
+                                const bar = document.getElementById('eco-controls-bar');
+                                if (bar) {
+                                    bar.querySelectorAll('.eco-cat-pill').forEach(p => {
+                                        const isAll = p.dataset.cat === '';
+                                        p.classList.toggle('active', isAll ? !lockedCategory : lockedCategory === p.dataset.cat);
+                                    });
+                                }
+                                applyFilterState(this.series.chart, true);
                             }
                         }
                     },
                     data: pieData
                 }
             ],
-            credits: {
-                enabled: false
-            }
+            credits: { enabled: false }
         };
-        const chart = Highcharts.chart('ecosystem-chart-container', chartConfig);
+
+        Highcharts.chart('ecosystem-chart-container', chartConfig);
+
         let resizeTimeout;
         window.ecosystemResizeHandler = function () {
             clearTimeout(resizeTimeout);
@@ -2811,7 +2976,7 @@ function main(ratio) {
     if (aggregatedDataCache?.bakers)
         renderBakers(aggregatedDataCache.bakers);
 }
-document.addEventListener('DOMContentLoaded', async() => {
+const initTezCoolApp = async () => {
     try {
         new NavigationManager();
         const ratios = await initializeRatios();
@@ -2855,4 +3020,9 @@ document.addEventListener('DOMContentLoaded', async() => {
             document.body.classList.remove('is-scrolling');
         }, 150);
     }, { passive: true, capture: true });
-});
+};
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTezCoolApp);
+} else {
+    initTezCoolApp();
+}
