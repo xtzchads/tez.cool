@@ -41,7 +41,8 @@ class StakingSimulator {
         this.ownStaked = 75000000;
         this.externalStaked = 225000000;
         this.delegated = 320000000;
-        this.maxAmount = 770000000;
+        this.currentBonus = 0.0216;
+        this.maxAmount = 450000000;
         this.init();
     }
     throttle(fn, delay) {
@@ -106,7 +107,8 @@ class StakingSimulator {
                 const {
                     stakingApy,
                     delegationApy,
-                    totalDelegatedPercentage
+                    totalDelegatedPercentage,
+                    inflation
                 } = aggregatedDataCache.homeData.stakingData;
                 this.stakingAPY = stakingApy || 0;
                 this.delegationAPY = delegationApy || 0;
@@ -123,7 +125,15 @@ class StakingSimulator {
                     this.delegated = lastCycle.totalDelegated
                         ? toXtz(lastCycle.totalDelegated)
                         : this.totalSupply * ((totalDelegatedPercentage || 30) / 100);
-                    this.maxAmount = Math.max(1000000, Math.floor(this.totalSupply - frozen));
+                    const adjCycle = (currentCycle || 860) - 2;
+                    const r0 = clip(frozen / this.totalSupply, 0.0001, 1);
+                    const trueMax0 = trueMaximumRatio(adjCycle, r0);
+                    const sRate0 = staticRate(adjCycle, r0, trueMax0);
+                    const maxBonus0 = Math.min(Math.max(0, trueMax0 - sRate0), 0.05);
+                    this.currentBonus = inflation
+                        ? clip((inflation / 100) - sRate0, 0, maxBonus0)
+                        : maxBonus0;
+                    this.maxAmount = Math.max(1000000, Math.floor(this.totalSupply - frozen - this.delegated));
                     if (this.inputs.xtz)
                         this.inputs.xtz.max = String(this.maxAmount);
                 }
@@ -136,15 +146,29 @@ class StakingSimulator {
             this.delegationAPY = 3.4;
         }
     }
-    getCycleIssuanceRate(ratio) {
+    getCycleIssuanceRate(ratio, days = 1) {
         const adjCycle = (currentCycle || 860) - 2;
         const r = clip(ratio, 0.0001, 1);
+        const minR = minimumRatio(adjCycle);
         const trueMax = trueMaximumRatio(adjCycle, r);
         const sRate = staticRate(adjCycle, r, trueMax);
-        const bonus = clip(tmp || 0, 0, Math.min(Math.max(0, trueMax - sRate), 0.05));
-        return clip(sRate + bonus, minimumRatio(adjCycle), trueMax);
+        const maxBonus = Math.min(Math.max(0, trueMax - sRate), 0.05);
+        const udist = Math.max(0, Math.abs(r - 0.5) - 0.02);
+        const dist = r >= 0.5 ? -udist : udist;
+        const nDays = Math.max(1, days);
+        if (dist >= 0 || nDays <= 1) {
+            const bonus = clip(this.currentBonus + (dist < 0 ? dist * 0.01 : 0), 0, maxBonus);
+            return clip(sRate + bonus, minR, trueMax);
+        }
+        let b = clip(this.currentBonus, 0, maxBonus);
+        let sumRate = 0;
+        for (let d = 0; d < nDays; d++) {
+            b = clip(b + dist * 0.01, 0, maxBonus);
+            sumRate += clip(sRate + b, minR, trueMax);
+        }
+        return sumRate / nDays;
     }
-    getEffectiveAPYs(principal) {
+    getEffectiveAPYs(principal, days = 1) {
         if (principal <= 0 || !this.totalSupply) {
             return { sApy: this.stakingAPY, dApy: this.delegationAPY };
         }
@@ -152,7 +176,7 @@ class StakingSimulator {
         const LIMIT = 9; // global_limit_of_staking_over_baking & limit_of_delegation_over_baking
         const frozen0 = this.ownStaked + this.externalStaked;
         const weight0 = frozen0 + this.delegated / EDGE;
-        const rate0 = this.getCycleIssuanceRate(frozen0 / this.totalSupply);
+        const rate0 = this.getCycleIssuanceRate(frozen0 / this.totalSupply, 1);
 
         // Staking boundaries: overstaked tez count as delegated up to delegation limit; overdelegated tez don't count
         const maxNewStake = Math.max(0, this.ownStaked * LIMIT - this.externalStaked);
@@ -161,7 +185,7 @@ class StakingSimulator {
         const overStakeAsDel = Math.min(principal - effStake, maxNewDel);
 
         const newFrozen = Math.min(this.totalSupply, frozen0 + effStake);
-        const rateStake = this.getCycleIssuanceRate(newFrozen / this.totalSupply);
+        const rateStake = this.getCycleIssuanceRate(newFrozen / this.totalSupply, days);
         const weightStake = newFrozen + (this.delegated + overStakeAsDel) / EDGE;
         const userStakeWeightRatio = (effStake + overStakeAsDel / EDGE) / principal;
         const sApy = this.stakingAPY * (rateStake / rate0) * (weight0 / weightStake) * userStakeWeightRatio;
@@ -191,7 +215,7 @@ class StakingSimulator {
         const principal = parseFloat(this.inputs.xtz.value) || 0;
         const days = parseInt(this.inputs.days.value) || 0;
         const bakerFee = parseFloat(this.inputs.fee.value) || 0;
-        const { sApy, dApy } = this.getEffectiveAPYs(principal);
+        const { sApy, dApy } = this.getEffectiveAPYs(principal, days);
         this.displays.stakingApy.textContent = `${sApy.toFixed(2)}%`;
         this.displays.delegationApy.textContent = `${dApy.toFixed(2)}%`;
         if (principal <= 0) {
@@ -1760,13 +1784,28 @@ function drawUpgradeOverlay(chart) {
         }
     });
 }
+function getCurrentOnChainBonus() {
+    const data = aggregatedDataCache?.historicalCycleData;
+    const last = Array.isArray(data) && data.length ? data[data.length - 1] : null;
+    if (!last || !last.totalSupply) return 0.0216;
+    const frozen = (last.totalOwnStaked || last.totalExternalStaked)
+        ? (last.totalOwnStaked || 0) + (last.totalExternalStaked || 0)
+        : (last.totalFrozen || 0);
+    const r0 = clip(frozen / last.totalSupply, 0.0001, 1);
+    const adjCycle = (currentCycle || last.cycle || 860) - 2;
+    const trueMax0 = trueMaximumRatio(adjCycle, r0);
+    const sRate0 = staticRate(adjCycle, r0, trueMax0);
+    const maxBonus0 = Math.min(Math.max(0, trueMax0 - sRate0), 0.05);
+    const inf = aggregatedDataCache?.homeData?.stakingData?.inflation;
+    return inf ? clip((inf / 100) - sRate0, 0, maxBonus0) : maxBonus0;
+}
 function createHistoricalCharts(ratio) {
     try {
         const data = aggregatedDataCache.historicalCycleData;
         const issuanceData = processIssuanceData(data);
         const stakingData = processStakingData(data);
         currentCycle = issuanceData.currentCycle;
-        tmp = 0.05; // Reset bonus state to current on-chain saturation before projection
+        tmp = getCurrentOnChainBonus(); // Reset bonus state to current on-chain saturation before projection
         const issuanceDataWithRatio = [...issuanceData.ratios, ...ratio.map((ratioValue, index) => ({
                     cycle: currentCycle + index + 1,
                     issuance: issuanceRateQ(index + currentCycle, ratioValue) /*LB_SUBSIDY / data[currentCycle].totalSupply * 100*/
@@ -1992,7 +2031,7 @@ function updateIssuanceChartFast(stakingData, animation) {
     const issuanceChart = _issuanceChartCache;
     if (!issuanceChart)
         return;
-    tmp = 0.05; // Reset bonus state to current on-chain saturation before projection
+    tmp = getCurrentOnChainBonus(); // Reset bonus state to current on-chain saturation before projection
     const originalData = issuanceChart.series[0].options.data;
 
     // #8: Pre-allocate buffer once, reuse on every drag tick
