@@ -703,7 +703,79 @@ function createVerticalLine(chart, xValue) {
 function createVerticalLines(chart, positions) {
     positions.forEach(pos => createVerticalLine(chart, pos));
 }
+function setupPostResizeChartRepaint() {
+    if (window._postResizeRepaintBound || typeof IntersectionObserver !== 'function') return;
+    window._postResizeRepaintBound = true;
+
+    const panelIds = [
+        'stakingh', 'issuanceh',
+        'chart-container2', 'chart-container', 'chart-container8',
+        'chart-container5', 'chart-container6', 'chart-container9',
+        'chart-container4', 'tvl-chart-container',
+        'ecosystem-chart-container'
+    ];
+    const dirtyAfterResize = new Set();
+
+    const repaintPanel = el => {
+        if (!el) return;
+        const chart = Array.isArray(Highcharts?.charts)
+            ? Highcharts.charts.find(c => c && c.renderTo === el)
+            : null;
+        if (chart && chart.container && !chart.isResizing) {
+            chart.containerBox = { width: 0, height: 0 };
+            chart.reflow();
+        }
+        const svg = el.querySelector('svg');
+        if (svg) {
+            svg.style.transform = 'translateZ(0)';
+            void svg.getBoundingClientRect();
+            requestAnimationFrame(() => {
+                svg.style.transform = '';
+            });
+        }
+    };
+
+    const isInViewport = el => {
+        const r = el.getBoundingClientRect();
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        return r.bottom > 0 && r.top < vh && r.width > 0 && r.height > 0;
+    };
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && dirtyAfterResize.has(entry.target)) {
+                const target = entry.target;
+                dirtyAfterResize.delete(target);
+                repaintPanel(target);
+                setTimeout(() => repaintPanel(target), 160);
+            }
+        });
+    }, { threshold: 0.05 });
+
+    panelIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+    });
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            panelIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (isInViewport(el)) {
+                    dirtyAfterResize.delete(el);
+                    repaintPanel(el);
+                } else {
+                    dirtyAfterResize.add(el);
+                }
+            });
+        }, 180);
+    }, { passive: true });
+}
 function renderDualRingWidget(containerId, titleText, legendItems, innerSlices, outerSlices, defaultMid, defaultBot, defaultMidColor, defaultBotColor, onLegendClick, defaultTop = '', defaultTopColor = '#38bdf8', defaultActiveKey = '') {
+    setupPostResizeChartRepaint();
     const container = document.getElementById(containerId);
     if (!container) return;
 
