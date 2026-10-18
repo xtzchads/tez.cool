@@ -703,92 +703,321 @@ function createVerticalLine(chart, xValue) {
 function createVerticalLines(chart, positions) {
     positions.forEach(pos => createVerticalLine(chart, pos));
 }
-function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedAPY, delegatedAPY) {
-    const jeetsPercentage = Number(Math.max(0, 100 - totalStakedPercentage - totalDelegatedPercentage).toFixed(2));
-    Highcharts.chart('chart-container4', {
-        chart: {
-            backgroundColor: 'rgba(0,0,0,0)',
-            type: 'pie'
-        },
-        title: {
-            text: 'TezStakeMeter',
-            style: {
-                color: '#ffffff',
-                fontSize: '24px'
+function renderDualRingWidget(containerId, titleText, legendItems, innerSlices, outerSlices, defaultMid, defaultBot, defaultMidColor, defaultBotColor, onLegendClick, defaultTop = '', defaultTopColor = '#38bdf8', defaultActiveKey = '') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let st = document.getElementById('tez-dual-ring-styles');
+    if (!st) {
+        st = document.createElement('style');
+        st.id = 'tez-dual-ring-styles';
+        document.head.appendChild(st);
+    }
+    st.textContent = `
+        .tez-dr-slice, .tez-dr-rail, .tez-dr-pill {
+            transition: opacity 0.16s ease, filter 0.16s ease, stroke 0.16s ease;
+            cursor: pointer;
+        }
+        .tez-dr-slice-outer {
+            filter: drop-shadow(0 0 6px var(--slice-glow, rgba(255, 255, 255, 0.2)));
+        }
+        .tez-dr-slice:hover, .tez-dr-slice.hl {
+            filter: brightness(1.3) drop-shadow(0 0 10px rgba(255, 255, 255, 0.65));
+            stroke: rgba(255, 255, 255, 0.85);
+        }
+        .tez-dr-rail polyline, .tez-dr-rail circle {
+            transition: filter 0.16s ease, stroke-width 0.16s ease, stroke-opacity 0.16s ease;
+        }
+        .tez-dr-rail.hl polyline {
+            stroke-width: 2;
+            stroke-opacity: 1;
+            filter: brightness(1.35) drop-shadow(0 0 6px rgba(255, 255, 255, 0.75));
+        }
+        .tez-dr-rail.hl circle {
+            filter: brightness(1.35) drop-shadow(0 0 6px rgba(255, 255, 255, 0.75));
+        }
+    `;
+
+    const p2c = (cx, cy, r, deg) => {
+        const rad = (deg - 90) * Math.PI / 180;
+        return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+    };
+    const slicePath = (cx, cy, rIn, rOut, a0, a1) => {
+        const span = Math.min(359.6, Math.max(0.4, a1 - a0));
+        const endA = a0 + span;
+        const sOut = p2c(cx, cy, rOut, endA);
+        const eOut = p2c(cx, cy, rOut, a0);
+        const sIn = p2c(cx, cy, rIn, endA);
+        const eIn = p2c(cx, cy, rIn, a0);
+        const large = span <= 180 ? 0 : 1;
+        return `M ${sOut.x} ${sOut.y} A ${rOut} ${rOut} 0 ${large} 0 ${eOut.x} ${eOut.y} L ${eIn.x} ${eIn.y} A ${rIn} ${rIn} 0 ${large} 1 ${sIn.x} ${sIn.y} Z`;
+    };
+
+    const cx = 210, cy = 121.5;
+    const rIn0 = 36, rIn1 = 50;
+    const rOut0 = 58, rOut1 = 76;
+
+    const ticks = [];
+    for (let deg = 0; deg < 360; deg += 6) {
+        const isMajor = deg % 30 === 0;
+        const p1 = p2c(cx, cy, 52, deg);
+        const p2 = p2c(cx, cy, isMajor ? 55.6 : 54.2, deg);
+        ticks.push(`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${isMajor ? 'rgba(255,255,255,0.68)' : 'rgba(255,255,255,0.24)'}" stroke-width="${isMajor ? 1.2 : 0.85}" pointer-events="none"/>`);
+    }
+
+    const bridgePaths = innerSlices.map(s => {
+        const gap = (s.a1 - s.a0) > 4 ? 1.1 : 0.2;
+        return `<path class="tez-dr-bridge" data-key="${escapeHTML(s.key)}" data-layer="${escapeHTML(s.layer || '')}" data-top="${escapeHTML(s.top || '')}" data-topcolor="${escapeHTML(s.topColor || s.color)}" data-val="${escapeHTML(s.val)}" data-sub="${escapeHTML(s.sub)}" data-color="${escapeHTML(s.color)}" data-subcolor="${escapeHTML(s.subColor)}" d="${slicePath(cx, cy, rIn0, rOut1, s.a0 + gap, s.a1 - gap)}" fill="transparent" stroke="none" style="cursor:pointer"/>`;
+    });
+
+    const innerPaths = innerSlices.map(s => {
+        const gap = (s.a1 - s.a0) > 4 ? 1.1 : 0.2;
+        return `<path class="tez-dr-slice" data-key="${escapeHTML(s.key)}" data-layer="${escapeHTML(s.layer || '')}" data-top="${escapeHTML(s.top || '')}" data-topcolor="${escapeHTML(s.topColor || s.color)}" data-val="${escapeHTML(s.val)}" data-sub="${escapeHTML(s.sub)}" data-color="${escapeHTML(s.color)}" data-subcolor="${escapeHTML(s.subColor)}" d="${slicePath(cx, cy, rIn0, rIn1, s.a0 + gap, s.a1 - gap)}" fill="${escapeHTML(s.color)}" fill-opacity="0.82" stroke="rgba(255,255,255,0.22)" stroke-width="0.9"/>`;
+    });
+
+    const outerPaths = outerSlices.map(s => {
+        const gap = (s.a1 - s.a0) > 3 ? 0.9 : 0.2;
+        return `<path class="tez-dr-slice tez-dr-slice-outer" data-key="${escapeHTML(s.key)}" data-layer="${escapeHTML(s.layer || '')}" data-top="${escapeHTML(s.top || '')}" data-topcolor="${escapeHTML(s.topColor || s.color)}" data-val="${escapeHTML(s.val)}" data-sub="${escapeHTML(s.sub)}" data-color="${escapeHTML(s.color)}" data-subcolor="${escapeHTML(s.subColor)}" d="${slicePath(cx, cy, rOut0, rOut1, s.a0 + gap, s.a1 - gap)}" fill="${escapeHTML(s.color)}" fill-opacity="0.92" stroke="rgba(255,255,255,0.35)" stroke-width="1" style="--slice-glow:${escapeHTML(s.color)}55"/>`;
+    });
+
+    // Collision-free vertical spacing for left & right horizontal HUD rails
+    const railItems = outerSlices.map(s => {
+        const midAngle = s.railAngle !== undefined ? s.railAngle : (s.a0 + s.a1) / 2;
+        const side = s.side || (midAngle <= 180 ? 'right' : 'left');
+        const pStart = p2c(cx, cy, rOut1 + 1.5, midAngle);
+        const pRadial = p2c(cx, cy, rOut1 + 10, midAngle);
+        return {
+            ...s,
+            midAngle,
+            side,
+            pStart,
+            pRadial,
+            yRail: s.yOverride !== undefined ? s.yOverride : pRadial.y
+        };
+    });
+
+    ['right', 'left'].forEach(side => {
+        const group = railItems.filter(r => r.side === side).sort((a, b) => a.pStart.y - b.pStart.y);
+        if (!group.length) return;
+        const baseGap = group.length > 7 ? 12.2 : (group.length > 5 ? 15.5 : 18);
+        const minY = 10.5, maxY = 234;
+
+        // Top-half slices shift strictly upward (yRail <= pStart.y) so they never cut across the top arc
+        const topHalf = group.filter(r => r.pStart.y <= cy);
+        for (let i = topHalf.length - 1; i >= 0; i--) {
+            if (topHalf[i].yRail > topHalf[i].pStart.y) topHalf[i].yRail = topHalf[i].pStart.y;
+            if (i < topHalf.length - 1 && topHalf[i + 1].yRail - topHalf[i].yRail < baseGap) {
+                topHalf[i].yRail = topHalf[i + 1].yRail - baseGap;
             }
-        },
-        tooltip: {
-            pointFormat: '<b>{point.y}%</b>'
-        },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                states: {
-                    hover: {
-                        brightness: 0.1
-                    }
-                }
+        }
+
+        // Bottom-half slices shift strictly downward (yRail >= pStart.y) so they never cut across the bottom arc
+        const botHalf = group.filter(r => r.pStart.y > cy);
+        for (let i = 0; i < botHalf.length; i++) {
+            if (botHalf[i].yRail < botHalf[i].pStart.y) botHalf[i].yRail = botHalf[i].pStart.y;
+            if (i > 0 && botHalf[i].yRail - botHalf[i - 1].yRail < baseGap) {
+                botHalf[i].yRail = botHalf[i - 1].yRail + baseGap;
             }
-        },
-        series: [{
-                name: 'Ratios',
-                data: [{
-                        name: 'Staked (' + escapeHTML(stakedAPY) + '% APY)',
-                        y: totalStakedPercentage,
-                        color: {
-                            radialGradient: {
-                                cx: 0.5,
-                                cy: 0.5,
-                                r: 0.8
-                            },
-                            stops: [[0, 'hsla(220, 85%, 70%, 0.9)'], [0.5, 'hsla(220, 75%, 55%, 0.8)'], [1, 'hsla(220, 65%, 40%, 0.7)']]
-                        }
-                    }, {
-                        name: 'Delegated (' + escapeHTML(delegatedAPY) + '% APY)',
-                        y: totalDelegatedPercentage,
-                        color: {
-                            radialGradient: {
-                                cx: 0.5,
-                                cy: 0.5,
-                                r: 0.8
-                            },
-                            stops: [[0, 'hsla(280, 85%, 70%, 0.9)'], [0.5, 'hsla(280, 75%, 55%, 0.8)'], [1, 'hsla(280, 65%, 40%, 0.7)']]
-                        }
-                    }, {
-                        name: 'Passive',
-                        y: jeetsPercentage,
-                        color: {
-                            radialGradient: {
-                                cx: 0.5,
-                                cy: 0.5,
-                                r: 0.8
-                            },
-                            stops: [[0, 'hsla(10, 85%, 70%, 0.9)'], [0.5, 'hsla(10, 75%, 55%, 0.8)'], [1, 'hsla(10, 65%, 40%, 0.7)']]
-                        }
-                    }
-                ],
-                showInLegend: false,
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.name}',
-                    style: {
-                        color: '#ffffff',
-                        fontSize: '14px',
-                        textOutline: '1px contrast'
-                    }
-                },
-                borderColor: 'rgba(255,255,255,0.2)',
-                borderWidth: 2
+        }
+
+        for (let i = 0; i < group.length; i++) {
+            if (group[i].yRail < minY) group[i].yRail = minY;
+            if (i > 0 && group[i].yRail - group[i - 1].yRail < baseGap) {
+                group[i].yRail = group[i - 1].yRail + baseGap;
             }
-        ],
-        exporting: {
-            enabled: false
-        },
-        credits: {
-            enabled: false
+        }
+        for (let i = group.length - 1; i >= 0; i--) {
+            if (group[i].yRail > maxY) group[i].yRail = maxY;
+            if (i > 0 && group[i].yRail - group[i - 1].yRail < baseGap) {
+                group[i - 1].yRail = Math.max(minY, group[i].yRail - baseGap);
+            }
         }
     });
+
+    const safeR = rOut1 + 9;
+    const rails = railItems.map(s => {
+        const yRail = s.yRail;
+        const xEnd = s.side === 'right' ? 312 : 108;
+        const yCheck = (s.pStart.y - cy) * (yRail - cy) <= 0
+            ? cy
+            : (Math.abs(yRail - cy) < Math.abs(s.pStart.y - cy) ? yRail : (s.pStart.y + yRail) / 2);
+        const dy = Math.min(safeR, Math.abs(yCheck - cy));
+        const circleSpanX = Math.sqrt(safeR * safeR - dy * dy);
+
+        // Enforce outward tangent condition (P0 - C) . (Pelbow - P0) >= 0 so segment P0 -> Pelbow never dips into the circle
+        const inwardYProd = -(s.pStart.y - cy) * (yRail - s.pStart.y);
+        const tangentStepX = inwardYProd > 0
+            ? (inwardYProd / Math.max(10, Math.abs(s.pStart.x - cx))) + 4
+            : 6;
+
+        const xElbow = s.side === 'right'
+            ? Math.min(xEnd - 14, Math.max(s.pRadial.x, s.pStart.x + tangentStepX, cx + circleSpanX))
+            : Math.max(xEnd + 14, Math.min(s.pRadial.x, s.pStart.x - tangentStepX, cx - circleSpanX));
+        const anchor = s.side === 'right' ? 'start' : 'end';
+        const tx = s.side === 'right' ? xEnd + 5 : xEnd - 5;
+        return `
+            <g class="tez-dr-rail" data-key="${escapeHTML(s.key)}" data-layer="${escapeHTML(s.layer || '')}" data-top="${escapeHTML(s.top || '')}" data-topcolor="${escapeHTML(s.topColor || s.color)}" data-val="${escapeHTML(s.val)}" data-sub="${escapeHTML(s.sub)}" data-color="${escapeHTML(s.color)}" data-subcolor="${escapeHTML(s.subColor)}">
+                <polyline points="${s.pStart.x},${s.pStart.y} ${xElbow},${yRail} ${xEnd},${yRail}" fill="none" stroke="${escapeHTML(s.color)}" stroke-width="1.15" stroke-opacity="0.9"/>
+                <circle cx="${xEnd}" cy="${yRail}" r="2.1" fill="${escapeHTML(s.color)}"/>
+                <text x="${tx}" y="${yRail + 3}" fill="#ffffff" font-size="8.5" font-weight="400" font-family='"Monda", Helvetica, Arial, sans-serif' text-anchor="${anchor}">${escapeHTML(s.railText)}</text>
+            </g>
+        `;
+    });
+
+    const legendHtml = legendItems && legendItems.length
+        ? legendItems.map(item => `
+            <span class="tez-dr-pill" data-layer="${escapeHTML(item.layer)}" style="color:${item.active === false ? 'rgba(255,255,255,0.38)' : 'rgba(255,255,255,0.9)'};font-size:12px;font-family:'Monda',Helvetica,Arial,sans-serif;user-select:none;">
+                <span style="color:${escapeHTML(item.color)};font-size:14px">●</span> ${escapeHTML(item.label)}
+            </span>
+        `).join('')
+        : '';
+
+    const hasTop = Boolean(defaultTop);
+    const topMarkup = hasTop
+        ? `<text class="tez-hud-top" x="${cx}" y="${cy - 11}" fill="${escapeHTML(defaultTopColor)}" font-size="8.5" font-weight="600" font-family='"Monda", Helvetica, Arial, sans-serif' text-anchor="middle">${escapeHTML(defaultTop)}</text>`
+        : '';
+    const midY = hasTop ? cy + 2 : cy - 1;
+    const botY = hasTop ? cy + 14 : cy + 12;
+    const midFontSize = hasTop ? '12.5' : '13';
+    const botFontSize = hasTop ? '8.5' : '9';
+
+    container.innerHTML = `
+        <div style="height:400px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px 6px 6px;font-family:'Monda',Helvetica,Arial,sans-serif;">
+            <div style="color:#ffffff;font-size:18px;font-weight:bold;line-height:1.2;margin-bottom:4px;text-align:center;">${escapeHTML(titleText)}</div>
+            <div class="tez-dr-legend" style="display:flex;align-items:center;justify-content:center;gap:16px;min-height:20px;margin-bottom:3px;">${legendHtml}</div>
+            <div style="flex:1;width:100%;display:flex;align-items:center;justify-content:center;min-height:0;">
+                <svg viewBox="0 0 420 240" style="width:100%;height:100%;max-height:330px;overflow:visible;">
+                    <circle cx="${cx}" cy="${cy}" r="${rIn0 - 3}" fill="rgba(14, 11, 34, 0.92)" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>
+                    ${bridgePaths.join('')}
+                    ${ticks.join('')}
+                    ${innerPaths.join('')}
+                    ${outerPaths.join('')}
+                    ${rails.join('')}
+                    ${topMarkup}
+                    <text class="tez-hud-mid" x="${cx}" y="${midY}" fill="${escapeHTML(defaultMidColor)}" font-size="${midFontSize}" font-weight="700" font-family='"Monda", Helvetica, Arial, sans-serif' text-anchor="middle">${escapeHTML(defaultMid)}</text>
+                    <text class="tez-hud-bot" x="${cx}" y="${botY}" fill="${escapeHTML(defaultBotColor)}" font-size="${botFontSize}" font-weight="600" font-family='"Monda", Helvetica, Arial, sans-serif' text-anchor="middle">${escapeHTML(defaultBot)}</text>
+                </svg>
+            </div>
+        </div>
+    `;
+
+    const topEl = container.querySelector('.tez-hud-top');
+    const midEl = container.querySelector('.tez-hud-mid');
+    const botEl = container.querySelector('.tez-hud-bot');
+    const interactiveEls = container.querySelectorAll('[data-key]');
+
+    const applyHighlightByKey = (key, layer = '') => {
+        interactiveEls.forEach(other => {
+            const match = Boolean(key) && (
+                other.dataset.key === key ||
+                (key === 'l1' && other.dataset.layer === 'l1') ||
+                (key === 'l2' && other.dataset.layer === 'l2') ||
+                (key === 'staked' && (other.dataset.key === 'own' || other.dataset.key === 'co')) ||
+                ((key === 'own' || key === 'co') && other.dataset.key === 'staked') ||
+                (layer && other.dataset.key === layer)
+            );
+            other.classList.toggle('hl', match);
+        });
+    };
+
+    if (defaultActiveKey) {
+        applyHighlightByKey(defaultActiveKey);
+    }
+
+    interactiveEls.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            applyHighlightByKey(el.dataset.key, el.dataset.layer);
+            if (topEl && el.dataset.top) {
+                topEl.textContent = el.dataset.top;
+                topEl.setAttribute('fill', el.dataset.topcolor || el.dataset.color || '#ffffff');
+            }
+            if (midEl) {
+                midEl.textContent = el.dataset.val;
+                midEl.setAttribute('fill', el.dataset.color || '#ffffff');
+            }
+            if (botEl) {
+                botEl.textContent = el.dataset.sub;
+                botEl.setAttribute('fill', el.dataset.subcolor || '#4ade80');
+            }
+        });
+        el.addEventListener('mouseleave', () => {
+            applyHighlightByKey(defaultActiveKey);
+            if (topEl) {
+                topEl.textContent = defaultTop;
+                topEl.setAttribute('fill', defaultTopColor);
+            }
+            if (midEl) {
+                midEl.textContent = defaultMid;
+                midEl.setAttribute('fill', defaultMidColor);
+            }
+            if (botEl) {
+                botEl.textContent = defaultBot;
+                botEl.setAttribute('fill', defaultBotColor);
+            }
+        });
+    });
+
+    container.querySelectorAll('.tez-dr-pill').forEach(pill => {
+        pill.addEventListener('mouseenter', () => {
+            const layer = pill.dataset.layer;
+            const innerTarget = innerSlices.find(s => s.layer === layer);
+            interactiveEls.forEach(el => el.classList.toggle('hl', el.dataset.layer === layer));
+            if (innerTarget && midEl && botEl) {
+                midEl.textContent = innerTarget.val;
+                midEl.setAttribute('fill', innerTarget.color);
+                botEl.textContent = innerTarget.sub;
+                botEl.setAttribute('fill', innerTarget.subColor);
+            }
+        });
+        pill.addEventListener('mouseleave', () => {
+            applyHighlightByKey(defaultActiveKey);
+            if (midEl) {
+                midEl.textContent = defaultMid;
+                midEl.setAttribute('fill', defaultMidColor);
+            }
+            if (botEl) {
+                botEl.textContent = defaultBot;
+                botEl.setAttribute('fill', defaultBotColor);
+            }
+        });
+        if (typeof onLegendClick === 'function') {
+            pill.addEventListener('click', () => onLegendClick(pill.dataset.layer));
+        }
+    });
+}
+function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedAPY, delegatedAPY) {
+    const sd = aggregatedDataCache?.homeData?.stakingData || {};
+    const ownRaw = sd.ownStakedPercentage !== undefined ? Number(sd.ownStakedPercentage) : totalStakedPercentage * 0.38;
+    const extRaw = sd.externalStakedPercentage !== undefined ? Number(sd.externalStakedPercentage) : Math.max(0, totalStakedPercentage - ownRaw);
+    const passiveRaw = Math.max(0, 100 - totalStakedPercentage - totalDelegatedPercentage);
+
+    const stakedPct = Number(totalStakedPercentage).toFixed(1);
+    const ownPct = ownRaw.toFixed(1);
+    const extPct = extRaw.toFixed(1);
+    const delPct = Number(totalDelegatedPercentage).toFixed(1);
+    const passPct = passiveRaw.toFixed(1);
+
+    const sApyText = `${Number(stakedAPY).toFixed(2)}% APY`;
+    const dApyText = `${Number(delegatedAPY).toFixed(2)}% APY`;
+
+    const ownDeg = (ownRaw / 100) * 360;
+    const stakedDeg = ((ownRaw + extRaw) / 100) * 360;
+    const delDeg = (Number(totalDelegatedPercentage) / 100) * 360;
+
+    const innerSlices = [
+        { key: 'staked', a0: 0, a1: stakedDeg, color: '#0284c7', top: 'Staked', topColor: '#38bdf8', val: `${stakedPct}%`, sub: sApyText, subColor: '#4ade80' },
+        { key: 'del', a0: stakedDeg, a1: stakedDeg + delDeg, color: '#9333ea', top: 'Delegated', topColor: '#c084fc', val: `${delPct}%`, sub: dApyText, subColor: '#c084fc' },
+        { key: 'pass', a0: stakedDeg + delDeg, a1: 360, color: '#e11d48', top: 'Passive', topColor: '#fb7185', val: `${passPct}%`, sub: '0.00% APY', subColor: '#fb7185' }
+    ];
+
+    const outerSlices = [
+        { key: 'own', a0: 0, a1: ownDeg, color: '#3b82f6', top: 'Staked', topColor: '#3b82f6', val: `${ownPct}%`, sub: sApyText, subColor: '#4ade80', side: 'right', railText: 'Own staked' },
+        { key: 'co', a0: ownDeg, a1: stakedDeg, color: '#38bdf8', top: 'Staked', topColor: '#38bdf8', val: `${extPct}%`, sub: sApyText, subColor: '#4ade80', side: 'right', railText: 'External staked' },
+        { key: 'del', a0: stakedDeg, a1: stakedDeg + delDeg, color: '#c084fc', top: 'Delegated', topColor: '#c084fc', val: `${delPct}%`, sub: dApyText, subColor: '#c084fc', side: 'right', railText: 'Delegated' },
+        { key: 'pass', a0: stakedDeg + delDeg, a1: 360, color: '#fb7185', top: 'Passive', topColor: '#fb7185', val: `${passPct}%`, sub: '0.00% APY', subColor: '#fb7185', side: 'left', railText: 'Passive' }
+    ];
+
+    renderDualRingWidget('chart-container4', 'TezStakeMeter', [], innerSlices, outerSlices, `${stakedPct}%`, sApyText, '#38bdf8', '#4ade80', null, 'Staked', '#38bdf8', 'staked');
 }
 function createDALSupportChart() {
     try {
@@ -895,38 +1124,48 @@ function createDALSupportChart() {
         console.error('Error loading DAL data:', error);
     }
 }
-function createBurnedSupplyChart() {
-    try {
-        const seriesData = aggregatedDataCache.burnedSupplyData;
-        let processedData;
-        let isCumulative = currentBurnedSupplyTimeframe === 'cumulative';
-        if (isCumulative) {
+function computeBurnedSupplyState(tf) {
+    const seriesData = aggregatedDataCache.burnedSupplyData || [];
+    const isCumulative = tf === 'cumulative';
+    let processedData;
+    if (isCumulative) {
+        processedData = seriesData;
+    } else {
+        const now = Date.now();
+        const timeRanges = {
+            '1y': 365 * 24 * 60 * 60 * 1000,
+            '3y': 3 * 365 * 24 * 60 * 60 * 1000,
+            '7y': 7 * 365 * 24 * 60 * 60 * 1000
+        };
+        const timeRange = timeRanges[tf];
+        const startTime = now - timeRange;
+        const dataWithoutLatest = seriesData.slice(1);
+        const filteredData = dataWithoutLatest.filter(point => point[0] >= startTime);
+        if (filteredData.length < 2) {
             processedData = seriesData;
         } else {
-            const now = Date.now();
-            const timeRanges = {
-                '1y': 365 * 24 * 60 * 60 * 1000,
-                '3y': 3 * 365 * 24 * 60 * 60 * 1000,
-                '7y': 7 * 365 * 24 * 60 * 60 * 1000
-            };
-            const timeRange = timeRanges[currentBurnedSupplyTimeframe];
-            const startTime = now - timeRange;
-            const dataWithoutLatest = seriesData.slice(1);
-            const filteredData = dataWithoutLatest.filter(point => point[0] >= startTime);
-            if (filteredData.length < 2) {
-                processedData = seriesData;
-            } else {
-                const sortedData = [...filteredData].sort((a, b) => a[0] - b[0]);
-                processedData = [];
-                for (let i = 1; i < sortedData.length; i++) {
-                    const diff = sortedData[i][1] - sortedData[i - 1][1];
-                    processedData.push([sortedData[i][0], diff]);
-                }
-                processedData.reverse();
+            const sortedData = [...filteredData].sort((a, b) => a[0] - b[0]);
+            processedData = [];
+            for (let i = 1; i < sortedData.length; i++) {
+                const diff = sortedData[i][1] - sortedData[i - 1][1];
+                processedData.push([sortedData[i][0], diff]);
             }
+            processedData.reverse();
         }
-        const formatter = isCumulative ? value => `${(value / 1000000).toFixed(2)}M` : value => `${(value / 1000).toFixed(2)}K`;
-        createTimeSeriesChart('chart-container', 'Burned supply', processedData, formatter, isCumulative);
+    }
+    const formatter = isCumulative ? value => `${(value / 1000000).toFixed(2)}M` : value => `${(value / 1000).toFixed(2)}K`;
+    let highPoint = null;
+    let lowPoint = null;
+    if (!isCumulative && processedData.length > 0) {
+        highPoint = processedData.reduce((max, point) => point[1] > max[1] ? point : max, processedData[0]);
+        lowPoint = processedData.reduce((min, point) => point[1] < min[1] ? point : min, processedData[0]);
+    }
+    return { processedData, formatter, isCumulative, highPoint, lowPoint };
+}
+function createBurnedSupplyChart() {
+    try {
+        const state = computeBurnedSupplyState(currentBurnedSupplyTimeframe);
+        createTimeSeriesChart('chart-container', 'Burned supply', state.processedData, state.formatter, state.isCumulative);
     } catch (error) {
         console.error('Error loading burned supply data:', error);
     }
@@ -961,12 +1200,19 @@ function createHistoricalTvlChart() {
             '5y': 1598918400000000,
             '3y': 1655769600000000
         };
-        const filterTimestamp = timestampFilters[currentTVLTimeframe];
-        let rawData = aggregatedDataCache.combinedTvlChart.filter(item => item[0] > filterTimestamp).map(item => [item[0] / 1000, item[1]]).sort((a, b) => a[0] - b[0]);
-        const tezosData = recursivelyRemoveDips(rawData, 0.2);
-        if (tezosData.length > 0) {
-            tezosData[tezosData.length - 1][1] = totalTVL - specificProtocolsTVL;
-        }
+        const computeTvlData = tf => {
+            const filterTimestamp = timestampFilters[tf];
+            const rawData = aggregatedDataCache.combinedTvlChart
+                .filter(item => item[0] > filterTimestamp)
+                .map(item => [item[0] / 1000, item[1]])
+                .sort((a, b) => a[0] - b[0]);
+            const data = recursivelyRemoveDips(rawData, 0.2);
+            if (data.length > 0) {
+                data[data.length - 1][1] = totalTVL - specificProtocolsTVL;
+            }
+            return data;
+        };
+        const tezosData = computeTvlData(currentTVLTimeframe);
         const series = [];
         series.push({
             showInLegend: false,
@@ -986,6 +1232,11 @@ function createHistoricalTvlChart() {
                 },
                 align: 'right',
                 verticalAlign: 'bottom',
+                style: {
+                    color: '#ffffff',
+                    fontSize: '10px',
+                    textOutline: '1px contrast'
+                }
             },
             color: {
                 linearGradient: {
@@ -997,15 +1248,83 @@ function createHistoricalTvlChart() {
                 stops: [[0, '#77dd77'], [1, '#ff6961']]
             }
         });
+        [
+            { label: '3Y', tf: '3y' },
+            { label: '5Y', tf: '5y' }
+        ].forEach(opt => {
+            series.push({
+                name: opt.label,
+                data: [],
+                showInLegend: true,
+                visible: currentTVLTimeframe === opt.tf,
+                enableMouseTracking: false,
+                events: {
+                    show: function () {
+                        if (this.chart._switchingTf) return;
+                        this.chart._switchingTf = true;
+                        currentTVLTimeframe = opt.tf;
+                        this.chart.series.slice(1).forEach(s => {
+                            if (s !== this && s.visible) s.setVisible(false, false);
+                        });
+                        this.chart.series[0].setData(computeTvlData(opt.tf).map(p => [p[0], p[1]]), false, undefined, false);
+                        this.chart._switchingTf = false;
+                    },
+                    hide: function () {
+                        if (this.chart._switchingTf) return;
+                        this.chart._switchingTf = true;
+                        this.setVisible(true, false);
+                        this.chart._switchingTf = false;
+                    }
+                }
+            });
+        });
         Highcharts.chart('chart-container9', {
+            boost: {
+                enabled: false
+            },
             chart: {
                 type: 'spline',
-                backgroundColor: 'rgba(0,0,0,0)'
+                backgroundColor: 'rgba(0,0,0,0)',
+                allowMutatingData: false
             },
             title: {
                 text: 'DeFi growth (L1+L2-RWA)',
                 style: {
                     color: '#ffffff'
+                }
+            },
+            legend: {
+                enabled: true,
+                align: 'center',
+                verticalAlign: 'top',
+                margin: 4,
+                padding: 2,
+                symbolWidth: 0,
+                symbolHeight: 0,
+                squareSymbol: false,
+                labelFormatter: function () {
+                    const dotColor = this.name === '5Y' ? '#38bdf8' : '#77dd77';
+                    return `<span style="color:${dotColor};font-size:14px">●</span> ${this.name}`;
+                },
+                itemStyle: {
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '12px',
+                    fontWeight: 'normal'
+                },
+                itemHoverStyle: {
+                    color: '#ffffff'
+                },
+                itemHiddenStyle: {
+                    color: 'rgba(255, 255, 255, 0.38)',
+                    textDecoration: 'none'
+                },
+                events: {
+                    itemClick: function (e) {
+                        const item = e.legendItem;
+                        if (item && item.visible) {
+                            e.preventDefault();
+                        }
+                    }
                 }
             },
             tooltip: {
@@ -1063,14 +1382,47 @@ function createHistoricalTvlChart() {
         console.error('Error loading accounts data:', error);
     }
 }
+function toMonthlyDiffsFromCumulative(sortedPoints) {
+    const monthMap = new Map();
+    sortedPoints.forEach(point => {
+        const d = new Date(point[0]);
+        const monthKey = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+        monthMap.set(monthKey, point[1]);
+    });
+    const sortedMonths = Array.from(monthMap.keys()).sort((a, b) => a - b);
+    let prevCum = 0;
+    const monthlyDiffs = sortedMonths.map(m => {
+        const cum = monthMap.get(m);
+        const diff = Math.max(0, cum - prevCum);
+        prevCum = cum;
+        return [m, diff];
+    });
+    return monthlyDiffs.length > 1 ? monthlyDiffs.slice(0, -1) : monthlyDiffs;
+}
 function createTotalAccountsChart() {
     try {
         const tezosData = aggregatedDataCache.totalAccountsData;
         const etherlinkData = aggregatedDataCache.etherlinkAccountsData;
         const series = [];
+        let cumulativeTezosData = [];
+        let nonCumulativeTezosData = [];
+        let cumulativeEtherlinkData = [];
+        let nonCumulativeEtherlinkData = [];
+
+        const formatAccountLabel = function () {
+            if (this.y === null || this.y === undefined) return null;
+            if (this.point.index !== this.series.data.length - 1) return null;
+            if (this.y >= 1000000) return `${(this.y / 1000000).toFixed(2)}M`;
+            if (this.y >= 1000) return `${(this.y / 1000).toFixed(1)}K`;
+            return `${Math.round(this.y)}`;
+        };
+
         if (tezosData && tezosData.length > 0) {
+            cumulativeTezosData = [...tezosData].reverse().map(p => [p[0], p[1]]);
+            nonCumulativeTezosData = toMonthlyDiffsFromCumulative(cumulativeTezosData);
             series.push({
-                showInLegend: false,
+                showInLegend: true,
+                visible: true,
                 shadow: {
                     color: 'rgba(255, 255, 0, 0.7)',
                     offsetX: 0,
@@ -1078,15 +1430,18 @@ function createTotalAccountsChart() {
                     opacity: 1,
                     width: 10
                 },
-                name: 'Tezos Accounts',
-                data: tezosData,
+                name: 'Tezos',
+                data: cumulativeTezosData.map(p => [p[0], p[1]]),
                 dataLabels: {
                     enabled: true,
-                    formatter: function () {
-                        return this.point.index === 0 ? `${(this.y / 1000000).toFixed(2)}M` : null;
-                    },
+                    formatter: formatAccountLabel,
                     align: 'right',
                     verticalAlign: 'bottom',
+                    style: {
+                        color: '#ffffff',
+                        fontSize: '10px',
+                        textOutline: '1px contrast'
+                    }
                 },
                 color: {
                     linearGradient: {
@@ -1100,8 +1455,11 @@ function createTotalAccountsChart() {
             });
         }
         if (etherlinkData && etherlinkData.length > 0) {
+            cumulativeEtherlinkData = etherlinkData.map(p => [p[0], p[1]]);
+            nonCumulativeEtherlinkData = toMonthlyDiffsFromCumulative(cumulativeEtherlinkData);
             series.push({
-                showInLegend: false,
+                showInLegend: true,
+                visible: true,
                 shadow: {
                     color: 'rgba(0, 150, 255, 0.7)',
                     offsetX: 0,
@@ -1109,15 +1467,18 @@ function createTotalAccountsChart() {
                     opacity: 1,
                     width: 8
                 },
-                name: 'Etherlink Accounts',
-                data: etherlinkData,
+                name: 'Etherlink',
+                data: cumulativeEtherlinkData.map(p => [p[0], p[1]]),
                 dataLabels: {
                     enabled: true,
-                    formatter: function () {
-                        return this.point.index === this.series.data.length - 1 ? `${(this.y / 1000000).toFixed(2)}M` : null;
-                    },
+                    formatter: formatAccountLabel,
                     align: 'right',
                     verticalAlign: 'bottom',
+                    style: {
+                        color: '#ffffff',
+                        fontSize: '10px',
+                        textOutline: '1px contrast'
+                    }
                 },
                 color: {
                     linearGradient: {
@@ -1131,15 +1492,88 @@ function createTotalAccountsChart() {
                 yAxis: 0
             });
         }
+        series.push({
+            name: 'Cumulative',
+            data: [],
+            showInLegend: true,
+            visible: true,
+            enableMouseTracking: false,
+            events: {
+                show: function () {
+                    const tezosSeries = this.chart.series.find(s => s.name === 'Tezos');
+                    const etherlinkSeries = this.chart.series.find(s => s.name === 'Etherlink');
+                    if (tezosSeries) tezosSeries.setData(cumulativeTezosData.map(p => [p[0], p[1]]), false, undefined, false);
+                    if (etherlinkSeries) etherlinkSeries.setData(cumulativeEtherlinkData.map(p => [p[0], p[1]]), false, undefined, false);
+                },
+                hide: function () {
+                    const tezosSeries = this.chart.series.find(s => s.name === 'Tezos');
+                    const etherlinkSeries = this.chart.series.find(s => s.name === 'Etherlink');
+                    if (tezosSeries) tezosSeries.setData(nonCumulativeTezosData.map(p => [p[0], p[1]]), false, undefined, false);
+                    if (etherlinkSeries) etherlinkSeries.setData(nonCumulativeEtherlinkData.map(p => [p[0], p[1]]), false, undefined, false);
+                }
+            }
+        });
         Highcharts.chart('chart-container2', {
+            boost: {
+                enabled: false
+            },
             chart: {
                 type: 'spline',
-                backgroundColor: 'rgba(0,0,0,0)'
+                backgroundColor: 'rgba(0,0,0,0)',
+                allowMutatingData: false
             },
             title: {
                 text: 'Total accounts',
                 style: {
                     color: '#ffffff'
+                }
+            },
+            legend: {
+                enabled: true,
+                align: 'center',
+                verticalAlign: 'top',
+                margin: 4,
+                padding: 2,
+                symbolWidth: 0,
+                symbolHeight: 0,
+                squareSymbol: false,
+                labelFormatter: function () {
+                    const dotColor = this.name === 'Etherlink' ? '#87CEEB' : (this.name === 'Cumulative' ? '#fbbf24' : '#77dd77');
+                    const labelText = this.name === 'Tezos' ? 'Tezos L1' : this.name;
+                    return `<span style="color:${dotColor};font-size:14px">●</span> ${labelText}`;
+                },
+                itemStyle: {
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '12px',
+                    fontWeight: 'normal'
+                },
+                itemHoverStyle: {
+                    color: '#ffffff'
+                },
+                itemHiddenStyle: {
+                    color: 'rgba(255, 255, 255, 0.38)',
+                    textDecoration: 'none'
+                },
+                events: {
+                    itemClick: function (e) {
+                        const item = e.legendItem;
+                        if (item && item.name !== 'Cumulative' && item.visible) {
+                            const otherVisible = this.chart.series.some(s => s.name !== 'Cumulative' && s !== item && s.visible);
+                            if (!otherVisible) {
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                style: {
+                    fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+                },
+                formatter: function () {
+                    const dot = this.series.name === 'Etherlink' ? '#87CEEB' : '#77dd77';
+                    const sName = this.series.name === 'Tezos' ? 'Tezos L1' : this.series.name;
+                    return `<span style="font-size:10px">${Highcharts.dateFormat('%b %Y', this.x)}</span><br/><span style="color:${dot}">●</span> ${escapeHTML(sName)}: <b>${Math.round(this.y).toLocaleString()}</b>`;
                 }
             },
             xAxis: {
@@ -1174,6 +1608,9 @@ function createTotalAccountsChart() {
                     states: {
                         hover: {
                             lineWidthPlus: 0
+                        },
+                        inactive: {
+                            enabled: false
                         }
                     }
                 }
@@ -1195,16 +1632,30 @@ function createTotalTransactionsChart() {
         const tezosData = aggregatedDataCache.tezosTransactionsData;
         const etherlinkData = aggregatedDataCache.etherlinkTxnsData;
         const series = [];
+        let cumulativeTezosData = [];
+        let nonCumulativeTezosData = [];
+        let cumulativeEtherlinkData = [];
+        let nonCumulativeEtherlinkData = [];
+
+        const formatTxLabel = function () {
+            if (this.y === null || this.y === undefined) return null;
+            if (this.point.index !== this.series.data.length - 1) return null;
+            return this.y >= 1000000 ? `${(this.y / 1000000).toFixed(1)}M` : `${(this.y / 1000).toFixed(1)}K`;
+        };
+
         if (tezosData && tezosData.length > 0) {
             const reversedTezosData = [...tezosData].reverse();
-            const cumulativeTezosData = [];
             let runningTotal = 0;
             reversedTezosData.forEach(point => {
                 runningTotal += point[1];
                 cumulativeTezosData.push([point[0], runningTotal]);
             });
+            nonCumulativeTezosData = reversedTezosData.length > 1
+                ? reversedTezosData.slice(0, -1).map(p => [p[0], p[1]])
+                : reversedTezosData.map(p => [p[0], p[1]]);
             series.push({
-                showInLegend: false,
+                showInLegend: true,
+                visible: true,
                 shadow: {
                     color: 'rgba(255, 255, 0, 0.7)',
                     offsetX: 0,
@@ -1212,15 +1663,18 @@ function createTotalTransactionsChart() {
                     opacity: 1,
                     width: 10
                 },
-                name: 'Tezos Transactions',
-                data: cumulativeTezosData,
+                name: 'Tezos',
+                data: cumulativeTezosData.map(p => [p[0], p[1]]),
                 dataLabels: {
                     enabled: true,
-                    formatter: function () {
-                        return this.point.index === this.series.data.length - 1 ? `${(this.y / 1000000).toFixed(1)}M` : null;
-                    },
+                    formatter: formatTxLabel,
                     align: 'right',
                     verticalAlign: 'bottom',
+                    style: {
+                        color: '#ffffff',
+                        fontSize: '10px',
+                        textOutline: '1px contrast'
+                    }
                 },
                 color: {
                     linearGradient: {
@@ -1234,8 +1688,12 @@ function createTotalTransactionsChart() {
             });
         }
         if (etherlinkData && etherlinkData.length > 0) {
+            cumulativeEtherlinkData = etherlinkData.map(p => [p[0], p[1]]);
+            nonCumulativeEtherlinkData = toMonthlyDiffsFromCumulative(cumulativeEtherlinkData);
+
             series.push({
-                showInLegend: false,
+                showInLegend: true,
+                visible: true,
                 shadow: {
                     color: 'rgba(0, 150, 255, 0.7)',
                     offsetX: 0,
@@ -1243,15 +1701,18 @@ function createTotalTransactionsChart() {
                     opacity: 1,
                     width: 8
                 },
-                name: 'Etherlink Transactions',
-                data: etherlinkData,
+                name: 'Etherlink',
+                data: cumulativeEtherlinkData.map(p => [p[0], p[1]]),
                 dataLabels: {
                     enabled: true,
-                    formatter: function () {
-                        return this.point.index === this.series.data.length - 1 ? `${(this.y / 1000000).toFixed(1)}M` : null;
-                    },
+                    formatter: formatTxLabel,
                     align: 'right',
                     verticalAlign: 'bottom',
+                    style: {
+                        color: '#ffffff',
+                        fontSize: '10px',
+                        textOutline: '1px contrast'
+                    }
                 },
                 color: {
                     linearGradient: {
@@ -1265,15 +1726,88 @@ function createTotalTransactionsChart() {
                 yAxis: 0
             });
         }
+        series.push({
+            name: 'Cumulative',
+            data: [],
+            showInLegend: true,
+            visible: true,
+            enableMouseTracking: false,
+            events: {
+                show: function () {
+                    const tezosSeries = this.chart.series.find(s => s.name === 'Tezos');
+                    const etherlinkSeries = this.chart.series.find(s => s.name === 'Etherlink');
+                    if (tezosSeries) tezosSeries.setData(cumulativeTezosData.map(p => [p[0], p[1]]), false, undefined, false);
+                    if (etherlinkSeries) etherlinkSeries.setData(cumulativeEtherlinkData.map(p => [p[0], p[1]]), false, undefined, false);
+                },
+                hide: function () {
+                    const tezosSeries = this.chart.series.find(s => s.name === 'Tezos');
+                    const etherlinkSeries = this.chart.series.find(s => s.name === 'Etherlink');
+                    if (tezosSeries) tezosSeries.setData(nonCumulativeTezosData.map(p => [p[0], p[1]]), false, undefined, false);
+                    if (etherlinkSeries) etherlinkSeries.setData(nonCumulativeEtherlinkData.map(p => [p[0], p[1]]), false, undefined, false);
+                }
+            }
+        });
         Highcharts.chart('chart-container8', {
+            boost: {
+                enabled: false
+            },
             chart: {
                 type: 'spline',
-                backgroundColor: 'rgba(0,0,0,0)'
+                backgroundColor: 'rgba(0,0,0,0)',
+                allowMutatingData: false
             },
             title: {
-                text: 'Tezos & Etherlink cumulative tx growth',
+                text: 'Transactions growth',
                 style: {
                     color: '#ffffff'
+                }
+            },
+            legend: {
+                enabled: true,
+                align: 'center',
+                verticalAlign: 'top',
+                margin: 4,
+                padding: 2,
+                symbolWidth: 0,
+                symbolHeight: 0,
+                squareSymbol: false,
+                labelFormatter: function () {
+                    const dotColor = this.name === 'Etherlink' ? '#87CEEB' : (this.name === 'Cumulative' ? '#fbbf24' : '#77dd77');
+                    const labelText = this.name === 'Tezos' ? 'Tezos L1' : this.name;
+                    return `<span style="color:${dotColor};font-size:14px">●</span> ${labelText}`;
+                },
+                itemStyle: {
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '12px',
+                    fontWeight: 'normal'
+                },
+                itemHoverStyle: {
+                    color: '#ffffff'
+                },
+                itemHiddenStyle: {
+                    color: 'rgba(255, 255, 255, 0.38)',
+                    textDecoration: 'none'
+                },
+                events: {
+                    itemClick: function (e) {
+                        const item = e.legendItem;
+                        if (item && item.name !== 'Cumulative' && item.visible) {
+                            const otherVisible = this.chart.series.some(s => s.name !== 'Cumulative' && s !== item && s.visible);
+                            if (!otherVisible) {
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                style: {
+                    fontFamily: '"Monda", Helvetica, Arial, sans-serif'
+                },
+                formatter: function () {
+                    const dot = this.series.name === 'Etherlink' ? '#87CEEB' : '#77dd77';
+                    const sName = this.series.name === 'Tezos' ? 'Tezos L1' : this.series.name;
+                    return `<span style="font-size:10px">${Highcharts.dateFormat('%b %Y', this.x)}</span><br/><span style="color:${dot}">●</span> ${escapeHTML(sName)}: <b>${Math.round(this.y).toLocaleString()}</b>`;
                 }
             },
             xAxis: {
@@ -1308,6 +1842,9 @@ function createTotalTransactionsChart() {
                     states: {
                         hover: {
                             lineWidthPlus: 0
+                        },
+                        inactive: {
+                            enabled: false
                         }
                     }
                 }
@@ -1325,21 +1862,133 @@ function createTotalTransactionsChart() {
     }
 }
 function createTimeSeriesChart(containerId, title, data, formatter, isCumulative = true) {
-    let highPoint = null;
-    let lowPoint = null;
-    if (!isCumulative && data.length > 0) {
-        highPoint = data.reduce((max, point) => point[1] > max[1] ? point : max, data[0]);
-        lowPoint = data.reduce((min, point) => point[1] < min[1] ? point : min, data[0]);
+    let state = {
+        processedData: data,
+        formatter,
+        isCumulative,
+        highPoint: (!isCumulative && data.length > 0) ? data.reduce((max, point) => point[1] > max[1] ? point : max, data[0]) : null,
+        lowPoint: (!isCumulative && data.length > 0) ? data.reduce((min, point) => point[1] < min[1] ? point : min, data[0]) : null
+    };
+    const isBurned = containerId === 'chart-container';
+    const series = [{
+            showInLegend: false,
+            shadow: {
+                color: 'rgba(255, 255, 0, 0.7)',
+                offsetX: 0,
+                offsetY: 0,
+                opacity: 1,
+                width: 10
+            },
+            name: title,
+            data: data.map(p => [p[0], p[1]]),
+            dataLabels: {
+                enabled: true,
+                formatter: function () {
+                    if (state.isCumulative) {
+                        return this.point.index === 0 ? state.formatter(this.y) : null;
+                    } else {
+                        if (state.highPoint && this.point.x === state.highPoint[0] && this.point.y === state.highPoint[1]) {
+                            return `High: ${state.formatter(this.y)}`;
+                        }
+                        if (state.lowPoint && this.point.x === state.lowPoint[0] && this.point.y === state.lowPoint[1]) {
+                            return `Low: ${state.formatter(this.y)}`;
+                        }
+                        return null;
+                    }
+                },
+                align: 'right',
+                verticalAlign: 'bottom',
+                style: {
+                    color: '#ffffff',
+                    fontSize: '10px',
+                    textOutline: '1px contrast'
+                }
+            }
+        }
+    ];
+    if (isBurned) {
+        [
+            { label: '1Y', tf: '1y' },
+            { label: '3Y', tf: '3y' },
+            { label: '7Y', tf: '7y' },
+            { label: 'All', tf: 'cumulative' }
+        ].forEach(opt => {
+            series.push({
+                name: opt.label,
+                data: [],
+                showInLegend: true,
+                visible: currentBurnedSupplyTimeframe === opt.tf,
+                enableMouseTracking: false,
+                events: {
+                    show: function () {
+                        if (this.chart._switchingTf) return;
+                        this.chart._switchingTf = true;
+                        currentBurnedSupplyTimeframe = opt.tf;
+                        state = computeBurnedSupplyState(opt.tf);
+                        this.chart.series.slice(1).forEach(s => {
+                            if (s !== this && s.visible) s.setVisible(false, false);
+                        });
+                        this.chart.series[0].setData(state.processedData.map(p => [p[0], p[1]]), false, undefined, false);
+                        this.chart._switchingTf = false;
+                    },
+                    hide: function () {
+                        if (this.chart._switchingTf) return;
+                        this.chart._switchingTf = true;
+                        this.setVisible(true, false);
+                        this.chart._switchingTf = false;
+                    }
+                }
+            });
+        });
     }
     Highcharts.chart(containerId, {
+        boost: {
+            enabled: false
+        },
         chart: {
             type: 'spline',
-            backgroundColor: 'rgba(0,0,0,0)'
+            backgroundColor: 'rgba(0,0,0,0)',
+            allowMutatingData: false
         },
         title: {
             text: title,
             style: {
                 color: '#ffffff'
+            }
+        },
+        legend: {
+            enabled: isBurned,
+            align: 'center',
+            verticalAlign: 'top',
+            margin: 4,
+            padding: 2,
+            symbolWidth: 0,
+            symbolHeight: 0,
+            squareSymbol: false,
+            labelFormatter: function () {
+                const dotMap = { '1Y': '#38bdf8', '3Y': '#c084fc', '7Y': '#fbbf24', 'All': '#77dd77' };
+                const dotColor = dotMap[this.name] || '#77dd77';
+                return `<span style="color:${dotColor};font-size:14px">●</span> ${this.name}`;
+            },
+            itemStyle: {
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontSize: '12px',
+                fontWeight: 'normal'
+            },
+            itemHoverStyle: {
+                color: '#ffffff'
+            },
+            itemHiddenStyle: {
+                color: 'rgba(255, 255, 255, 0.38)',
+                textDecoration: 'none'
+            },
+            events: {
+                itemClick: function (e) {
+                    const item = e.legendItem;
+                    if (item && item.visible) {
+                        e.preventDefault();
+                    }
+                }
             }
         },
         xAxis: {
@@ -1392,37 +2041,7 @@ function createTimeSeriesChart(containerId, title, data, formatter, isCumulative
         exporting: {
             enabled: false
         },
-        series: [{
-                showInLegend: false,
-                shadow: {
-                    color: 'rgba(255, 255, 0, 0.7)',
-                    offsetX: 0,
-                    offsetY: 0,
-                    opacity: 1,
-                    width: 10
-                },
-                name: title,
-                data: data,
-                dataLabels: {
-                    enabled: true,
-                    formatter: function () {
-                        if (isCumulative) {
-                            return this.point.index === 0 ? formatter(this.y) : null;
-                        } else {
-                            if (highPoint && this.point.x === highPoint[0] && this.point.y === highPoint[1]) {
-                                return `High: ${formatter(this.y)}`;
-                            }
-                            if (lowPoint && this.point.x === lowPoint[0] && this.point.y === lowPoint[1]) {
-                                return `Low: ${formatter(this.y)}`;
-                            }
-                            return null;
-                        }
-                    },
-                    align: 'right',
-                    verticalAlign: 'bottom',
-                },
-            }
-        ],
+        series: series,
         credits: {
             enabled: false
         }
@@ -1688,11 +2307,16 @@ function drawUpgradeOverlay(chart) {
     const majorPath = [];
     const minorPath = [];
     const addGuide = (cycle, target) => {
-        const y = yAtCycle(series, cycle);
-        if (y === null || y === undefined)
+        let maxY = null;
+        chart.series.forEach(s => {
+            if (!s.visible) return;
+            const val = yAtCycle(s, cycle);
+            if (val !== null && val !== undefined && (maxY === null || val > maxY)) maxY = val;
+        });
+        if (maxY === null)
             return;
         const xPx = xAxis.toPixels(cycle);
-        const yPx = Math.max(chart.plotTop, yAxis.toPixels(y));
+        const yPx = Math.max(chart.plotTop, yAxis.toPixels(maxY));
         if (yPx < bottom)
             target.push(['M', xPx, bottom], ['L', xPx, yPx]);
     };
@@ -1709,7 +2333,8 @@ function drawUpgradeOverlay(chart) {
     chart.upgradeGuides.minor.attr({ d: minorPath.length ? minorPath : 'M 0 0' });
 
     // Pulsing "you are here" marker on the current cycle
-    const nowY = inRange(currentCycle) ? yAtCycle(series, currentCycle) : null;
+    const activeSeries = chart.series.find(s => s.visible) || series;
+    const nowY = inRange(currentCycle) && activeSeries.visible ? yAtCycle(activeSeries, currentCycle) : null;
     if (nowY !== null && nowY !== undefined) {
         const nx = xAxis.toPixels(currentCycle);
         const ny = Math.max(chart.plotTop, yAxis.toPixels(nowY));
@@ -1725,8 +2350,11 @@ function drawUpgradeOverlay(chart) {
             }).add(chart.nowMarker);
             chart.nowMarkerDot = chart.renderer.circle(0, 0, 3.2).attr({ fill: '#ffffff' }).add(chart.nowMarker);
         }
+        chart.nowMarker.attr({ visibility: 'visible' });
         chart.nowMarkerRing.attr({ cx: nx, cy: ny });
         chart.nowMarkerDot.attr({ cx: nx, cy: ny });
+    } else if (chart.nowMarker) {
+        chart.nowMarker.attr({ visibility: 'hidden' });
     }
 
     // One-time intro (timeline is attached in the chart's load event)
@@ -1772,7 +2400,7 @@ function drawUpgradeOverlay(chart) {
             })
             .add(group);
         const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        title.textContent = p.item.title;
+        title.textContent = p.title || p.item.title;
         label.element.appendChild(title);
         // During the intro each label pops in just as the reveal passes its tick
         if (intro) {
@@ -1801,6 +2429,24 @@ function getCurrentOnChainBonus() {
     const inf = aggregatedDataCache?.homeData?.stakingData?.inflation;
     return inf ? clip((inf / 100) - sRate0, 0, maxBonus0) : maxBonus0;
 }
+function getProjectedAPYs(issuancePct, r) {
+    const data = aggregatedDataCache?.historicalCycleData;
+    const last = Array.isArray(data) && data.length ? data[data.length - 1] : null;
+    const staked0 = last && last.totalSupply
+        ? ((last.totalOwnStaked || last.totalExternalStaked)
+            ? (last.totalOwnStaked || 0) + (last.totalExternalStaked || 0)
+            : (last.totalFrozen || 0)) / last.totalSupply
+        : 0.3118;
+    const bp0 = last && last.totalSupply && last.totalBakingPower
+        ? last.totalBakingPower / last.totalSupply
+        : staked0 + 0.2812 / 3;
+    const delWeight0 = Math.max(0, bp0 - staked0);
+    const sr = clip(r, 0.0001, 1);
+    const delWeight = delWeight0 * Math.max(0, (1 - sr) / Math.max(0.0001, 1 - staked0));
+    const bpRatio = Math.max(0.01, sr + delWeight);
+    const sApy = clip(issuancePct / bpRatio, 0, 21.5);
+    return { stakingApy: sApy, delegationApy: sApy / 3 };
+}
 function createHistoricalCharts(ratio) {
     try {
         const data = aggregatedDataCache.historicalCycleData;
@@ -1808,10 +2454,17 @@ function createHistoricalCharts(ratio) {
         const stakingData = processStakingData(data);
         currentCycle = issuanceData.currentCycle;
         tmp = getCurrentOnChainBonus(); // Reset bonus state to current on-chain saturation before projection
-        const issuanceDataWithRatio = [...issuanceData.ratios, ...ratio.map((ratioValue, index) => ({
-                    cycle: currentCycle + index + 1,
-                    issuance: issuanceRateQ(index + currentCycle, ratioValue) /*LB_SUBSIDY / data[currentCycle].totalSupply * 100*/
-                }))];
+        const issuanceDataWithRatio = [...issuanceData.ratios, ...ratio.map((ratioValue, index) => {
+            const cycle = currentCycle + index + 1;
+            const iss = issuanceRateQ(index + currentCycle, ratioValue);
+            const apys = getProjectedAPYs(iss, ratioValue);
+            return {
+                cycle,
+                issuance: iss,
+                stakingApy: apys.stakingApy,
+                delegationApy: apys.delegationApy
+            };
+        })];
         createHistoricalChart('issuanceh', 'Issuance since genesis', issuanceDataWithRatio, d => ({
                 x: d.cycle,
                 y: d.issuance
@@ -1835,7 +2488,92 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
     const xLast = seriesData.length ? seriesData[seriesData.length - 1].x : 1;
     const introState = { nowFrac: Math.min(Math.max((currentCycle - xFirst) / Math.max(1, xLast - xFirst), 0.05), 0.95) };
     const introTimeline = createIntroTimeline(introState);
+    const isIssuance = containerId === 'issuanceh';
+    const makeZoneSeries = (name, sData, stops, shadowColor, visible = true, events = {}) => ({
+        zoneAxis: 'x',
+        zones: [{
+                value: (currentCycle + 1)
+            }, {
+                dashStyle: 'ShortDot'
+            }
+        ],
+        visible,
+        events,
+        showInLegend: isIssuance,
+        shadow: {
+            color: shadowColor,
+            offsetX: 0,
+            offsetY: 0,
+            opacity: 1,
+            width: 10
+        },
+        color: {
+            linearGradient: {
+                x1: 0,
+                y1: 0,
+                x2: 0,
+                y2: 1
+            },
+            stops
+        },
+        name,
+        data: sData,
+        animation: {
+            duration: introTimeline.duration,
+            easing: introTimeline.ease
+        },
+        lineWidth: 1.5,
+        dataLabels: {
+            enabled: true,
+            formatter: function () {
+                if (this.y === null || this.y === undefined) return null;
+                if (this.point.index === this.series.data.length - 1 || this.point.x === currentCycle) {
+                    return `${this.y.toFixed(2)}%`;
+                }
+                return null;
+            },
+            align: 'right',
+            verticalAlign: 'bottom',
+            style: {
+                color: '#ffffff',
+                fontSize: '10px',
+                textOutline: '1px contrast'
+            }
+        },
+        marker: {
+            enabled: false
+        },
+        states: {
+            inactive: {
+                enabled: false
+            }
+        }
+    });
+    const stakingSeriesEvents = {
+        show: function () {
+            if (this.chart && this.chart.yAxis && this.chart.yAxis[0]) {
+                this.chart.yAxis[0].setExtremes(0, 22, false);
+            }
+        },
+        hide: function () {
+            if (this.chart && this.chart.yAxis && this.chart.yAxis[0]) {
+                this.chart.yAxis[0].setExtremes(0, 11, false);
+            }
+        }
+    };
+    const seriesList = isIssuance
+        ? [
+            makeZoneSeries('Issuance', seriesData, [[0, '#ff6961'], [1, '#77dd77']], 'rgba(255, 255, 0, 0.7)', true),
+            makeZoneSeries('Staking APY', data.map(d => ({ x: d.cycle, y: d.stakingApy })), [[0, '#38bdf8'], [1, '#60a5fa']], 'rgba(56, 189, 248, 0.5)', false, stakingSeriesEvents),
+            makeZoneSeries('Delegation APY', data.map(d => ({ x: d.cycle, y: d.delegationApy })), [[0, '#c084fc'], [1, '#a855f7']], 'rgba(192, 132, 252, 0.5)', false)
+        ]
+        : [
+            makeZoneSeries(title, seriesData, [[0, '#77dd77'], [1, '#ff6961']], 'rgba(255, 255, 0, 0.7)', true)
+        ];
     const chartConfig = {
+        boost: {
+            enabled: false
+        },
         chart: {
             type: 'spline',
             backgroundColor: 'rgba(0,0,0,0)',
@@ -1858,6 +2596,43 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
             text: title,
             style: {
                 color: '#ffffff'
+            }
+        },
+        legend: {
+            enabled: isIssuance,
+            align: 'center',
+            verticalAlign: 'top',
+            margin: 4,
+            padding: 2,
+            symbolWidth: 0,
+            symbolHeight: 0,
+            squareSymbol: false,
+            labelFormatter: function () {
+                const dotColor = this.name === 'Staking APY' ? '#38bdf8' : (this.name === 'Delegation APY' ? '#c084fc' : '#77dd77');
+                return `<span style="color:${dotColor};font-size:14px">●</span> ${this.name}`;
+            },
+            itemStyle: {
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontSize: '12px',
+                fontWeight: 'normal'
+            },
+            itemHoverStyle: {
+                color: '#ffffff'
+            },
+            itemHiddenStyle: {
+                color: 'rgba(255, 255, 255, 0.38)',
+                textDecoration: 'none'
+            },
+            events: {
+                itemClick: function (e) {
+                    const item = e.legendItem;
+                    if (item && item.visible) {
+                        const otherVisible = this.chart.series.some(s => s !== item && s.visible);
+                        if (!otherVisible) {
+                            e.preventDefault();
+                        }
+                    }
+                }
             }
         },
         xAxis: {
@@ -1884,65 +2659,25 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
                 text: null
             },
             min: 0,
-            max: containerId === 'issuanceh' ? 11 : 60,
+            max: isIssuance ? 11 : 60,
             tickInterval: 1
         },
         tooltip: {
+            shared: isIssuance,
             formatter: function () {
-                const label = containerId === 'issuanceh' ? 'Issuance' : 'Staking (frozen tez)';
                 const era = this.x > currentCycle ? 'Projection' : escapeHTML(protocolNameForCycle(this.x));
-                return `Cycle: ${this.x} <span style="opacity:0.7">· ${era}</span><br><span style="color:${this.point.color}">●</span> ${label}: <b>${this.y.toFixed(2)}%</b><br/>`;
+                if (isIssuance && this.points) {
+                    const rows = this.points.map(p => {
+                        const dot = p.series.name === 'Staking APY' ? '#38bdf8' : (p.series.name === 'Delegation APY' ? '#c084fc' : '#77dd77');
+                        return `<span style="color:${dot}">●</span> ${escapeHTML(p.series.name)}: <b>${p.y.toFixed(2)}%</b>`;
+                    }).join('<br/>');
+                    return `Cycle: ${this.x} <span style="opacity:0.7">· ${era}</span><br/>${rows}`;
+                }
+                const label = isIssuance ? 'Issuance' : 'Staking (frozen tez)';
+                return `Cycle: ${this.x} <span style="opacity:0.7">· ${era}</span><br><span style="color:#77dd77">●</span> ${label}: <b>${this.y.toFixed(2)}%</b><br/>`;
             }
         },
-        series: [{
-                zoneAxis: 'x',
-                zones: [{
-                        value: (currentCycle + 1)
-                    }, {
-                        dashStyle: 'ShortDot'
-                    }
-                ],
-                showInLegend: false,
-                shadow: {
-                    color: 'rgba(255, 255, 0, 0.7)',
-                    offsetX: 0,
-                    offsetY: 0,
-                    opacity: 1,
-                    width: 10
-                },
-                color: {
-                    linearGradient: {
-                        x1: 0,
-                        y1: 0,
-                        x2: 0,
-                        y2: 1
-                    },
-                    stops: containerId === 'issuanceh' ? [[0, '#ff6961'], [1, '#77dd77']] : [[0, '#77dd77'], [1, '#ff6961']]
-                },
-                name: title,
-                data: seriesData,
-                // Cinematic reveal; overlays (scan line, guides, labels) share this timeline
-                animation: {
-                    duration: introTimeline.duration,
-                    easing: introTimeline.ease
-                },
-                lineWidth: 1.5,
-                dataLabels: {
-                    enabled: true,
-                    formatter: function () {
-                        if (this.point.index === this.series.data.length - 1 || this.point.x === currentCycle) {
-                            return `${this.y.toFixed(2)}%`;
-                        }
-                        return null;
-                    },
-                    align: 'right',
-                    verticalAlign: 'bottom',
-                },
-                marker: {
-                    enabled: false
-                },
-            }
-        ],
+        series: seriesList,
         credits: {
             enabled: false
         }
@@ -2022,8 +2757,10 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
 // #7: Cache both chart references
 let _issuanceChartCache = null;
 let _stakingChartCache = null;
-// #8: Pre-allocated array for issuance updates (avoids GC pressure)
+// #8: Pre-allocated arrays for issuance & APY updates (avoids GC pressure)
 let _issuanceUpdateBuffer = null;
+let _stakingApyUpdateBuffer = null;
+let _delegationApyUpdateBuffer = null;
 
 function updateIssuanceChartFast(stakingData, animation) {
     // #7: Cached chart lookup
@@ -2035,10 +2772,18 @@ function updateIssuanceChartFast(stakingData, animation) {
         return;
     tmp = getCurrentOnChainBonus(); // Reset bonus state to current on-chain saturation before projection
     const originalData = issuanceChart.series[0].options.data;
+    const origStakeApy = issuanceChart.series[1]?.options?.data;
+    const origDelApy = issuanceChart.series[2]?.options?.data;
 
-    // #8: Pre-allocate buffer once, reuse on every drag tick
+    // #8: Pre-allocate buffers once, reuse on every drag tick
     if (!_issuanceUpdateBuffer || _issuanceUpdateBuffer.length !== originalData.length) {
         _issuanceUpdateBuffer = originalData.map(p => ({ x: p.x, y: p.y }));
+    }
+    if (origStakeApy && (!_stakingApyUpdateBuffer || _stakingApyUpdateBuffer.length !== origStakeApy.length)) {
+        _stakingApyUpdateBuffer = origStakeApy.map(p => ({ x: p.x, y: p.y }));
+    }
+    if (origDelApy && (!_delegationApyUpdateBuffer || _delegationApyUpdateBuffer.length !== origDelApy.length)) {
+        _delegationApyUpdateBuffer = origDelApy.map(p => ({ x: p.x, y: p.y }));
     }
 
     // #3: Build staking lookup only for future cycles
@@ -2054,20 +2799,38 @@ function updateIssuanceChartFast(stakingData, animation) {
     for (let i = 0; i < originalData.length; i++) {
         const point = originalData[i];
         _issuanceUpdateBuffer[i].x = point.x;
+        if (_stakingApyUpdateBuffer) _stakingApyUpdateBuffer[i].x = point.x;
+        if (_delegationApyUpdateBuffer) _delegationApyUpdateBuffer[i].x = point.x;
         if (point.x > currentCycle) {
             const stakingY = stakingMap.get(point.x);
             if (stakingY !== undefined) {
-                _issuanceUpdateBuffer[i].y = issuanceRateQ(point.x, stakingY / 100);
+                const r = stakingY / 100;
+                const iss = issuanceRateQ(point.x, r);
+                const apys = getProjectedAPYs(iss, r);
+                _issuanceUpdateBuffer[i].y = iss;
+                if (_stakingApyUpdateBuffer) _stakingApyUpdateBuffer[i].y = apys.stakingApy;
+                if (_delegationApyUpdateBuffer) _delegationApyUpdateBuffer[i].y = apys.delegationApy;
                 continue;
             }
         }
         _issuanceUpdateBuffer[i].y = point.y;
+        if (_stakingApyUpdateBuffer && origStakeApy[i]) _stakingApyUpdateBuffer[i].y = origStakeApy[i].y;
+        if (_delegationApyUpdateBuffer && origDelApy[i]) _delegationApyUpdateBuffer[i].y = origDelApy[i].y;
     }
-    issuanceChart.series[0].setData(_issuanceUpdateBuffer, true, animation);
+    issuanceChart.series[0].setData(_issuanceUpdateBuffer, false);
+    if (issuanceChart.series[1] && _stakingApyUpdateBuffer) {
+        issuanceChart.series[1].setData(_stakingApyUpdateBuffer, false);
+    }
+    if (issuanceChart.series[2] && _delegationApyUpdateBuffer) {
+        issuanceChart.series[2].setData(_delegationApyUpdateBuffer, false);
+    }
+    issuanceChart.redraw(animation);
 }
 // Keep legacy function for createHistoricalCharts initial call
 function updateIssuanceChart(newStakingData, animation = true) {
     _issuanceUpdateBuffer = null; // Force buffer rebuild
+    _stakingApyUpdateBuffer = null;
+    _delegationApyUpdateBuffer = null;
     updateIssuanceChartFast(newStakingData, animation);
 }
 function processIssuanceData(data) {
@@ -2081,9 +2844,21 @@ function processIssuanceData(data) {
         const growthRate = supplyDiff / prevSupply;
         const timeDiffSec = (new Date(curr.timestamp) - new Date(prev.timestamp)) / 1000;
         const annualized = (growthRate * ((365.25 * 24 * 60 * 60) / timeDiffSec)) * 100;
+        const createdDiff = (curr.totalCreated !== undefined && prev.totalCreated !== undefined)
+            ? parseFloat(curr.totalCreated) - parseFloat(prev.totalCreated)
+            : supplyDiff;
+        const grossAnnualized = ((createdDiff / prevSupply) * ((365.25 * 24 * 60 * 60) / timeDiffSec)) * 100;
+        const snap = curr.cycle >= 752 ? data[Math.max(0, i - 4)] : curr;
+        const snapSupply = parseFloat(snap.totalSupply) || currSupply;
+        const bpRatio = snap.totalBakingPower && snapSupply > 0 ? parseFloat(snap.totalBakingPower) / snapSupply : 0;
+        const edge = snap.cycle >= 822 ? 3 : (curr.cycle >= 748 ? 2 : 1);
+        const sApy = bpRatio > 0 ? Math.max(0, grossAnnualized / bpRatio) : 0;
+        const dApy = Math.min(10.8, sApy / edge);
         ratios.push({
             cycle: curr.cycle,
-            issuance: annualized
+            issuance: annualized,
+            stakingApy: curr.cycle >= 747 ? (curr.cycle === 747 ? dApy : sApy) : null,
+            delegationApy: dApy
         });
     }
     return {
@@ -2120,86 +2895,179 @@ function createTVLChart() {
                 specificProtocolsTVL += tvlValues[index];
             }
         });
-        const generateUniqueHue = (index, total) => {
-            const goldenRatio = 0.618033988749895;
-            return (index * goldenRatio * 360) % 360;
+        totalTVL = tvlValues.reduce((sum, value) => sum + value, 0);
+
+        // Identify Tezos L1 vs Etherlink L2 split
+        let splitIdx = projects.length;
+        for (let i = 1; i < tvlValues.length; i++) {
+            if (tvlValues[i] > tvlValues[i - 1] * 1.5) {
+                splitIdx = i;
+                break;
+            }
+        }
+        const shortNameMap = {
+            'Curve DEX': 'Curve',
+            'Uranium.io': 'Uranium',
+            'UltraYield Curator': 'UltraYield',
+            'Morpho Blue': 'Morpho',
+            'Liquidity House': 'Liq. House',
+            'Hanji Protocol': 'Hanji',
+            'Uniswap V3': 'Uniswap',
+            'Crunchy Network': 'Crunchy',
+            'Dexter Exchange': 'Dexter',
+            'Vortex Protocol': 'Vortex',
+            'Superlend.xyz': 'Superlend',
+            'Matter Defi': 'Matter',
+            'Organic Growth': 'Organic'
         };
-        const pieData = projects.map((project, index) => {
-            const hue = generateUniqueHue(index, projects.length);
-            const saturation = 75 + (index % 3) * 10;
-            const lightness = 55 + (index % 4) * 5;
+        const fmtUsd = v => v >= 1e6 ? `$${(v / 1e6).toFixed(1)}M` : (v >= 1e3 ? `$${(v / 1e3).toFixed(0)}K` : `$${Math.round(v)}`);
+
+        const items = projects.map((project, index) => {
+            let layer = index < splitIdx ? 'l1' : 'l2';
+            if (Array.isArray(layers) && layers[index]) {
+                const lStr = String(layers[index]).toLowerCase();
+                layer = (lStr.includes('etherlink') || lStr.includes('l2')) ? 'l2' : 'l1';
+            }
             return {
-                name: `${escapeHTML(project)}`,
-                y: tvlValues[index],
-                color: {
-                    radialGradient: {
-                        cx: 0.5,
-                        cy: 0.5,
-                        r: 0.8
-                    },
-                    stops: [[0, `hsla(${hue}, ${saturation}%, ${lightness + 15}%, 0.9)`], [0.5, `hsla(${hue}, ${saturation - 10}%, ${lightness}%, 0.8)`], [1, `hsla(${hue}, ${saturation - 20}%, ${lightness - 15}%, 0.7)`]]
-                }
+                name: project,
+                shortName: shortNameMap[project] || project,
+                val: Number(tvlValues[index]) || 0,
+                layer
             };
         });
-        totalTVL = tvlValues.reduce((sum, value) => sum + value, 0);
-        Highcharts.chart('tvl-chart-container', {
-            chart: {
-                backgroundColor: 'rgba(0,0,0,0)',
-                type: 'pie'
-            },
-            title: {
-                text: 'DeFi NET TVL (+RWA)',
-                style: {
-                    color: '#ffffff',
-                    fontSize: '24px'
-                }
-            },
-            subtitle: {
-                text: `Total: $${totalTVL.toLocaleString()}`,
-                style: {
+
+        const l1Palette = ['#16a34a', '#22c55e', '#4ade80', '#86efac', '#10b981', '#34d399', '#6ee7b7', '#14b8a6', '#2dd4bf', '#5eead4', '#a7f3d0'];
+        const l2Palette = ['#0284c7', '#0ea5e9', '#38bdf8', '#60a5fa', '#3b82f6', '#6366f1', '#818cf8', '#8b5cf6', '#a855f7', '#c084fc', '#e879f9'];
+
+        const activeLayers = { l1: true, l2: true };
+
+        const renderTvlRing = () => {
+            const l1Items = activeLayers.l1 ? items.filter(i => i.layer === 'l1') : [];
+            const l2Items = activeLayers.l2 ? items.filter(i => i.layer === 'l2') : [];
+            const l1Sum = l1Items.reduce((s, i) => s + i.val, 0);
+            const l2Sum = l2Items.reduce((s, i) => s + i.val, 0);
+            const activeTotal = l1Sum + l2Sum || 1;
+
+            const innerSlices = [];
+            let degCursor = 0;
+            if (activeLayers.l1 && l1Sum > 0) {
+                const span = (l1Sum / activeTotal) * 360;
+                innerSlices.push({
+                    key: 'l1',
+                    layer: 'l1',
+                    a0: degCursor,
+                    a1: degCursor + span,
                     color: '#22c55e',
-                    fontSize: '16px'
-                }
-            },
-            tooltip: {
-                pointFormat: 'Share: {point.percentage:.1f}%'
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    states: {
-                        hover: {
-                            brightness: 0.1
-                        }
-                    }
-                }
-            },
-            series: [{
-                    name: 'TVL',
-                    data: pieData,
-                    showInLegend: false,
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.name}<br/>${point.y:,.0f}',
-                        style: {
-                            color: '#ffffff',
-                            fontSize: '12px',
-                            textOutline: '1px contrast'
-                        },
-                        distance: 20
-                    },
-                    borderColor: 'rgba(255,255,255,0.2)',
-                    borderWidth: 2
-                }
-            ],
-            exporting: {
-                enabled: false
-            },
-            credits: {
-                enabled: false
+                    val: fmtUsd(l1Sum),
+                    sub: `${((l1Sum / totalTVL) * 100).toFixed(1)}%`,
+                    subColor: '#4ade80'
+                });
+                degCursor += span;
             }
-        });
+            if (activeLayers.l2 && l2Sum > 0) {
+                const span = (l2Sum / activeTotal) * 360;
+                innerSlices.push({
+                    key: 'l2',
+                    layer: 'l2',
+                    a0: degCursor,
+                    a1: degCursor + span,
+                    color: '#0ea5e9',
+                    val: fmtUsd(l2Sum),
+                    sub: `${((l2Sum / totalTVL) * 100).toFixed(1)}%`,
+                    subColor: '#38bdf8'
+                });
+            }
+
+            const buildLayerOuter = (list, layerKey, startDeg, totalDegSpan, layerTotal, palette, otherLabel) => {
+                if (!list.length || layerTotal <= 0) return [];
+                const top = list.filter(i => i.val > 500000);
+                const rest = list.filter(i => i.val <= 500000);
+                if (!top.length && rest.length) {
+                    top.push(rest.shift());
+                }
+                const restSum = rest.reduce((s, i) => s + i.val, 0);
+                const grouped = [...top];
+                if (restSum > 0) {
+                    grouped.push({ name: otherLabel, shortName: otherLabel, val: restSum, layer: layerKey, isOther: true });
+                }
+
+                const rawSpans = grouped.map(item => (item.val / layerTotal) * totalDegSpan);
+                const minDeg = Math.min(4.2, totalDegSpan / Math.max(2, grouped.length * 2.2));
+                let deficit = 0;
+                let totalExcess = 0;
+                rawSpans.forEach(s => {
+                    if (s < minDeg) deficit += (minDeg - s);
+                    else totalExcess += (s - minDeg);
+                });
+                const spans = rawSpans.map(s => {
+                    if (s < minDeg) return minDeg;
+                    if (deficit > 0 && totalExcess > deficit) {
+                        return minDeg + (s - minDeg) * ((totalExcess - deficit) / totalExcess);
+                    }
+                    return s;
+                });
+
+                let cur = startDeg;
+                return grouped.map((item, idx) => {
+                    const span = spans[idx];
+                    const a0 = cur;
+                    const a1 = cur + span;
+                    cur = a1;
+                    const col = palette[idx % palette.length];
+                    return {
+                        key: `${layerKey}_${idx}`,
+                        layer: layerKey,
+                        a0,
+                        a1,
+                        color: col,
+                        val: fmtUsd(item.val),
+                        sub: `${((item.val / totalTVL) * 100).toFixed(1)}%`,
+                        subColor: col,
+                        railText: `${item.shortName} ${fmtUsd(item.val)}`
+                    };
+                });
+            };
+
+            const bothActive = activeLayers.l1 && activeLayers.l2;
+            const l1Span = activeLayers.l1 ? (l1Sum / activeTotal) * 360 : 0;
+            const l2Span = activeLayers.l2 ? (l2Sum / activeTotal) * 360 : 0;
+            const outerSlices = [
+                ...buildLayerOuter(l1Items, 'l1', 0, l1Span, l1Sum, l1Palette, 'Other L1'),
+                ...buildLayerOuter(l2Items, 'l2', l1Span, l2Span, l2Sum, l2Palette, 'Other L2')
+            ];
+
+            const legendItems = [
+                { layer: 'l1', label: 'Tezos L1', color: '#22c55e', active: activeLayers.l1 },
+                { layer: 'l2', label: 'Etherlink', color: '#0ea5e9', active: activeLayers.l2 }
+            ];
+
+            const defMid = fmtUsd(activeTotal);
+            const defBot = `${((activeTotal / totalTVL) * 100).toFixed(bothActive ? 0 : 1)}%`;
+            const defMidColor = (!activeLayers.l1 && activeLayers.l2) ? '#38bdf8' : '#4ade80';
+            const defBotColor = (!activeLayers.l2 && activeLayers.l1) ? '#4ade80' : '#38bdf8';
+
+            renderDualRingWidget(
+                'tvl-chart-container',
+                'DeFi NET TVL (+RWA)',
+                legendItems,
+                innerSlices,
+                outerSlices,
+                defMid,
+                defBot,
+                defMidColor,
+                defBotColor,
+                clickedLayer => {
+                    const otherLayer = clickedLayer === 'l1' ? 'l2' : 'l1';
+                    if (activeLayers[clickedLayer] && !activeLayers[otherLayer]) {
+                        return; // Do not hide if it's the only active layer
+                    }
+                    activeLayers[clickedLayer] = !activeLayers[clickedLayer];
+                    renderTvlRing();
+                }
+            );
+        };
+
+        renderTvlRing();
     } catch (error) {
         console.error('Error creating TVL chart:', error);
     }
