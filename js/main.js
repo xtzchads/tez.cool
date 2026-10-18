@@ -341,13 +341,11 @@ function createBakerElement(baker) {
 
         <div class="baker-avatar">
 
-            <img src="https://services.tzkt.io/v1/avatars/${escapeHTML(baker.address)}" 
+            <img src="https://services.tzkt.io/v1/avatars/${encodeURIComponent(baker.address)}" 
 
                  alt="${escapeHTML(baker.name)}" loading="lazy" crossorigin="anonymous"
 
-                 onerror="this.style.display='none'" 
-
-                 onclick="window.open('https://tzkt.io/${escapeHTML(baker.address)}', '_blank')"/>
+                 onerror="this.style.display='none'"/>
 
         </div>
 
@@ -408,6 +406,12 @@ function createBakerElement(baker) {
         </div>
 
     `;
+    const avatarImg = div.querySelector('.baker-avatar img');
+    if (avatarImg && baker.address) {
+        avatarImg.addEventListener('click', () => {
+            window.open(`https://tzkt.io/${encodeURIComponent(baker.address)}`, '_blank', 'noopener,noreferrer');
+        });
+    }
     return div;
 }
 function escapeHTML(str) {
@@ -2609,7 +2613,12 @@ async function createEcosystemChart() {
 
                 grp.element.addEventListener('click', function () {
                     if (pt.custom && pt.custom.website) {
-                        window.open(pt.custom.website, '_blank');
+                        try {
+                            const parsedUrl = new URL(pt.custom.website);
+                            if (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') {
+                                window.open(parsedUrl.href, '_blank', 'noopener,noreferrer');
+                            }
+                        } catch (e) {}
                     }
                 });
 
