@@ -2204,6 +2204,22 @@
         "Status": "active",
         "Website": "https://tezonia.thetezos.com/"
       }
+    },
+    {
+      "fields": {
+        "Project": "Tezos Systems",
+        "Logline": "Live Tezos and Etherlink dashboard tracking cross-layer capital, dapp activity, staking, governance, bakers, and protocol history.",
+        "Logo": [
+          {
+            "url": "/icons/tezos-systems.svg"
+          }
+        ],
+        "Tags": [
+          "tooling"
+        ],
+        "Status": "active",
+        "Website": "https://tezos.systems/"
+      }
     }
   ]
 }
