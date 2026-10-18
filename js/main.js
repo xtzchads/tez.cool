@@ -137,8 +137,9 @@ class StakingSimulator {
                     if (this.inputs.xtz)
                         this.inputs.xtz.max = String(this.maxAmount);
                 }
-                this.displays.stakingApy.textContent = `${this.stakingAPY.toFixed(2)}%`;
-                this.displays.delegationApy.textContent = `${this.delegationAPY.toFixed(2)}%`;
+                const feeFactor = Math.max(0, 1 - (parseFloat(this.inputs.fee?.value) || 0) / 100);
+                this.displays.stakingApy.textContent = `${(this.stakingAPY * feeFactor).toFixed(2)}%`;
+                this.displays.delegationApy.textContent = `${(this.delegationAPY * feeFactor).toFixed(2)}%`;
             }
         } catch (error) {
             console.error('APY error:', error);
@@ -215,9 +216,10 @@ class StakingSimulator {
         const principal = parseFloat(this.inputs.xtz.value) || 0;
         const days = parseInt(this.inputs.days.value) || 0;
         const bakerFee = parseFloat(this.inputs.fee.value) || 0;
+        const feeFactor = Math.max(0, 1 - bakerFee / 100);
         const { sApy, dApy } = this.getEffectiveAPYs(principal, days);
-        this.displays.stakingApy.textContent = `${sApy.toFixed(2)}%`;
-        this.displays.delegationApy.textContent = `${dApy.toFixed(2)}%`;
+        this.displays.stakingApy.textContent = `${(sApy * feeFactor).toFixed(2)}%`;
+        this.displays.delegationApy.textContent = `${(dApy * feeFactor).toFixed(2)}%`;
         if (principal <= 0) {
             this.updateDisplays(0, 0, 0, 0);
             return;
