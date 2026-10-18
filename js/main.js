@@ -37,6 +37,11 @@ class StakingSimulator {
         this.displays = {};
         this.stakingAPY = 0;
         this.delegationAPY = 0;
+        this.totalSupply = 1070000000;
+        this.ownStaked = 75000000;
+        this.externalStaked = 225000000;
+        this.delegated = 320000000;
+        this.maxAmount = 770000000;
         this.init();
     }
     throttle(fn, delay) {
@@ -53,8 +58,8 @@ class StakingSimulator {
         setTimeout(() => {
             this.bindElements();
             if (this.inputs.xtz && this.inputs.days && this.inputs.fee) {
-                this.setupEventListeners();
                 this.updateAPYValues();
+                this.setupEventListeners();
                 this.calculateRewards();
             }
         }, 100);
@@ -77,9 +82,10 @@ class StakingSimulator {
     }
     setupEventListeners() {
         const calcThrottled = this.throttle(() => this.calculateRewards(), 100);
-        const handleNum = (e, max, decimals) => {
+        const handleNum = (e, getMax, decimals) => {
             e.target.value = e.target.value.replace(/^0+(?=\d)/, '');
             let val = parseFloat(e.target.value.replace(',', '.')) || 0;
+            const max = typeof getMax === 'function' ? getMax() : getMax;
             if (val < 0)
                 val = 0;
             if (val > max)
@@ -87,7 +93,7 @@ class StakingSimulator {
             e.target.value = decimals ? val.toFixed(decimals) : val.toString();
             calcThrottled();
         };
-        this.inputs.xtz.addEventListener('input', (e) => handleNum(e, 1000000, 0));
+        this.inputs.xtz.addEventListener('input', (e) => handleNum(e, () => this.maxAmount, 0));
         this.inputs.fee.addEventListener('input', (e) => handleNum(e, 100, 0));
         this.inputs.days.addEventListener('input', () => {
             this.displays.daysDisplay.textContent = this.inputs.days.value;
@@ -99,10 +105,28 @@ class StakingSimulator {
             if (aggregatedDataCache?.homeData?.stakingData) {
                 const {
                     stakingApy,
-                    delegationApy
+                    delegationApy,
+                    totalDelegatedPercentage
                 } = aggregatedDataCache.homeData.stakingData;
                 this.stakingAPY = stakingApy || 0;
                 this.delegationAPY = delegationApy || 0;
+                const cycles = aggregatedDataCache.historicalCycleData;
+                const lastCycle = Array.isArray(cycles) && cycles.length ? cycles[cycles.length - 1] : null;
+                if (lastCycle && lastCycle.totalSupply) {
+                    const toXtz = v => (v > 1e12 ? v / 1e6 : v);
+                    this.totalSupply = toXtz(lastCycle.totalSupply);
+                    this.ownStaked = toXtz(lastCycle.totalOwnStaked || 0);
+                    this.externalStaked = toXtz(lastCycle.totalExternalStaked || 0);
+                    const frozen = (this.ownStaked + this.externalStaked) || toXtz(lastCycle.totalFrozen || 0);
+                    if (!this.ownStaked && frozen)
+                        this.ownStaked = frozen * 0.25;
+                    this.delegated = lastCycle.totalDelegated
+                        ? toXtz(lastCycle.totalDelegated)
+                        : this.totalSupply * ((totalDelegatedPercentage || 30) / 100);
+                    this.maxAmount = Math.max(1000000, Math.floor(this.totalSupply - frozen));
+                    if (this.inputs.xtz)
+                        this.inputs.xtz.max = String(this.maxAmount);
+                }
                 this.displays.stakingApy.textContent = `${this.stakingAPY.toFixed(2)}%`;
                 this.displays.delegationApy.textContent = `${this.delegationAPY.toFixed(2)}%`;
             }
@@ -111,6 +135,44 @@ class StakingSimulator {
             this.stakingAPY = 10;
             this.delegationAPY = 3.4;
         }
+    }
+    getCycleIssuanceRate(ratio) {
+        const adjCycle = (currentCycle || 860) - 2;
+        const r = clip(ratio, 0.0001, 1);
+        const trueMax = trueMaximumRatio(adjCycle, r);
+        const sRate = staticRate(adjCycle, r, trueMax);
+        const bonus = clip(tmp || 0, 0, Math.min(Math.max(0, trueMax - sRate), 0.05));
+        return clip(sRate + bonus, minimumRatio(adjCycle), trueMax);
+    }
+    getEffectiveAPYs(principal) {
+        if (principal <= 0 || !this.totalSupply) {
+            return { sApy: this.stakingAPY, dApy: this.delegationAPY };
+        }
+        const EDGE = 3; // edge_of_staking_over_delegation
+        const LIMIT = 9; // global_limit_of_staking_over_baking & limit_of_delegation_over_baking
+        const frozen0 = this.ownStaked + this.externalStaked;
+        const weight0 = frozen0 + this.delegated / EDGE;
+        const rate0 = this.getCycleIssuanceRate(frozen0 / this.totalSupply);
+
+        // Staking boundaries: overstaked tez count as delegated up to delegation limit; overdelegated tez don't count
+        const maxNewStake = Math.max(0, this.ownStaked * LIMIT - this.externalStaked);
+        const maxNewDel = Math.max(0, this.ownStaked * LIMIT - this.delegated);
+        const effStake = Math.min(principal, maxNewStake);
+        const overStakeAsDel = Math.min(principal - effStake, maxNewDel);
+
+        const newFrozen = Math.min(this.totalSupply, frozen0 + effStake);
+        const rateStake = this.getCycleIssuanceRate(newFrozen / this.totalSupply);
+        const weightStake = newFrozen + (this.delegated + overStakeAsDel) / EDGE;
+        const userStakeWeightRatio = (effStake + overStakeAsDel / EDGE) / principal;
+        const sApy = this.stakingAPY * (rateStake / rate0) * (weight0 / weightStake) * userStakeWeightRatio;
+
+        // Delegation boundaries: overdelegated tez beyond 9x own_frozen don't count
+        const effDel = Math.min(principal, maxNewDel);
+        const weightDel = frozen0 + (this.delegated + effDel) / EDGE;
+        const userDelWeightRatio = effDel / principal;
+        const dApy = this.delegationAPY * (weight0 / weightDel) * userDelWeightRatio;
+
+        return { sApy, dApy };
     }
     formatNumber(num) {
         return new Intl.NumberFormat('en-US', {
@@ -126,15 +188,18 @@ class StakingSimulator {
     calculateRewards() {
         if (!this.inputs.xtz)
             return;
-        const principal = parseInt(this.inputs.xtz.value) || 0;
+        const principal = parseFloat(this.inputs.xtz.value) || 0;
         const days = parseInt(this.inputs.days.value) || 0;
-        const bakerFee = parseInt(this.inputs.fee.value) || 0;
+        const bakerFee = parseFloat(this.inputs.fee.value) || 0;
+        const { sApy, dApy } = this.getEffectiveAPYs(principal);
+        this.displays.stakingApy.textContent = `${sApy.toFixed(2)}%`;
+        this.displays.delegationApy.textContent = `${dApy.toFixed(2)}%`;
         if (principal <= 0) {
             this.updateDisplays(0, 0, 0, 0);
             return;
         }
-        const stakingRewards = this.calculateCompoundRewards(principal, this.stakingAPY, days, bakerFee);
-        const delegationRewards = this.calculateCompoundRewards(principal, this.delegationAPY, days, bakerFee);
+        const stakingRewards = this.calculateCompoundRewards(principal, sApy, days, bakerFee);
+        const delegationRewards = this.calculateCompoundRewards(principal, dApy, days, bakerFee);
         this.updateDisplays(stakingRewards, principal + stakingRewards, delegationRewards, principal + delegationRewards);
     }
     updateDisplays(sRewards, sTotal, dRewards, dTotal) {
