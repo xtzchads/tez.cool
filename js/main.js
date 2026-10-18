@@ -703,6 +703,22 @@ function createVerticalLine(chart, xValue) {
 function createVerticalLines(chart, positions) {
     positions.forEach(pos => createVerticalLine(chart, pos));
 }
+if (typeof Highcharts !== 'undefined' && Highcharts.Chart && Highcharts.Chart.prototype) {
+    const _origWarnA11y = Highcharts.Chart.prototype.warnIfA11yModuleNotLoaded;
+    Highcharts.Chart.prototype.warnIfA11yModuleNotLoaded = function () {
+        if (typeof _origWarnA11y === 'function') {
+            _origWarnA11y.apply(this, arguments);
+        }
+        if (this.renderer && this.renderer.boxWrapper) {
+            const rawTitle = (this.title && this.title.element && this.title.element.textContent || '').trim();
+            const label = rawTitle || (this.renderTo && this.renderTo.id === 'ecosystem-chart-container' ? 'Tezos Ecosystem Map' : 'Tezos Analytics Chart');
+            this.renderer.boxWrapper.attr({
+                role: 'img',
+                'aria-label': label.replace(/</g, '&lt;')
+            });
+        }
+    };
+}
 function setupPostResizeChartRepaint() {
     if (window._postResizeRepaintBound || typeof IntersectionObserver !== 'function') return;
     window._postResizeRepaintBound = true;
@@ -958,7 +974,7 @@ function renderDualRingWidget(containerId, titleText, legendItems, innerSlices, 
             <div style="color:#ffffff;font-size:18px;font-weight:bold;line-height:1.2;margin-bottom:4px;text-align:center;">${escapeHTML(titleText)}</div>
             <div class="tez-dr-legend" style="display:flex;align-items:center;justify-content:center;gap:16px;min-height:20px;margin-bottom:3px;">${legendHtml}</div>
             <div style="flex:1;width:100%;display:flex;align-items:center;justify-content:center;min-height:0;">
-                <svg viewBox="0 0 420 240" style="width:100%;height:100%;max-height:330px;overflow:visible;">
+                <svg role="img" aria-label="${escapeHTML(titleText)}" viewBox="0 0 420 240" style="width:100%;height:100%;max-height:330px;overflow:visible;">
                     <circle cx="${cx}" cy="${cy}" r="${rIn0 - 3}" fill="rgba(14, 11, 34, 0.92)" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>
                     ${bridgePaths.join('')}
                     ${ticks.join('')}
