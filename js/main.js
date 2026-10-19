@@ -344,6 +344,64 @@ class NavigationManager {
         setTimeout(() => this.adjustContainerHeight(), 100);
     }
 }
+let lastTouchTime = 0;
+if (typeof document !== 'undefined') {
+    document.addEventListener('touchstart', () => {
+        lastTouchTime = Date.now();
+    }, { passive: true, capture: true });
+    document.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+            lastTouchTime = Date.now();
+        }
+    }, { passive: true, capture: true });
+}
+function isTouchInteraction() {
+    return (Date.now() - lastTouchTime < 1500) ||
+        (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+}
+function positionSingleBakerTooltip(item) {
+    const tooltip = item.querySelector('.baker-tooltip');
+    if (!tooltip)
+        return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const isMobile = vw <= 640 || isTouchInteraction();
+    const rect = item.getBoundingClientRect();
+    item.classList.remove('tooltip-left', 'tooltip-right', 'tooltip-top', 'tooltip-bottom');
+    tooltip.style.minWidth = '';
+    tooltip.style.transform = '';
+    tooltip.style.removeProperty('--arrow-shift');
+    if (isMobile) {
+        const headerEl = document.querySelector('.header');
+        const headerBottom = headerEl ? Math.max(0, headerEl.getBoundingClientRect().bottom) : 70;
+        const spaceBelow = vh - rect.bottom;
+        const spaceAbove = rect.top - headerBottom;
+        if (spaceBelow >= 210 || spaceBelow >= spaceAbove) {
+            item.classList.add('tooltip-bottom');
+        } else {
+            item.classList.add('tooltip-top');
+        }
+        const tipWidth = tooltip.offsetWidth || Math.min(260, vw - 24);
+        const itemCenter = rect.left + rect.width / 2;
+        const margin = 12;
+        let shiftX = 0;
+        if (itemCenter - tipWidth / 2 < margin) {
+            shiftX = margin - (itemCenter - tipWidth / 2);
+        } else if (itemCenter + tipWidth / 2 > vw - margin) {
+            shiftX = (vw - margin) - (itemCenter + tipWidth / 2);
+        }
+        if (shiftX !== 0) {
+            const roundedShift = Math.round(shiftX);
+            tooltip.style.transform = `translateX(calc(-50% + ${roundedShift}px))`;
+            const maxArrowShift = Math.max(0, tipWidth / 2 - 18);
+            const clampedArrow = Math.max(-maxArrowShift, Math.min(maxArrowShift, -roundedShift));
+            tooltip.style.setProperty('--arrow-shift', `${clampedArrow}px`);
+        }
+    } else {
+        const spaceRight = vw - rect.right;
+        item.classList.add(spaceRight >= 320 ? 'tooltip-right' : 'tooltip-left');
+    }
+}
 function setupSmartTooltipPositioning() {
     const bakersGrid = document.getElementById('bakers-grid');
     if (!bakersGrid)
@@ -351,38 +409,7 @@ function setupSmartTooltipPositioning() {
     let resizeTimeout;
     const updateTooltipPositions = () => {
         const bakerItems = bakersGrid.querySelectorAll('.baker-item');
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const isMobile = vw <= 640;
-        const rects = Array.from(bakerItems).map(item => ({
-                    item,
-                    rect: item.getBoundingClientRect()
-                }));
-        rects.forEach(({
-                item,
-                rect
-            }) => {
-            const tooltip = item.querySelector('.baker-tooltip');
-            if (!tooltip)
-                return;
-            item.classList.remove('tooltip-left', 'tooltip-right', 'tooltip-top', 'tooltip-bottom');
-            tooltip.style.minWidth = '';
-            if (isMobile) {
-                const spaceBelow = vh - rect.bottom;
-                const spaceAbove = rect.top;
-                if (spaceBelow >= 150) {
-                    item.classList.add('tooltip-bottom');
-                } else if (spaceAbove >= 150) {
-                    item.classList.add('tooltip-top');
-                } else {
-                    const spaceRight = vw - rect.right;
-                    item.classList.add(spaceRight >= 240 ? 'tooltip-right' : 'tooltip-left');
-                }
-            } else {
-                const spaceRight = vw - rect.right;
-                item.classList.add(spaceRight >= 320 ? 'tooltip-right' : 'tooltip-left');
-            }
-        });
+        bakerItems.forEach(item => positionSingleBakerTooltip(item));
     };
     updateTooltipPositions();
     window.addEventListener('resize', () => {
@@ -392,6 +419,15 @@ function setupSmartTooltipPositioning() {
     new MutationObserver(updateTooltipPositions).observe(bakersGrid, {
         childList: true
     });
+    if (!window._bakerOutsideTapBound) {
+        window._bakerOutsideTapBound = true;
+        document.addEventListener('click', (e) => {
+            const t = e.target;
+            if (!t || typeof t.closest !== 'function' || !t.closest('.baker-item')) {
+                document.querySelectorAll('.baker-item.active').forEach(el => el.classList.remove('active'));
+            }
+        });
+    }
 }
 function renderBakers(bakers) {
     const bakersGrid = document.getElementById('bakers-grid');
@@ -492,17 +528,40 @@ function createBakerElement(baker) {
 
                 </div>
 
+                <div class="baker-mobile-hint">Tap again to view on TzKT &#8599;</div>
+
             </div>
 
         </div>
 
     `;
-    const avatarImg = div.querySelector('.baker-avatar img');
-    if (avatarImg && baker.address) {
-        avatarImg.addEventListener('click', () => {
-            window.open(`https://tzkt.io/${encodeURIComponent(baker.address)}`, '_blank', 'noopener,noreferrer');
-        });
-    }
+    div.addEventListener('mouseenter', () => {
+        if (!isTouchInteraction()) {
+            positionSingleBakerTooltip(div);
+        }
+    });
+    div.addEventListener('click', (e) => {
+        if (!baker.address)
+            return;
+        const url = `https://tzkt.io/${encodeURIComponent(baker.address)}`;
+        if (isTouchInteraction()) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (div.classList.contains('active')) {
+                div.classList.remove('active');
+                window.open(url, '_blank', 'noopener,noreferrer');
+            } else {
+                document.querySelectorAll('.baker-item.active').forEach(el => {
+                    if (el !== div)
+                        el.classList.remove('active');
+                });
+                positionSingleBakerTooltip(div);
+                div.classList.add('active');
+            }
+        } else {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+    });
     return div;
 }
 function escapeHTML(str) {
@@ -3527,6 +3586,91 @@ async function createEcosystemChart() {
         let pillPreviewCategory = null;
         let searchQuery = '';
         let lastAppliedSignature = null;
+        let activeMobilePoint = null;
+
+        function openEcoWebsite(pt) {
+            if (pt && pt.custom && pt.custom.website) {
+                try {
+                    const parsedUrl = new URL(pt.custom.website);
+                    if (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') {
+                        window.open(parsedUrl.href, '_blank', 'noopener,noreferrer');
+                    }
+                } catch (e) {}
+            }
+        }
+
+        function clearMobileEcoPoint(chart) {
+            if (activeMobilePoint && activeMobilePoint.customBorderCircle) {
+                activeMobilePoint.customBorderCircle.attr({ opacity: 0.55, 'stroke-width': 1.5 });
+            }
+            activeMobilePoint = null;
+            const tip = document.getElementById('custom-tooltip');
+            if (tip) {
+                tip.style.display = 'none';
+                tip.style.pointerEvents = 'none';
+            }
+            if (hoveredSector !== null) {
+                hoveredSector = null;
+                if (chart) applyFilterState(chart, false);
+            }
+        }
+
+        function showEcosystemTooltip(pt, chart, ev, isTouch) {
+            const tip = document.getElementById('custom-tooltip');
+            if (!tip) return;
+            const imgHtml = pt.custom.logoUrl
+                ? `<img src="${escapeHTML(pt.custom.logoUrl)}" style="width: 34px; height: 34px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px; object-fit: cover;" onerror="this.style.display='none'" />`
+                : '';
+            const tapHintHtml = (isTouch && pt.custom.website)
+                ? `<div style="margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(255, 255, 255, 0.14); color: #a27cee; font-size: 11px; font-weight: 500;">Tap again to visit website &#8599;</div>`
+                : '';
+            tip.innerHTML = `
+                ${imgHtml}
+                <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #ffffff;">
+                    ${escapeHTML(pt.name)}
+                </div>
+                <div style="color: rgba(255, 255, 255, 0.76); font-size: 12px; line-height: 1.35; margin-bottom: 6px;">
+                    ${escapeHTML(pt.custom.logline)}
+                </div>
+                <div style="color: ${pt.color}; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                    ${escapeHTML(pt.custom.displayTag)}
+                </div>
+                ${tapHintHtml}
+            `;
+            tip.style.pointerEvents = isTouch ? 'auto' : 'none';
+            tip.style.cursor = (isTouch && pt.custom.website) ? 'pointer' : 'default';
+            tip.style.display = 'block';
+
+            const rect = container.getBoundingClientRect();
+            const tw = tip.offsetWidth;
+            const th = tip.offsetHeight;
+
+            if (isTouch && chart && chart.container) {
+                const chartRect = chart.container.getBoundingClientRect();
+                const bubbleX = (chartRect.left - rect.left) + pt.plotX + chart.plotLeft;
+                const bubbleY = (chartRect.top - rect.top) + pt.plotY + chart.plotTop;
+                const radius = (pt.marker && pt.marker.radius ? pt.marker.radius : bubbleSize / 2) + 8;
+                let left = bubbleX - tw / 2;
+                let top = bubbleY - radius - th - 6;
+                if (top < 10) {
+                    top = bubbleY + radius + 6;
+                }
+                if (left < 10) left = 10;
+                if (left + tw > rect.width - 10) left = Math.max(10, rect.width - tw - 10);
+                if (top + th > rect.height - 10) top = Math.max(10, rect.height - th - 10);
+                tip.style.left = Math.round(left) + 'px';
+                tip.style.top = Math.round(top) + 'px';
+            } else if (ev) {
+                let left = ev.clientX - rect.left + 12;
+                let top = ev.clientY - rect.top + 12;
+                if (left + tw > rect.width) left = ev.clientX - rect.left - tw - 12;
+                if (top + th > rect.height) top = ev.clientY - rect.top - th - 12;
+                if (left < 0) left = 10;
+                if (top < 0) top = 10;
+                tip.style.left = left + 'px';
+                tip.style.top = top + 'px';
+            }
+        }
 
         function getSectorFromPointerEvent(ev, chart) {
             if (!chart || !chart.pane || !chart.pane[0] || !chart.container) return null;
@@ -3637,6 +3781,7 @@ async function createEcosystemChart() {
             if (!chart || !chart.container || chart._sectorBoundaryBound) return;
             chart._sectorBoundaryBound = true;
             chart.container.addEventListener('mousemove', function (ev) {
+                if (isTouchInteraction()) return;
                 const sec = getSectorFromPointerEvent(ev, chart);
                 if (sec !== hoveredSector) {
                     hoveredSector = sec;
@@ -3644,6 +3789,7 @@ async function createEcosystemChart() {
                 }
             });
             chart.container.addEventListener('mouseleave', function () {
+                if (isTouchInteraction()) return;
                 if (hoveredSector !== null) {
                     hoveredSector = null;
                     applyFilterState(chart, false);
@@ -3651,6 +3797,17 @@ async function createEcosystemChart() {
                 const tip = document.getElementById('custom-tooltip');
                 if (tip) tip.style.display = 'none';
             });
+            if (!window._ecoOutsideTapBound) {
+                window._ecoOutsideTapBound = true;
+                document.addEventListener('click', function (ev) {
+                    const t = ev.target;
+                    if (!t || typeof t.closest !== 'function' || (!t.closest('.clickable-logo') && !t.closest('#custom-tooltip'))) {
+                        if (window.ecosystemChart) {
+                            clearMobileEcoPoint(window.ecosystemChart);
+                        }
+                    }
+                });
+            }
         }
 
         function renderCustomLogos(chart) {
@@ -3673,18 +3830,33 @@ async function createEcosystemChart() {
                     .add();
                 chart.customLogoGroups.push(grp);
 
-                grp.element.addEventListener('click', function () {
-                    if (pt.custom && pt.custom.website) {
-                        try {
-                            const parsedUrl = new URL(pt.custom.website);
-                            if (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') {
-                                window.open(parsedUrl.href, '_blank', 'noopener,noreferrer');
+                grp.element.addEventListener('click', function (ev) {
+                    ev.stopPropagation();
+                    if (isTouchInteraction()) {
+                        if (activeMobilePoint && activeMobilePoint.name === pt.name) {
+                            clearMobileEcoPoint(chart);
+                            openEcoWebsite(pt);
+                        } else {
+                            if (activeMobilePoint && activeMobilePoint.customBorderCircle) {
+                                activeMobilePoint.customBorderCircle.attr({ opacity: 0.55, 'stroke-width': 1.5 });
                             }
-                        } catch (e) {}
+                            activeMobilePoint = pt;
+                            if (pt.customBorderCircle) {
+                                pt.customBorderCircle.attr({ opacity: 1, 'stroke-width': 2.5 });
+                            }
+                            if (hoveredSector !== pt.custom.tag) {
+                                hoveredSector = pt.custom.tag;
+                                applyFilterState(chart, false);
+                            }
+                            showEcosystemTooltip(pt, chart, ev, true);
+                        }
+                    } else {
+                        openEcoWebsite(pt);
                     }
                 });
 
-                grp.element.addEventListener('mouseenter', function () {
+                grp.element.addEventListener('mouseenter', function (ev) {
+                    if (isTouchInteraction()) return;
                     if (pt.customBorderCircle) {
                         pt.customBorderCircle.attr({ opacity: 1, 'stroke-width': 2.5 });
                     }
@@ -3692,27 +3864,11 @@ async function createEcosystemChart() {
                         hoveredSector = pt.custom.tag;
                         applyFilterState(chart, false);
                     }
-                    const tip = document.getElementById('custom-tooltip');
-                    if (!tip) return;
-                    const imgHtml = pt.custom.logoUrl
-                        ? `<img src="${escapeHTML(pt.custom.logoUrl)}" style="width: 34px; height: 34px; border-radius: 8px; margin-bottom: 8px; background: white; padding: 2px; object-fit: cover;" onerror="this.style.display='none'" />`
-                        : '';
-                    tip.innerHTML = `
-                        ${imgHtml}
-                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #ffffff;">
-                            ${escapeHTML(pt.name)}
-                        </div>
-                        <div style="color: rgba(255, 255, 255, 0.76); font-size: 12px; line-height: 1.35; margin-bottom: 6px;">
-                            ${escapeHTML(pt.custom.logline)}
-                        </div>
-                        <div style="color: ${pt.color}; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                            ${escapeHTML(pt.custom.displayTag)}
-                        </div>
-                    `;
-                    tip.style.display = 'block';
+                    showEcosystemTooltip(pt, chart, ev, false);
                 });
 
                 grp.element.addEventListener('mousemove', function (ev) {
+                    if (isTouchInteraction()) return;
                     const tip = document.getElementById('custom-tooltip');
                     if (!tip) return;
                     const rect = container.getBoundingClientRect();
@@ -3729,6 +3885,7 @@ async function createEcosystemChart() {
                 });
 
                 grp.element.addEventListener('mouseleave', function () {
+                    if (isTouchInteraction()) return;
                     if (pt.customBorderCircle) {
                         pt.customBorderCircle.attr({ opacity: 0.55, 'stroke-width': 1.5 });
                     }
@@ -3758,15 +3915,19 @@ async function createEcosystemChart() {
                     });
                 }
 
+                const isMobileActive = activeMobilePoint && activeMobilePoint.name === pt.name;
                 const borderCircle = chart.renderer.circle(cx, cy, diam / 2)
                     .attr({
                         fill: 'none',
                         stroke: pt.color || 'rgba(255, 255, 255, 0.45)',
-                        'stroke-width': 1.5,
-                        opacity: 0.55
+                        'stroke-width': isMobileActive ? 2.5 : 1.5,
+                        opacity: isMobileActive ? 1 : 0.55
                     })
                     .add(grp);
                 pt.customBorderCircle = borderCircle;
+                if (isMobileActive) {
+                    activeMobilePoint = pt;
+                }
                 if (pt.graphic) {
                     pt.graphic.attr({ opacity: 0, visibility: 'hidden' });
                     pt.graphic.css({ display: 'none', pointerEvents: 'none' });
@@ -3790,7 +3951,7 @@ async function createEcosystemChart() {
             const subEl = document.createElement('div');
             subEl.style.cssText = `color: rgba(255, 255, 255, 0.7); font-family: "Monda", Helvetica, sans-serif; font-size: ${vw < 768 ? '11px' : '12px'}; margin-bottom: 10px;`;
             subEl.textContent = vw < 768
-                ? 'Tap category pills to filter \u00b7 Tap logos to visit websites'
+                ? 'Tap category pills to filter \u00b7 Tap logos for details, tap again to visit'
                 : 'Projects organized by category \u00b7 Filter by category or click logos to visit websites';
             headerWrap.appendChild(titleEl);
             headerWrap.appendChild(subEl);
@@ -3814,6 +3975,7 @@ async function createEcosystemChart() {
             allPill.dataset.cat = '';
             allPill.innerHTML = `<span>All</span><span class="eco-cat-count">${totalProjects}</span>`;
             allPill.addEventListener('click', () => {
+                clearMobileEcoPoint(chart);
                 lockedCategory = null;
                 pillPreviewCategory = null;
                 syncPillsUI();
@@ -3836,18 +3998,21 @@ async function createEcosystemChart() {
                     <span class="eco-cat-count">${grouped[cat].length}</span>
                 `;
                 pill.addEventListener('mouseenter', () => {
+                    if (isTouchInteraction()) return;
                     if (!lockedCategory) {
                         pillPreviewCategory = cat;
                         applyFilterState(chart, false);
                     }
                 });
                 pill.addEventListener('mouseleave', () => {
+                    if (isTouchInteraction()) return;
                     if (pillPreviewCategory === cat) {
                         pillPreviewCategory = null;
                         applyFilterState(chart, false);
                     }
                 });
                 pill.addEventListener('click', () => {
+                    clearMobileEcoPoint(chart);
                     lockedCategory = lockedCategory === cat ? null : cat;
                     pillPreviewCategory = null;
                     syncPillsUI();
@@ -3863,6 +4028,7 @@ async function createEcosystemChart() {
             searchInput.placeholder = 'Search projects...';
             searchInput.setAttribute('aria-label', 'Search ecosystem projects');
             searchInput.addEventListener('input', () => {
+                clearMobileEcoPoint(chart);
                 searchQuery = searchInput.value || '';
                 applyFilterState(chart, false);
             });
@@ -3898,6 +4064,14 @@ async function createEcosystemChart() {
                             max-width: 260px;
                             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
                         `;
+                        customTooltip.addEventListener('click', function (ev) {
+                            ev.stopPropagation();
+                            if (activeMobilePoint) {
+                                const ptToOpen = activeMobilePoint;
+                                clearMobileEcoPoint(chart);
+                                openEcoWebsite(ptToOpen);
+                            }
+                        });
                         container.appendChild(customTooltip);
                         window.ecosystemChart = chart;
                         buildControlsBar(chart);
@@ -3988,6 +4162,7 @@ async function createEcosystemChart() {
                     point: {
                         events: {
                             click() {
+                                clearMobileEcoPoint(this.series.chart);
                                 const cat = this.options.custom.tag;
                                 lockedCategory = lockedCategory === cat ? null : cat;
                                 const bar = document.getElementById('eco-controls-bar');
