@@ -1,35 +1,21 @@
 const TRANSITION_PERIOD = 50;
 const INITIAL_PERIOD = 10;
 const AI_ACTIVATION_CYCLE = 748;
-const LB_SUBSIDY = 2628000000000;
 const WORKER_URL = 'https://tez.cool/api/v1/getData';
 let aggregatedDataCache = null;
-let currentCycle, forecasted, tmp = 0, tmp1;
+let currentCycle, tmp = 0, tmp1;
 let totalTVL;
 let specificProtocolsTVL = 0;
-let stakingSimulator;
 let currentTVLTimeframe = '3y';
 let currentBurnedSupplyTimeframe = 'cumulative';
 const DOMCache = {};
-const MemoCache = new Map();
 function cacheDOM(id) {
     if (!DOMCache[id])
         DOMCache[id] = document.getElementById(id);
     return DOMCache[id];
 }
-function memoize(key, fn, duration = 60000) {
-    const cached = MemoCache.get(key);
-    if (cached && Date.now() - cached.time < duration)
-        return cached.value;
-    const value = fn();
-    MemoCache.set(key, {
-        value,
-        time: Date.now()
-    });
-    return value;
-}
 function initializeStakingSimulator() {
-    stakingSimulator = new StakingSimulator();
+    new StakingSimulator();
 }
 class StakingSimulator {
     constructor() {
@@ -237,111 +223,12 @@ class StakingSimulator {
 }
 class NavigationManager {
     constructor() {
-        this.navItems = document.querySelectorAll('.nav-item');
-        this.homeContent = cacheDOM('home-content');
-        this.iframeContainers = document.querySelectorAll('.iframe-container');
-        this.preloadedIframes = new Set();
-        this.currentView = 'home';
-        this.savedScrollPosition = 0;
-        this.resizeTimeout = null;
-        this.init();
-    }
-    init() {
         document.addEventListener('click', (e) => {
             const item = e.target.closest('.nav-item');
-            if (!item)
-                return;
-            const target = item.dataset.target;
-            const url = item.dataset.url;
-            if (item.dataset.external === 'true' && url) {
-                window.open(url, '_self');
-                return;
-            }
-            if (target && target !== this.currentView)
-                this.navigateTo(target, url, item);
-        });
-        window.addEventListener('resize', () => {
-            clearTimeout(this.resizeTimeout);
-            this.resizeTimeout = setTimeout(() => {
-                if (this.currentView !== 'home')
-                    this.adjustContainerHeight();
-            }, 200);
-        });
-        setTimeout(() => this.preloadIframes(), 2000);
-    }
-    preloadIframes() {
-        this.navItems.forEach(item => {
-            const target = item.dataset.target;
-            const url = item.dataset.url;
-            if (url && target !== 'home' && item.dataset.external !== 'true' && !this.preloadedIframes.has(target)) {
-                requestIdleCallback(() => this.preloadIframe(target, url));
+            if (item && item.dataset.external === 'true' && item.dataset.url) {
+                window.open(item.dataset.url, '_self');
             }
         });
-    }
-    preloadIframe(target, url) {
-        const iframe = document.getElementById(`${target}-iframe`);
-        if (!iframe)
-            return;
-        iframe.onload = () => this.preloadedIframes.add(target);
-        iframe.onerror = () => console.warn(`Preload failed: ${target}`);
-        iframe.src = url;
-    }
-    adjustContainerHeight() {
-        const mainContainer = document.querySelector('.container.scrollable-content');
-        if (!mainContainer)
-            return;
-        if (this.currentView === 'home') {
-            Object.assign(mainContainer.style, {
-                height: 'auto',
-                minHeight: '100vh',
-                maxHeight: 'none',
-                overflow: 'visible'
-            });
-            mainContainer.scrollTop = this.savedScrollPosition;
-        } else {
-            const vh = window.innerHeight;
-            Object.assign(mainContainer.style, {
-                height: `${vh}px`,
-                minHeight: `${vh}px`,
-                maxHeight: `${vh}px`,
-                overflow: 'hidden'
-            });
-        }
-    }
-    navigateTo(target, url, clickedItem) {
-        const mainContainer = document.querySelector('.container.scrollable-content');
-        
-        if (this.currentView === 'home' && target !== 'home') {
-            if (mainContainer)
-                this.savedScrollPosition = mainContainer.scrollTop;
-        }
-        this.navItems.forEach(item => item.classList.remove('active'));
-        clickedItem.classList.add('active');
-        if (target === 'home') {
-            this.homeContent.classList.remove('hidden');
-            this.iframeContainers.forEach(c => c.classList.remove('active'));
-        } else {
-            this.homeContent.classList.add('hidden');
-            this.iframeContainers.forEach(c => c.classList.remove('active'));
-            const targetContainer = document.getElementById(`${target}-container`);
-            const targetIframe = document.getElementById(`${target}-iframe`);
-            if (targetContainer && targetIframe) {
-                if (!this.preloadedIframes.has(target) && targetIframe.src === 'about:blank') {
-                    clickedItem.classList.add('loading');
-                    targetIframe.onload = () => {
-                        clickedItem.classList.remove('loading');
-                        this.preloadedIframes.add(target);
-                    };
-                    targetIframe.src = url;
-                }
-                targetContainer.classList.add('active');
-            }
-            if (mainContainer) {
-                mainContainer.scrollTop = 0;
-            }
-        }
-        this.currentView = target;
-        setTimeout(() => this.adjustContainerHeight(), 100);
     }
 }
 let lastTouchTime = 0;
@@ -626,9 +513,6 @@ function minimumRatio(cycle) {
 function maximumRatio(cycle) {
     return computeExtremum(cycle, 0.055, 0.1);
 }
-function stakedRatio(cycle, value) {
-    return value;
-}
 function clip(value, minValue, maxValue) {
     return Math.max(minValue, Math.min(value, maxValue));
 }
@@ -695,16 +579,6 @@ async function fetchAggregatedData() {
         throw error;
     }
 }
-function calculateIndicator(stakingRatio) {
-    const indicator = 100 / (Math.exp(-2 * (stakingRatio - 0.5)));
-    return parseInt(Math.min(indicator, 100));
-}
-function fetchHistoricalCycleData() {
-    return aggregatedDataCache.historicalCycleData;
-}
-async function getCurrentStakingRatio() {
-    return aggregatedDataCache.currentStakingRatio;
-}
 function calculateAverageDifference(arr) {
     return arr.reduce((sum, val, idx, array) => idx > 0 ? sum + Math.abs(val - array[idx - 1]) : sum, 0) / (arr.length - 1);
 }
@@ -731,7 +605,6 @@ async function initializeRatios() {
             last += slowIncrement(last, calculateAverageDifference(ratios));
             ratios.push(last);
         }
-        forecasted = ratios[ratios.length - 1];
         const elementsToRemove = currentCycle - AI_ACTIVATION_CYCLE;
         ratios = ratios.slice(elementsToRemove);
         return ratios;
@@ -739,23 +612,6 @@ async function initializeRatios() {
         console.error('Error initializing ratios:', error);
         throw error;
     }
-}
-function createVerticalLine(chart, xValue) {
-    const xAxis = chart.xAxis[0];
-    const yAxis = chart.yAxis[0];
-    const dataPoint = chart.series[0].data.find(point => point.x === xValue);
-    if (dataPoint) {
-        const xPos = xAxis.toPixels(xValue);
-        const yPosTop = yAxis.toPixels(dataPoint.y);
-        const yPosBottom = yAxis.toPixels(0);
-        chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom]).attr({
-            'stroke-width': 0.5,
-            stroke: '#ffffff',
-        }).add();
-    }
-}
-function createVerticalLines(chart, positions) {
-    positions.forEach(pos => createVerticalLine(chart, pos));
 }
 if (typeof Highcharts !== 'undefined' && Highcharts.Chart && Highcharts.Chart.prototype) {
     const _origWarnA11y = Highcharts.Chart.prototype.warnIfA11yModuleNotLoaded;
@@ -1164,7 +1020,6 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
 function createDALSupportChart() {
     try {
         const data = aggregatedDataCache.dalHistoryData;
-        const latestCycle = data[data.length - 1]?.cycle || currentCycle;
         const chartData = data
     .map(item => ({
         x: item.cycle,
@@ -1421,9 +1276,6 @@ function createHistoricalTvlChart() {
             });
         });
         Highcharts.chart('chart-container9', {
-            boost: {
-                enabled: false
-            },
             chart: {
                 type: 'spline',
                 backgroundColor: 'rgba(0,0,0,0)',
@@ -1656,9 +1508,6 @@ function createTotalAccountsChart() {
             }
         });
         Highcharts.chart('chart-container2', {
-            boost: {
-                enabled: false
-            },
             chart: {
                 type: 'spline',
                 backgroundColor: 'rgba(0,0,0,0)',
@@ -1890,9 +1739,6 @@ function createTotalTransactionsChart() {
             }
         });
         Highcharts.chart('chart-container8', {
-            boost: {
-                enabled: false
-            },
             chart: {
                 type: 'spline',
                 backgroundColor: 'rgba(0,0,0,0)',
@@ -2084,9 +1930,6 @@ function createTimeSeriesChart(containerId, title, data, formatter, isCumulative
         });
     }
     Highcharts.chart(containerId, {
-        boost: {
-            enabled: false
-        },
         chart: {
             type: 'spline',
             backgroundColor: 'rgba(0,0,0,0)',
@@ -2713,9 +2556,6 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
             makeZoneSeries(title, seriesData, [[0, '#77dd77'], [1, '#ff6961']], 'rgba(255, 255, 0, 0.7)', true)
         ];
     const chartConfig = {
-        boost: {
-            enabled: false
-        },
         chart: {
             type: 'spline',
             backgroundColor: 'rgba(0,0,0,0)',
@@ -2896,9 +2736,8 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
     // Build (and animate) only once the chart scrolls into view so the intro is actually seen
     whenElementVisible(document.getElementById(containerId), () => Highcharts.chart(containerId, chartConfig));
 }
-// #7: Cache both chart references
+// #7: Cache issuance chart reference
 let _issuanceChartCache = null;
-let _stakingChartCache = null;
 // #8: Pre-allocated arrays for issuance & APY updates (avoids GC pressure)
 let _issuanceUpdateBuffer = null;
 let _stakingApyUpdateBuffer = null;
@@ -2967,13 +2806,6 @@ function updateIssuanceChartFast(stakingData, animation) {
         issuanceChart.series[2].setData(_delegationApyUpdateBuffer, false);
     }
     issuanceChart.redraw(animation);
-}
-// Keep legacy function for createHistoricalCharts initial call
-function updateIssuanceChart(newStakingData, animation = true) {
-    _issuanceUpdateBuffer = null; // Force buffer rebuild
-    _stakingApyUpdateBuffer = null;
-    _delegationApyUpdateBuffer = null;
-    updateIssuanceChartFast(newStakingData, animation);
 }
 function processIssuanceData(data) {
     const ratios = [];
@@ -3468,9 +3300,6 @@ async function createEcosystemChart() {
 
         const vw = window.innerWidth;
         const bubbleSize = vw < 480 ? 15 : vw < 640 ? 18 : vw < 768 ? 22 : vw < 1024 ? 26 : 31;
-        const baseOrigin = (window.location.origin && window.location.origin.startsWith('http'))
-            ? window.location.origin
-            : 'https://tez.cool';
 
         const bubbleData = [];
 
@@ -4225,28 +4054,6 @@ const initTezCoolApp = async () => {
         new NavigationManager();
         const ratios = await initializeRatios();
         main(ratios);
-        const tvlContainer = document.querySelector('#chart-container9')?.closest('.chart-with-controls');
-        if (tvlContainer) {
-            tvlContainer.querySelectorAll('.timeframe-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    tvlContainer.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentTVLTimeframe = this.dataset.timeframe;
-                    createHistoricalTvlChart();
-                });
-            });
-        }
-        const burnedContainer = document.querySelector('#chart-container')?.closest('.chart-with-controls');
-        if (burnedContainer) {
-            burnedContainer.querySelectorAll('.timeframe-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    burnedContainer.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentBurnedSupplyTimeframe = this.dataset.timeframe;
-                    createBurnedSupplyChart();
-                });
-            });
-        }
     } catch (error) {
         console.error('Init error:', error);
     }
