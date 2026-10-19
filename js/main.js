@@ -254,7 +254,7 @@ class NavigationManager {
             const target = item.dataset.target;
             const url = item.dataset.url;
             if (item.dataset.external === 'true' && url) {
-                window.open(url);
+                window.open(url, '_self');
                 return;
             }
             if (target && target !== this.currentView)
