@@ -370,7 +370,6 @@ function positionSingleBakerTooltip(item) {
     item.classList.remove('tooltip-left', 'tooltip-right', 'tooltip-top', 'tooltip-bottom');
     tooltip.style.minWidth = '';
     tooltip.style.transform = '';
-    tooltip.style.removeProperty('--arrow-shift');
     if (isMobile) {
         const headerEl = document.querySelector('.header');
         const headerBottom = headerEl ? Math.max(0, headerEl.getBoundingClientRect().bottom) : 70;
@@ -391,11 +390,7 @@ function positionSingleBakerTooltip(item) {
             shiftX = (vw - margin) - (itemCenter + tipWidth / 2);
         }
         if (shiftX !== 0) {
-            const roundedShift = Math.round(shiftX);
-            tooltip.style.transform = `translateX(calc(-50% + ${roundedShift}px))`;
-            const maxArrowShift = Math.max(0, tipWidth / 2 - 18);
-            const clampedArrow = Math.max(-maxArrowShift, Math.min(maxArrowShift, -roundedShift));
-            tooltip.style.setProperty('--arrow-shift', `${clampedArrow}px`);
+            tooltip.style.transform = `translateX(calc(-50% + ${Math.round(shiftX)}px))`;
         }
     } else {
         const spaceRight = vw - rect.right;
