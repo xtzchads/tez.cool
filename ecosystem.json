@@ -1031,7 +1031,7 @@
         "Status": "active",
         "Logo": [
           {
-            "url": "https://stacy.fi/stxtz-logo.svg"
+            "url": "/icons/stxtz-logo.svg"
           }
         ]
       }
@@ -1095,7 +1095,7 @@
         "Status": "active",
         "Logo": [
           {
-            "url": "https://tezex.io/assets/favicon.ico"
+            "url": "/icons/tezex.ico"
           }
         ]
       }
@@ -1111,7 +1111,7 @@
         "Status": "active",
         "Logo": [
           {
-            "url": "https://stabletez.com/favicon.ico"
+            "url": "/icons/stabletez.ico"
           }
         ]
       }
