@@ -945,7 +945,7 @@
           loaderSub.textContent = 'Fetching live stakers & active bakers from TzKT API';
 
           const [stakersRes, delegatesRes] = await Promise.all([
-            fetch('https://api.tzkt.io/v1/accounts?stakedPseudotokens.gt=0&limit=10000'),
+            fetch('https://api.tzkt.io/v1/accounts?stakedBalance.gt=0&limit=10000'),
             fetch('https://api.tzkt.io/v1/delegates?active=true&limit=10000')
           ]);
 
