@@ -2444,7 +2444,7 @@ function createHistoricalCharts(ratio) {
         tmp = getCurrentOnChainBonus(); // Reset bonus state to current on-chain saturation before projection
         const issuanceDataWithRatio = [...issuanceData.ratios, ...ratio.map((ratioValue, index) => {
             const cycle = currentCycle + index + 1;
-            const iss = issuanceRateQ(index + currentCycle, ratioValue);
+            const iss = issuanceRateQ(cycle, ratioValue);
             const apys = getProjectedAPYs(iss, ratioValue);
             return {
                 cycle,
@@ -2545,7 +2545,10 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
         },
         hide: function () {
             if (this.chart && this.chart.yAxis && this.chart.yAxis[0]) {
-                this.chart.yAxis[0].setExtremes(0, 11, false);
+                const otherApyVisible = this.chart.series.some(s => s !== this && s.name !== 'Issuance' && s.visible);
+                if (!otherApyVisible) {
+                    this.chart.yAxis[0].setExtremes(0, 11, false);
+                }
             }
         }
     };
@@ -2553,7 +2556,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
         ? [
             makeZoneSeries('Issuance', seriesData, [[0, '#ff6961'], [1, '#77dd77']], 'rgba(255, 255, 0, 0.7)', true),
             makeZoneSeries('Staking APY', data.map(d => ({ x: d.cycle, y: d.stakingApy })), [[0, '#38bdf8'], [1, '#60a5fa']], 'rgba(56, 189, 248, 0.5)', false, stakingSeriesEvents),
-            makeZoneSeries('Delegation APY', data.map(d => ({ x: d.cycle, y: d.delegationApy })), [[0, '#c084fc'], [1, '#a855f7']], 'rgba(192, 132, 252, 0.5)', false)
+            makeZoneSeries('Delegation APY', data.map(d => ({ x: d.cycle, y: d.delegationApy })), [[0, '#c084fc'], [1, '#a855f7']], 'rgba(192, 132, 252, 0.5)', false, stakingSeriesEvents)
         ]
         : [
             makeZoneSeries(title, seriesData, [[0, '#77dd77'], [1, '#ff6961']], 'rgba(255, 255, 0, 0.7)', true)
@@ -2815,26 +2818,57 @@ function processIssuanceData(data) {
     for (let i = 1; i < data.length; i++) {
         const prev = data[i - 1];
         const curr = data[i];
+        const c = curr.cycle;
         const prevSupply = parseFloat(prev.totalSupply);
         const currSupply = parseFloat(curr.totalSupply);
         const supplyDiff = currSupply - prevSupply;
         const growthRate = supplyDiff / prevSupply;
         const timeDiffSec = (new Date(curr.timestamp) - new Date(prev.timestamp)) / 1000;
-        const annualized = (growthRate * ((365.25 * 24 * 60 * 60) / timeDiffSec)) * 100;
+        const annFactor = (365.25 * 24 * 60 * 60) / timeDiffSec;
+        const annualized = (growthRate * annFactor) * 100;
         const createdDiff = (curr.totalCreated !== undefined && prev.totalCreated !== undefined)
             ? parseFloat(curr.totalCreated) - parseFloat(prev.totalCreated)
             : supplyDiff;
-        const grossAnnualized = ((createdDiff / prevSupply) * ((365.25 * 24 * 60 * 60) / timeDiffSec)) * 100;
-        const snap = curr.cycle >= 752 ? data[Math.max(0, i - 4)] : curr;
-        const snapSupply = parseFloat(snap.totalSupply) || currSupply;
-        const bpRatio = snap.totalBakingPower && snapSupply > 0 ? parseFloat(snap.totalBakingPower) / snapSupply : 0;
-        const edge = snap.cycle >= 822 ? 3 : (curr.cycle >= 748 ? 2 : 1);
-        const sApy = bpRatio > 0 ? Math.max(0, grossAnnualized / bpRatio) : 0;
-        const dApy = Math.min(10.8, sApy / edge);
+        // Subtract non-baker minting (Liquidity Baking CPMM subsidy & protocol migration invoices)
+        const lbSubsidy = (c >= 388 && c <= 857) ? 20480e6
+            : (c >= 858 && c <= 1247) ? 7200e6
+            : c === 1248 ? 4754.5e6
+            : c === 1250 ? 77e6 : 0;
+        const invoice = c === 557 ? 25000e6
+            : c === 527 ? 3000e6
+            : c === 159 ? 500e6
+            : (c === 111 || c === 356) ? 100e6 : 0;
+        const bakerRewardsDiff = Math.max(0, createdDiff - lbSubsidy - invoice);
+        // Active stake snapshot lag per protocol era:
+        // - Paris+ (c >= 746): consensus_rights_delay = 2 -> end of cycle c - 3 (cycle 825 sampled on block 7692288 before Quebec edge=3 migration -> i - 4)
+        // - Ithaca..Oxford (474 <= c <= 745): preserved_cycles = 5 -> snapshot in cycle c - 6 (between i - 7 and i - 6)
+        // - Ithaca migration (468 <= c <= 473): all sampled from end of cycle 467
+        // - Alpha..Hangzhou (c < 468): preserved_cycles = 5, roll_storage c + preserved + 2 -> snapshot in cycle c - 7 (between i - 8 and i - 7)
+        let activeBp;
+        if (c >= 746) {
+            const snapIdx = Math.max(0, c === 825 ? i - 4 : i - 3);
+            activeBp = parseFloat(data[snapIdx]?.totalBakingPower) || 0;
+        } else if (c >= 474) {
+            const bp6 = parseFloat(data[Math.max(0, i - 6)]?.totalBakingPower) || 0;
+            const bp7 = parseFloat(data[Math.max(0, i - 7)]?.totalBakingPower) || bp6;
+            activeBp = (bp6 + bp7) / 2;
+        } else if (c >= 468) {
+            activeBp = parseFloat(data[Math.min(467, i)]?.totalBakingPower) || 0;
+        } else if (c === 7) {
+            activeBp = 190768000000000;
+        } else {
+            const bp7 = parseFloat(data[Math.max(0, i - 7)]?.totalBakingPower) || 0;
+            const bp8 = parseFloat(data[Math.max(0, i - 8)]?.totalBakingPower) || bp7;
+            activeBp = (bp7 + bp8) / 2;
+        }
+        // Active edge_of_staking_over_delegation takes effect 3 cycles after activation (748 -> 751 for Paris AI edge=2; 823 -> 826 for Quebec edge=3)
+        const edge = c >= 826 ? 3 : (c >= 751 ? 2 : 1);
+        const sApy = activeBp > 0 ? Math.max(0, ((bakerRewardsDiff / activeBp) * annFactor) * 100) : 0;
+        const dApy = sApy / edge;
         ratios.push({
-            cycle: curr.cycle,
+            cycle: c,
             issuance: annualized,
-            stakingApy: curr.cycle >= 747 ? (curr.cycle === 747 ? dApy : sApy) : null,
+            stakingApy: c >= 747 ? (c <= 750 ? dApy : sApy) : null,
             delegationApy: dApy
         });
     }
