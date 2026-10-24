@@ -2096,6 +2096,44 @@ function protocolNameForCycle(cycle) {
         name = list[i].name;
     return name;
 }
+const _cycleDateFormatter = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC'
+});
+let _cycleDateMap = null;
+let _lastCycleRef = null;
+function formatCycleDate(cycle) {
+    const data = aggregatedDataCache?.historicalCycleData;
+    if (!Array.isArray(data) || !data.length)
+        return '';
+    const last = data[data.length - 1];
+    if (!_cycleDateMap || _lastCycleRef !== last) {
+        _lastCycleRef = last;
+        _cycleDateMap = new Map();
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i];
+            if (item && item.timestamp) {
+                const ts = Date.parse(item.timestamp);
+                if (!Number.isNaN(ts))
+                    _cycleDateMap.set(item.cycle, _cycleDateFormatter.format(new Date(ts)));
+            }
+        }
+    }
+    const cached = _cycleDateMap.get(cycle);
+    if (cached)
+        return cached;
+    if (last && last.timestamp && cycle > last.cycle) {
+        const lastTs = Date.parse(last.timestamp);
+        if (!Number.isNaN(lastTs)) {
+            const formatted = _cycleDateFormatter.format(new Date(lastTs + (cycle - last.cycle) * 86400000));
+            _cycleDateMap.set(cycle, formatted);
+            return formatted;
+        }
+    }
+    return '';
+}
 function getUpgradeTickPositions() {
     const ticks = getProtocolUpgrades().map(u => u.cycle);
     if (!ticks.includes(currentCycle))
@@ -2654,15 +2692,17 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
             shared: isIssuance,
             formatter: function () {
                 const era = this.x > currentCycle ? 'Projection' : escapeHTML(protocolNameForCycle(this.x));
+                const dateStr = formatCycleDate(this.x);
+                const dateLine = dateStr ? `Date: ${escapeHTML(dateStr)}<br/>` : '';
                 if (isIssuance && this.points) {
                     const rows = this.points.map(p => {
                         const dot = p.series.name === 'Staking APY' ? '#38bdf8' : (p.series.name === 'Delegation APY' ? '#c084fc' : '#77dd77');
                         return `<span style="color:${dot}">●</span> ${escapeHTML(p.series.name)}: <b>${p.y.toFixed(2)}%</b>`;
                     }).join('<br/>');
-                    return `Cycle: ${this.x} <span style="opacity:0.7">· ${era}</span><br/>${rows}`;
+                    return `Cycle: ${this.x} <span style="opacity:0.7">· ${era}</span><br/>${dateLine}${rows}`;
                 }
                 const label = isIssuance ? 'Issuance' : 'Staking (frozen tez)';
-                return `Cycle: ${this.x} <span style="opacity:0.7">· ${era}</span><br><span style="color:#77dd77">●</span> ${label}: <b>${this.y.toFixed(2)}%</b><br/>`;
+                return `Cycle: ${this.x} <span style="opacity:0.7">· ${era}</span><br/>${dateLine}<span style="color:#77dd77">●</span> ${label}: <b>${this.y.toFixed(2)}%</b><br/>`;
             }
         },
         series: seriesList,
