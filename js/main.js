@@ -31,16 +31,6 @@ class StakingSimulator {
         this.maxAmount = 450000000;
         this.init();
     }
-    throttle(fn, delay) {
-        let lastCall = 0;
-        return (...args) => {
-            const now = Date.now();
-            if (now - lastCall >= delay) {
-                lastCall = now;
-                fn(...args);
-            }
-        };
-    }
     init() {
         setTimeout(() => {
             this.bindElements();
@@ -68,7 +58,11 @@ class StakingSimulator {
         };
     }
     setupEventListeners() {
-        const calcThrottled = this.throttle(() => this.calculateRewards(), 100);
+        let raf = 0;
+    	const calcThrottled = () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => this.calculateRewards());
+    	};
         const handleNum = (e, getMax, decimals) => {
             e.target.value = e.target.value.replace(/^0+(?=\d)/, '');
             let val = parseFloat(e.target.value.replace(',', '.')) || 0;
